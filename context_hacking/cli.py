@@ -272,6 +272,41 @@ def cursor() -> None:
     console.print("[green]Cursor rules generated.[/green]")
 
 
+@main.command(name="install-skills")
+@click.option("--global", "global_install", is_flag=True,
+              help="Install to ~/.claude/skills/ (all projects)")
+def install_skills(global_install: bool) -> None:
+    """Install CHP skills for Claude Code (/chp-run, /chp-critic, etc)."""
+    skills_src = PACKAGE_ROOT / "claude-code-skills"
+    if not skills_src.exists():
+        console.print("[red]Skills directory not found.[/red]")
+        raise SystemExit(1)
+
+    if global_install:
+        target = Path.home() / ".claude" / "skills"
+    else:
+        target = Path(".claude") / "skills"
+
+    target.mkdir(parents=True, exist_ok=True)
+
+    installed = 0
+    for skill_file in skills_src.glob("chp-*.md"):
+        dst = target / skill_file.name
+        shutil.copy2(skill_file, dst)
+        installed += 1
+        console.print(f"  Installed: [cyan]/{skill_file.stem}[/cyan]")
+
+    scope = "globally (~/.claude/skills/)" if global_install else f"locally ({target})"
+    console.print(f"\n[bold green]{installed} CHP skills installed {scope}[/bold green]")
+    console.print("\nAvailable commands in Claude Code:")
+    console.print("  /chp-init      Initialize a new CHP project")
+    console.print("  /chp-run       Execute one build turn")
+    console.print("  /chp-critic    Adversarial review (4 gates)")
+    console.print("  /chp-reviewer  Code hygiene check")
+    console.print("  /chp-status    Show current status")
+    console.print("  /chp-gates     Run sigma-gated verification")
+
+
 @main.command()
 @click.option("--port", default=8501, help="Streamlit server port")
 def dashboard(port: int) -> None:
