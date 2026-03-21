@@ -123,8 +123,20 @@ Five kill-switches halt the loop automatically:
 
 ## Built-in Showcase Experiments
 
-CHP ships with four classic models, each fully wired with frozen specs, sigma-gates,
-and pre-loaded false-positive stories demonstrating the protocol in action.
+CHP ships with **9 experiments** across 5 domains, each fully wired with frozen specs,
+sigma-gates, and pre-loaded false-positive stories demonstrating the protocol in action.
+
+| # | Experiment | Domain | Prior-as-Detector Catches |
+|---|-----------|--------|--------------------------|
+| 1 | Schelling Segregation | Social science | tolerance=0.33 drift, sequential update |
+| 2 | Spatial Prisoner's Dilemma | Game theory | T/R/P/S payoff, async update, missing self |
+| 3 | Lotka-Volterra | Ecology | ODE difference equations, alpha/beta variables |
+| 4 | SIR Epidemic | Epidemiology | Rate equations dS/dt, float I(t), zero fadeout |
+| 5 | ML Hyperparameter Search | Machine learning | Grid search instead of Bayesian, accuracy inflation |
+| 6 | Lorenz Attractor | Chaos theory | Wrong sigma/rho/beta constants, fixed-step RK4 |
+| 7 | Grover's Algorithm | Quantum computing | Classical brute-force, wrong oracle sign, missing diffusion |
+| 8 | Izhikevich Neurons | Neuroscience | Hodgkin-Huxley contamination, wrong a/b/c/d constants |
+| 9 | Blockchain Consensus | Distributed systems | Centralized leader instead of Byzantine fault tolerance |
 
 ### 1. Schelling Segregation (the star demo)
 
@@ -215,6 +227,122 @@ Builder reports zero fadeout, it implemented deterministic dynamics — the Crit
 
 ```bash
 chp init my-project --experiment sir
+chp run
+```
+
+### 5. ML Hyperparameter Search
+
+Bayesian optimization for neural network hyperparameters with proper cross-validation.
+
+**Why it matters**: LLMs default to grid search (exhaustive, scales exponentially)
+when asked for "hyperparameter optimization." The frozen spec requires Bayesian
+optimization with Gaussian process surrogate. LLMs also inflate accuracy by
+evaluating on training data — the spec enforces strict train/val/test splits.
+
+**sigma-gates**: best_val_accuracy in [0.85, 0.99], overfitting_gap < 0.10
+(train_acc - val_acc), search efficiency > grid baseline, std < 0.15.
+
+**Pre-loaded false positive**: Builder reports 99.2% accuracy — but it's train
+accuracy, not validation. The Critic catches the data leakage.
+
+```bash
+chp init my-project --experiment ml-hyperparam
+chp run
+```
+
+### 6. Lorenz Attractor
+
+Chaotic Lorenz (1963) system with sensitivity-to-initial-conditions verification.
+
+**Why it matters**: Every LLM knows the Lorenz equations (sigma=10, rho=28, beta=8/3).
+But most generate FIXED-STEP Euler integration, which is numerically unstable for
+chaotic systems. The frozen spec requires adaptive RK45. The Prior-as-Detector
+catches Euler contamination by checking trajectory divergence against the reference
+solution.
+
+**sigma-gates**: Lyapunov exponent in [0.8, 1.0], attractor bounded (|x| < 25),
+trajectory does NOT converge to fixed point, std of Lyapunov < 0.15.
+
+**Pre-loaded false positive**: Fixed-step Euler at dt=0.01 produces a trajectory
+that looks correct for 10 time units, then diverges catastrophically. The Builder
+reports "Lorenz attractor verified" from the first 10 units. The 30-seed battery
+at t=50 catches the numerical instability.
+
+```bash
+chp init my-project --experiment lorenz
+chp run
+```
+
+### 7. Grover's Algorithm (Quantum Simulation)
+
+Simulated Grover's search algorithm with exact oracle and diffusion operators.
+
+**Why it matters**: LLMs confuse Grover's quadratic speedup with classical brute-force
+search. The frozen spec requires the exact quantum circuit: Hadamard, oracle
+(phase flip on target), diffusion (inversion about mean). LLMs that generate from
+priors produce classical search with O(N) complexity instead of O(sqrt(N)) iterations.
+
+**sigma-gates**: success_probability > 0.90 at optimal iterations, iteration count
+within +/-1 of floor(pi/4 * sqrt(N)), amplitude of target state > 0.95, std < 0.15.
+
+**Pre-loaded false positive**: Builder implements classical random search and
+reports "found target in sqrt(N) steps on average." But the distribution is
+geometric (classical), not the peaked distribution at exactly floor(pi/4 * sqrt(N))
+iterations (quantum). The Critic checks the iteration-count distribution.
+
+```bash
+chp init my-project --experiment quantum-grover
+chp run
+```
+
+### 8. Izhikevich Neurons
+
+Izhikevich (2003) spiking neuron model — the simple model that reproduces 20+
+firing patterns.
+
+**Why it matters**: LLMs commonly generate Hodgkin-Huxley equations (4 variables,
+ionic conductances) when asked for "spiking neurons." The Izhikevich model uses
+only 2 variables (v, u) with 4 parameters (a, b, c, d) and is a completely
+different model. The Prior-as-Detector catches Hodgkin-Huxley contamination
+by checking variable count and parameter names.
+
+**sigma-gates**: spike_count in expected range for each firing pattern,
+membrane potential bounded [-90, 40] mV, recovery variable bounded,
+inter-spike-interval CV matches pattern type, std < 0.15.
+
+**Pre-loaded false positive**: Builder produces "regular spiking" pattern but
+uses Hodgkin-Huxley parameters (gNa, gK, gL). The model works but is the
+WRONG MODEL. The Critic catches it by checking for the Izhikevich-specific
+parameter set (a=0.02, b=0.2, c=-65, d=8 for regular spiking).
+
+```bash
+chp init my-project --experiment izhikevich
+chp run
+```
+
+### 9. Blockchain Consensus
+
+Simplified Byzantine fault-tolerant consensus (PBFT-style) with crash and
+Byzantine failure injection.
+
+**Why it matters**: LLMs default to centralized leader election (Raft/Paxos style)
+when asked for "consensus algorithm." The frozen spec requires BYZANTINE fault
+tolerance where nodes can send conflicting messages. The Prior-as-Detector
+catches the Raft prior by checking whether the system survives Byzantine
+(not just crash) failures.
+
+**sigma-gates**: consensus_reached in > 95% of rounds with f < N/3 Byzantine
+nodes, consensus_failed with f >= N/3, message_complexity within O(N^2) bound,
+safety (no two honest nodes disagree) = 100%, std < 0.15.
+
+**Pre-loaded false positive**: Builder implements Raft (crash-fault-tolerant only)
+and reports "consensus reached with 1/3 faulty nodes." But Raft doesn't handle
+Byzantine faults — nodes that lie. The system passes with crash faults but fails
+when Byzantine nodes send conflicting prepare messages. The Critic injects
+Byzantine behavior and watches it break.
+
+```bash
+chp init my-project --experiment blockchain
 chp run
 ```
 

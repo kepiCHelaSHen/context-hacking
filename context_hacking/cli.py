@@ -39,7 +39,8 @@ def main() -> None:
 @main.command()
 @click.argument("name")
 @click.option("--experiment", type=click.Choice(
-    ["schelling", "spatial-pd", "lotka-volterra", "sir"],
+    ["schelling", "spatial-pd", "lotka-volterra", "sir",
+     "ml-hyperparam", "lorenz", "quantum-grover", "izhikevich", "blockchain"],
     case_sensitive=False,
 ), help="Initialize with a built-in showcase experiment")
 @click.option("--existing", is_flag=True, help="Init in existing project directory")
@@ -84,6 +85,11 @@ def init(name: str, experiment: str | None, existing: bool, cursor: bool) -> Non
             "spatial-pd": "spatial-prisoners-dilemma",
             "lotka-volterra": "lotka-volterra",
             "sir": "sir-epidemic",
+            "ml-hyperparam": "ml-hyperparam-search",
+            "lorenz": "lorenz-attractor",
+            "quantum-grover": "quantum-grover",
+            "izhikevich": "izhikevich-neurons",
+            "blockchain": "blockchain-consensus",
         }
         exp_name = exp_map.get(experiment, experiment)
         exp_src = TEMPLATE_DIR / "experiments" / exp_name
