@@ -11,6 +11,7 @@ Safe to run alongside `chp run`.
 
 from __future__ import annotations
 
+import json
 import re
 import time
 from pathlib import Path
@@ -128,6 +129,24 @@ st.markdown("""
         margin: 24px 0;
     }
     div[data-testid="stMetricValue"] { font-family: 'JetBrains Mono', monospace; }
+    .health-gauge {
+        padding: 10px 16px;
+        margin: 6px 0;
+        border-radius: 8px;
+        font-family: 'JetBrains Mono', monospace;
+        position: relative;
+        overflow: hidden;
+    }
+    .health-gauge .bar {
+        position: absolute;
+        top: 0; left: 0; bottom: 0;
+        border-radius: 8px;
+        opacity: 0.15;
+    }
+    .health-gauge .content {
+        position: relative;
+        z-index: 1;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -204,6 +223,41 @@ def _detect_experiment(cfg: dict) -> str | None:
         if k in name or name in k: return k
     return None
 
+def _health_gauge(label: str, value: float, target: float, direction: str = "higher_better") -> str:
+    """Render a green-yellow-red gradient health gauge.
+
+    direction: "higher_better" (green=high, red=low) or "lower_better" (green=low, red=high)
+    value and target are used to compute the score (0-1).
+    """
+    if direction == "higher_better":
+        score = min(value / max(target, 0.001), 1.0) if target > 0 else 0.5
+    else:
+        score = min(target / max(value, 0.001), 1.0) if value > 0 else 1.0
+    score = max(0.0, min(1.0, score))
+
+    # Green-yellow-red gradient
+    if score >= 0.8:
+        color = "#00ff88"  # green
+    elif score >= 0.5:
+        color = "#ffcc00"  # yellow
+    elif score >= 0.3:
+        color = "#ff8800"  # orange
+    else:
+        color = "#ff4444"  # red
+
+    pct = int(score * 100)
+    return (
+        f'<div class="health-gauge" style="background:#0d0d20;border-left:4px solid {color};">'
+        f'<div class="bar" style="width:{pct}%;background:{color};"></div>'
+        f'<div class="content">'
+        f'<b style="color:{color};">{label}</b><br/>'
+        f'<span style="font-size:22px;color:{color};">{value:.2f}</span>'
+        f' <span style="color:#666;">/ {target:.2f} target</span>'
+        f' <span style="float:right;color:{color};font-size:18px;">{pct}%</span>'
+        f'</div></div>'
+    )
+
+
 def _mode_html(mode: str) -> str:
     m = mode.upper()
     if "DONE" in m or "COMPLETE" in m:
@@ -256,8 +310,8 @@ def main() -> None:
     st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
     # ── MAIN GRID ────────────────────────────────────────────────────────
-    tab_monitor, tab_report, tab_gallery = st.tabs([
-        "📊 Live Monitor", "📄 Experiment Report", "🧪 Experiment Gallery"
+    tab_monitor, tab_health, tab_report, tab_gallery = st.tabs([
+        "📊 Live Monitor", "🏥 Protocol Health", "📄 Experiment Report", "🧪 Experiment Gallery"
     ])
 
     # ── TAB 1: LIVE MONITOR ──────────────────────────────────────────────
@@ -353,7 +407,11 @@ def main() -> None:
             else:
                 st.caption("No dead ends logged.")
 
-    # ── TAB 2: EXPERIMENT REPORT ─────────────────────────────────────────
+    # ── TAB 2: PROTOCOL HEALTH ──────────────────────────────────────────
+    with tab_health:
+        _render_protocol_health()
+
+    # ── TAB 3: EXPERIMENT REPORT ─────────────────────────────────────────
     with tab_report:
         if report_text:
             st.markdown("### Experiment Report")
@@ -400,6 +458,216 @@ def main() -> None:
     # ── Auto-refresh ─────────────────────────────────────────────────────
     time.sleep(REFRESH_SECONDS)
     st.rerun()
+
+
+def _render_protocol_health() -> None:
+    """Render the Protocol Health tab with telemetry data."""
+    import plotly.graph_objects as go
+
+    telemetry_path = Path(".chp") / "telemetry.json"
+
+    st.markdown("### Protocol Health — Is the loop learning?")
+    st.markdown(
+        "These metrics track whether the CHP protocol is getting more efficient "
+        "over time. A healthy loop shows: declining drift rate, improving gate "
+        "scores, faster turns, and fewer fix cycles."
+    )
+
+    if not telemetry_path.exists():
+        st.info(
+            "No telemetry data yet. Telemetry is recorded automatically when "
+            "the loop runs via `chp run --method api`. "
+            "The metrics below will populate as turns complete."
+        )
+        # Show empty metric cards with explanations
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.markdown(
+                '<div class="metric-card">'
+                '<div class="metric-label">Tokens per Turn</div>'
+                '<div style="color:#888;font-size:14px;">How efficient is the loop getting?<br/>'
+                'Fewer tokens per turn = Builder learns to be concise.</div>'
+                '</div>', unsafe_allow_html=True)
+        with col2:
+            st.markdown(
+                '<div class="metric-card">'
+                '<div class="metric-label">Drift Rate</div>'
+                '<div style="color:#888;font-size:14px;">Is the Builder matching the spec?<br/>'
+                'Declining drift = fewer coefficients wrong per turn.</div>'
+                '</div>', unsafe_allow_html=True)
+        with col3:
+            st.markdown(
+                '<div class="metric-card">'
+                '<div class="metric-label">First-Try Pass Rate</div>'
+                '<div style="color:#888;font-size:14px;">How often do tests pass without fixes?<br/>'
+                'Rising rate = Builder producing cleaner code.</div>'
+                '</div>', unsafe_allow_html=True)
+
+        col4, col5, col6 = st.columns(3)
+        with col4:
+            st.markdown(
+                '<div class="metric-card">'
+                '<div class="metric-label">Gate Score Trend</div>'
+                '<div style="color:#888;font-size:14px;">Is code quality improving?<br/>'
+                'Rising scores = Critic finding fewer issues.</div>'
+                '</div>', unsafe_allow_html=True)
+        with col5:
+            st.markdown(
+                '<div class="metric-card">'
+                '<div class="metric-label">Dead Ends Avoided</div>'
+                '<div style="color:#888;font-size:14px;">Is the memory system working?<br/>'
+                'Each avoided dead end = a mistake NOT repeated.</div>'
+                '</div>', unsafe_allow_html=True)
+        with col6:
+            st.markdown(
+                '<div class="metric-card">'
+                '<div class="metric-label">Time per Turn</div>'
+                '<div style="color:#888;font-size:14px;">Is it getting faster?<br/>'
+                'Declining time = more efficient builds.</div>'
+                '</div>', unsafe_allow_html=True)
+        return
+
+    # Load telemetry data
+    try:
+        data = json.loads(telemetry_path.read_text(encoding="utf-8"))
+        turns_data = data.get("turns", [])
+    except Exception:
+        st.error("Failed to load telemetry data.")
+        return
+
+    if not turns_data:
+        st.info("No turns recorded yet.")
+        return
+
+    # ── Summary cards ────────────────────────────────────────────────
+    total_tokens = sum(t.get("tokens_total", 0) for t in turns_data)
+    total_lines = sum(t.get("lines_written", 0) for t in turns_data)
+    total_time = sum(t.get("duration_seconds", 0) for t in turns_data)
+    n_fp = sum(1 for t in turns_data if t.get("false_positive_caught"))
+    n_de = sum(t.get("dead_ends_avoided", 0) for t in turns_data)
+    tested = [t for t in turns_data if t.get("tests_passed", 0) + t.get("tests_failed", 0) > 0]
+    first_try = sum(1 for t in tested if t.get("tests_passed_first_try"))
+    ftr = first_try / len(tested) if tested else 0
+
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        tpl = round(total_tokens / total_lines, 1) if total_lines > 0 else 0
+        st.metric("Tokens/Line", f"{tpl}", help="Lower = more token-efficient")
+    with col2:
+        st.metric("Total Tokens", f"{total_tokens:,}")
+    with col3:
+        st.metric("False Positives Caught", str(n_fp))
+    with col4:
+        st.metric("Dead Ends Avoided", str(n_de))
+
+    col5, col6, col7, col8 = st.columns(4)
+    with col5:
+        st.metric("First-Try Pass", f"{ftr:.0%}", help="Tests pass without fix cycle")
+    with col6:
+        st.metric("Total Lines Built", f"{total_lines:,}")
+    with col7:
+        st.metric("Total Time", f"{total_time/60:.1f} min")
+    with col8:
+        st.metric("Turns", str(len(turns_data)))
+
+    # ── Trend charts ─────────────────────────────────────────────────
+    st.markdown("### Trends Over Time")
+
+    turn_nums = [t.get("turn", i+1) for i, t in enumerate(turns_data)]
+
+    # Token consumption per turn
+    tokens = [t.get("tokens_total", 0) for t in turns_data]
+    if any(t > 0 for t in tokens):
+        fig_tokens = go.Figure(data=go.Scatter(
+            x=turn_nums, y=tokens, mode="lines+markers",
+            line=dict(color="#4488ff"), name="Tokens",
+        ))
+        fig_tokens.update_layout(
+            title="Tokens per Turn — is the loop getting more efficient?",
+            xaxis_title="Turn", yaxis_title="Tokens",
+            height=300, template="plotly_dark",
+            paper_bgcolor="#0a0a1a", plot_bgcolor="#0d0d20",
+        )
+        st.plotly_chart(fig_tokens, use_container_width=True)
+
+    # Gate scores over time
+    g1 = [t.get("gate_1_frozen", 0) for t in turns_data]
+    g3 = [t.get("gate_3_scientific", 0) for t in turns_data]
+    if any(g > 0 for g in g1):
+        fig_gates = go.Figure()
+        fig_gates.add_trace(go.Scatter(
+            x=turn_nums, y=g1, name="Gate 1 (Frozen)", mode="lines+markers",
+            line=dict(color="#00ff88"),
+        ))
+        fig_gates.add_trace(go.Scatter(
+            x=turn_nums, y=g3, name="Gate 3 (Scientific)", mode="lines+markers",
+            line=dict(color="#ffaa00"),
+        ))
+        fig_gates.add_hline(y=0.85, line_dash="dash", line_color="#ff4444",
+                            annotation_text="Threshold (0.85)")
+        fig_gates.update_layout(
+            title="Critic Gate Scores — is code quality improving?",
+            xaxis_title="Turn", yaxis_title="Score",
+            height=300, template="plotly_dark",
+            paper_bgcolor="#0a0a1a", plot_bgcolor="#0d0d20",
+        )
+        st.plotly_chart(fig_gates, use_container_width=True)
+
+    # Drift rate over time
+    drifts = [t.get("drift_rate", 0) for t in turns_data]
+    if any(d > 0 for d in drifts):
+        fig_drift = go.Figure(data=go.Scatter(
+            x=turn_nums, y=drifts, mode="lines+markers",
+            line=dict(color="#ff4444"), fill="tozeroy",
+            fillcolor="rgba(255,68,68,0.1)",
+        ))
+        fig_drift.update_layout(
+            title="Drift Rate — is the Builder matching the spec better?",
+            xaxis_title="Turn", yaxis_title="Drift Rate (lower = better)",
+            height=300, template="plotly_dark",
+            paper_bgcolor="#0a0a1a", plot_bgcolor="#0d0d20",
+        )
+        st.plotly_chart(fig_drift, use_container_width=True)
+
+    # Time per turn
+    times = [t.get("duration_seconds", 0) for t in turns_data]
+    if any(t > 0 for t in times):
+        fig_time = go.Figure(data=go.Bar(
+            x=turn_nums, y=[t/60 for t in times],
+            marker_color=["#00ff88" if t < 300 else "#ffaa00" if t < 600 else "#ff4444"
+                          for t in times],
+        ))
+        fig_time.update_layout(
+            title="Time per Turn — is it getting faster?",
+            xaxis_title="Turn", yaxis_title="Minutes",
+            height=300, template="plotly_dark",
+            paper_bgcolor="#0a0a1a", plot_bgcolor="#0d0d20",
+        )
+        st.plotly_chart(fig_time, use_container_width=True)
+
+    # ── Event log ────────────────────────────────────────────────────
+    st.markdown("### Key Events")
+    for t in turns_data:
+        turn_n = t.get("turn", "?")
+        if t.get("false_positive_caught"):
+            st.markdown(
+                f'<div style="background:#1a1a0a;border-left:4px solid #ffaa00;'
+                f'padding:8px 12px;margin:4px 0;border-radius:4px;">'
+                f'Turn {turn_n}: FALSE POSITIVE CAUGHT — '
+                f'{t.get("false_positive_description", "see innovation log")}'
+                f'</div>', unsafe_allow_html=True)
+        if t.get("anomaly"):
+            st.markdown(
+                f'<div style="background:#1a0a0a;border-left:4px solid #ff4444;'
+                f'padding:8px 12px;margin:4px 0;border-radius:4px;">'
+                f'Turn {turn_n}: ANOMALY — sigma-gate failed'
+                f'</div>', unsafe_allow_html=True)
+        if t.get("new_dead_ends_logged", 0) > 0:
+            st.markdown(
+                f'<div style="background:#0a0a1a;border-left:4px solid #4488ff;'
+                f'padding:8px 12px;margin:4px 0;border-radius:4px;">'
+                f'Turn {turn_n}: New dead end logged'
+                f'</div>', unsafe_allow_html=True)
 
 
 def _export(cfg: dict, log: str, dead: str, sv: dict, report: str) -> None:
