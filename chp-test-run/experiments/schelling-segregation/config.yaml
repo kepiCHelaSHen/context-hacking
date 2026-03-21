@@ -1,0 +1,67 @@
+# Schelling Segregation — CHP Experiment Config
+
+project:
+  name: "schelling-segregation"
+  description: "Schelling (1971) segregation model with CHP dynamic-tolerance extension"
+  frozen_paths: ["frozen/"]
+  chain_prompt: "spec.md"
+
+models:
+  builder: "claude-sonnet-4-20250514"
+  critic: "claude-sonnet-4-20250514"
+  reviewer: "claude-sonnet-4-20250514"
+  council:
+    - provider: "openai"
+      model: "gpt-4o"
+      api_key_env: "OPENAI_API_KEY"
+    - provider: "xai"
+      model: "grok-3"
+      api_key_env: "GROK_API_KEY"
+
+gates:
+  seeds: 3
+  convergence_seeds: 30
+  sigma_threshold: 0.15
+  anomaly_checks:
+    - metric: "segregation_index"
+      operator: ">"
+      threshold: 0.30
+      description: "Segregation must exceed random baseline"
+    - metric: "segregation_index"
+      operator: "<"
+      threshold: 0.80
+      description: "Dynamic tolerance should prevent complete segregation"
+    - metric: "cluster_count"
+      operator: ">"
+      threshold: 1
+      description: "Must have more than one cluster"
+    - metric: "population"
+      operator: ">"
+      threshold: 0
+      description: "Grid must not be empty"
+  max_consecutive_anomalies: 3
+
+loop:
+  max_turns: 20
+  stagnation_threshold: 5
+  max_consecutive_exploration: 3
+  state_vector_interval: 5
+  auto_tag: true
+
+critic:
+  mindset: "Assume the build failed until proven otherwise"
+  instruction: "Argue AGAINST the science before scoring it"
+  specific_mission: "Check every coefficient against frozen/schelling_rules.md. Flag any deviation as specification drift."
+  gates:
+    - name: "frozen_compliance"
+      threshold: 1.0
+      blocking: true
+    - name: "architecture"
+      threshold: 0.85
+      blocking: false
+    - name: "scientific_validity"
+      threshold: 0.85
+      blocking: false
+    - name: "drift_check"
+      threshold: 0.85
+      blocking: false

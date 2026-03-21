@@ -229,6 +229,48 @@ def cursor() -> None:
     console.print("[green]Cursor rules generated.[/green]")
 
 
+@main.command()
+@click.option("--port", default=8501, help="Streamlit server port")
+def dashboard(port: int) -> None:
+    """Launch the live Streamlit dashboard."""
+    import subprocess
+    import sys
+
+    config_path = Path("config.yaml")
+    if not config_path.exists():
+        console.print("[red]config.yaml not found.[/red] Run 'chp init' first.")
+        raise SystemExit(1)
+
+    # Find the dashboard app.py
+    app_path = PACKAGE_ROOT / "dashboard" / "app.py"
+    if not app_path.exists():
+        console.print(f"[red]Dashboard not found at {app_path}[/red]")
+        raise SystemExit(1)
+
+    try:
+        import streamlit  # noqa: F401
+    except ImportError:
+        console.print(
+            "[red]Streamlit not installed.[/red] "
+            "Run: pip install context-hacking[dashboard]"
+        )
+        raise SystemExit(1)
+
+    console.print(f"[bold green]Launching CHP Dashboard[/bold green] on port {port}")
+    console.print(f"  Dashboard: {app_path}")
+    console.print(f"  Project:   {config_path.resolve().parent}")
+    console.print(f"  URL:       http://localhost:{port}")
+    console.print()
+
+    subprocess.run(
+        [sys.executable, "-m", "streamlit", "run", str(app_path),
+         "--server.port", str(port),
+         "--server.headless", "true",
+         "--browser.gatherUsageStats", "false"],
+        cwd=str(Path.cwd()),
+    )
+
+
 def _generate_cursor_rules(target: Path) -> None:
     """Generate .cursorrules and skills/ for Cursor/Claude Code integration."""
     rules_dir = TEMPLATE_DIR / "cursor-rules"
