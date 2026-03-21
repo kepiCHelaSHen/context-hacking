@@ -348,12 +348,85 @@ chp run
 
 ---
 
+## Live Dashboard (v0.2)
+
+CHP includes an optional Streamlit dashboard that turns the loop into a
+real-time scientific control panel. Install with:
+
+```bash
+pip install context-hacking[dashboard]
+chp dashboard
+```
+
+### What You See
+
+**Header bar** — project name, current turn, and a big colored mode indicator:
+green for VALIDATION, amber for EXPLORATION, red for EXIT.
+
+**sigma-Gauge Panel** — real-time gauges for every anomaly check defined in
+`config.yaml`. Green = passing, red = failing, with the actual value and
+threshold displayed. Updates every 5 seconds from `state_vector.md`.
+
+**Critic Scorecard** — live Gate 1-4 scores from the most recent Critic review.
+Color-coded: green >= threshold, red below. Shows blocking vs non-blocking issues.
+
+**Council Votes** — latest GPT-4o and Grok reviews side by side. Consensus
+issues highlighted in red. Drift flags shown with a warning banner.
+
+**Innovation Log** — last 15 entries from `innovation_log.md`, scrollable, with
+turn numbers, modes, and metric deltas. New entries appear automatically.
+
+**Dead End Tracker** — all logged dead ends with red X markers and the "Do NOT
+repeat" rule for each. Visible at a glance so you never drift into one.
+
+**Experiment Gallery** — 9 clickable cards, one per built-in experiment. Each
+shows the experiment name, domain, status (not started / in progress / complete),
+and which Prior-as-Detector pattern it demonstrates.
+
+**Export Button** — one click generates `paper_appendix.md` with the full
+innovation log, dead ends, sigma-gate results, and state vector timeline.
+
+### Experiment-Specific Live Plots
+
+Each experiment gets a domain-appropriate visualization:
+
+| Experiment | Live Plot |
+|-----------|-----------|
+| **Schelling** | 2D grid heatmap showing agent types + segregation index gauge |
+| **Spatial PD** | Lattice with cooperators (blue) / defectors (red) + cooperation rate curve |
+| **Lotka-Volterra** | Prey vs predator population time series + phase portrait |
+| **SIR** | Epidemic curve (S/I/R stacked area) + R0 estimate badge |
+| **ML Hyperparam** | Convergence curve (best-so-far accuracy) + overfitting gap bar |
+| **Lorenz** | 3D butterfly attractor (rotatable) + Lyapunov exponent badge |
+| **Grover's** | Amplitude bar chart per basis state + sinusoidal success curve |
+| **Izhikevich** | Membrane voltage raster plot + ISI histogram |
+| **Blockchain** | Node communication graph + safety/liveness status indicators |
+
+Plots auto-detect which experiment is running from `config.yaml` and update
+every 5 seconds by reading the experiment's output files.
+
+### Architecture
+
+The dashboard is READ-ONLY. It never writes to any CHP file. It reads:
+- `state_vector.md` for current turn, mode, flags
+- `innovation_log.md` for turn history
+- `dead_ends.md` for failure tracking
+- `config.yaml` for experiment identity and gate definitions
+- Experiment output CSVs for live plots
+
+This means `chp run` and `chp dashboard` can run simultaneously without
+interference. The dashboard watches for file changes and updates automatically.
+
+---
+
 ## Quick Start
 
 ### Install
 
 ```bash
-pip install context-hacking
+pip install context-hacking              # core only
+pip install context-hacking[dashboard]   # with live Streamlit dashboard
+pip install context-hacking[all]         # everything (dashboard + ML experiments)
 ```
 
 ### Initialize a new project
@@ -408,6 +481,16 @@ chp cursor
 
 Creates `.cursorrules` and `skills/` folder that auto-inject the Critic, gates,
 and mode logic into Cursor or Claude Code sessions.
+
+### Launch the live dashboard
+
+```bash
+chp dashboard
+```
+
+Opens the Streamlit dashboard at `http://localhost:8501` with real-time mode
+indicator, sigma-gauges, innovation log, dead end tracker, and experiment-specific
+plots. Requires `pip install context-hacking[dashboard]`.
 
 ---
 

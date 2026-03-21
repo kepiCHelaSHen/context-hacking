@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "context-hacking"
-version = "0.1.0"
+version = "0.2.0"
 description = "Context Hacking Protocol (CHP) — 9-layer anti-drift framework for trustworthy LLM-assisted scientific code generation"
 readme = "README.md"
 license = { text = "MIT" }
@@ -51,6 +51,8 @@ dependencies = [
 dashboard = [
     "streamlit>=1.30",
     "plotly>=5.18",
+    "matplotlib>=3.8",
+    "watchdog>=4.0",
 ]
 ml = [
     "scikit-learn>=1.4",
