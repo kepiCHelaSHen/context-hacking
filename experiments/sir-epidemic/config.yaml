@@ -1,0 +1,41 @@
+# Stochastic SIR Epidemic — CHP Experiment Config
+
+project:
+  name: "sir-epidemic"
+  description: "Stochastic individual-based SIR with fadeout dynamics and parameter inference"
+  frozen_paths: ["frozen/"]
+  chain_prompt: "CHAIN_PROMPT.md"
+
+gates:
+  seeds: 3
+  convergence_seeds: 30
+  sigma_threshold: 0.15
+  anomaly_checks:
+    - metric: "fadeout_rate"
+      operator: ">"
+      threshold: 0.0
+      description: "Stochastic fadeout must occur (NOT zero — that's deterministic contamination)"
+    - metric: "mean_final_size_fraction"
+      operator: ">"
+      threshold: 0.50
+      description: "Most runs should produce a substantial epidemic at R0=3"
+    - metric: "mean_final_size_fraction"
+      operator: "<"
+      threshold: 0.99
+      description: "Stochastic model shouldn't infect exactly everyone"
+    - metric: "r0_recovered"
+      operator: ">"
+      threshold: 2.0
+      description: "Inferred R0 should be near the true value of 3.0"
+  max_consecutive_anomalies: 3
+
+loop:
+  max_turns: 20
+  stagnation_threshold: 5
+  max_consecutive_exploration: 3
+  auto_tag: true
+
+critic:
+  mindset: "Assume the build failed until proven otherwise"
+  instruction: "Argue AGAINST the science before scoring it"
+  specific_mission: "Check for deterministic contamination: float-valued I(t), smooth curves, beta*S*I/N rate equation, or zero fadeout."
