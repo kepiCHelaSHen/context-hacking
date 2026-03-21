@@ -1,0 +1,41 @@
+# Agent-Based Lotka-Volterra — CHP Experiment Config
+
+project:
+  name: "lotka-volterra"
+  description: "Agent-based predator-prey with extinction dynamics and oscillation metrics"
+  frozen_paths: ["frozen/"]
+  chain_prompt: "CHAIN_PROMPT.md"
+
+gates:
+  seeds: 3
+  convergence_seeds: 30
+  sigma_threshold: 0.15
+  anomaly_checks:
+    - metric: "prey_survived"
+      operator: ">"
+      threshold: 0.50
+      description: "Prey should survive in >50% of runs at default N"
+    - metric: "predator_survived"
+      operator: ">"
+      threshold: 0.50
+      description: "Predators should survive in >50% of runs at default N"
+    - metric: "predator_extinction_rate"
+      operator: ">"
+      threshold: 0.0
+      description: "Some predator extinction expected (NOT zero — that would be ODE contamination)"
+    - metric: "oscillation_detected"
+      operator: ">"
+      threshold: 0.50
+      description: "Population oscillations must be present in >50% of surviving runs"
+  max_consecutive_anomalies: 3
+
+loop:
+  max_turns: 20
+  stagnation_threshold: 5
+  max_consecutive_exploration: 3
+  auto_tag: true
+
+critic:
+  mindset: "Assume the build failed until proven otherwise"
+  instruction: "Argue AGAINST the science before scoring it"
+  specific_mission: "Check for ODE contamination: variables named alpha/beta/gamma/delta, smooth trajectories, or zero extinction rate."
