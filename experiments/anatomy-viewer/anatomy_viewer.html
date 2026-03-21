@@ -205,13 +205,13 @@ let currentView = "anterior";
 const canvas = document.getElementById("anatomy");
 const ctx = canvas.getContext("2d");
 const cx = CANVAS_WIDTH / 2;  // midline x
-const top = FIGURE_TOP;
+const figTop = FIGURE_TOP;
 
 // ══════════════════════════════════════════════════════════════════════════════
 // DRAWING HELPERS
 // ══════════════════════════════════════════════════════════════════════════════
 
-function y(ratio) { return top + H * ratio; }
+function y(ratio) { return figTop + H * ratio; }
 function xOff(ratio) { return cx + H * ratio; }
 function dim(ratio) { return H * ratio; }
 
@@ -278,7 +278,7 @@ function drawSilhouette() {
     const thighH = dim(THIGH_RATIO);
     const lowerLegH = dim(LOWER_LEG_RATIO);
 
-    const headTop = top;
+    const headTop = figTop;
     const neckTop = headTop + headH;
     const shoulderTop = neckTop + neckH;
     const waistTop = shoulderTop + torsoH * 0.6;
