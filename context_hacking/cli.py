@@ -118,33 +118,76 @@ def init(name: str, experiment: str | None, existing: bool, cursor: bool) -> Non
 
 
 @main.command()
-def run() -> None:
-    """Launch the CHP orchestrator loop."""
-    from context_hacking.core.orchestrator import Config, Orchestrator
+@click.option("--experiment", default=None,
+              help="Run a specific experiment (e.g., schelling-segregation)")
+@click.option("--method", type=click.Choice(["auto", "claude-cli", "api", "interactive"]),
+              default="auto", help="Execution method for the loop")
+@click.option("--all-experiments", is_flag=True,
+              help="Run all 9 built-in experiments sequentially")
+def run(experiment: str | None, method: str, all_experiments: bool) -> None:
+    """Launch the CHP loop — builds, critiques, tests, and reports autonomously."""
+    from context_hacking.runner import run_experiment
 
     config_path = Path("config.yaml")
     if not config_path.exists():
         console.print("[red]config.yaml not found.[/red] Run 'chp init' first.")
         raise SystemExit(1)
 
-    config = Config.from_yaml(config_path)
-    orch = Orchestrator(config)
+    if all_experiments:
+        exp_names = [
+            "schelling-segregation", "spatial-prisoners-dilemma",
+            "lotka-volterra", "sir-epidemic", "ml-hyperparam-search",
+            "lorenz-attractor", "quantum-grover", "izhikevich-neurons",
+            "blockchain-consensus",
+        ]
+        console.print(f"[bold]Running ALL {len(exp_names)} experiments[/bold]")
+        for i, name in enumerate(exp_names, 1):
+            console.print(f"\n[bold cyan]{'='*60}[/bold cyan]")
+            console.print(f"[bold cyan]  [{i}/{len(exp_names)}] {name}[/bold cyan]")
+            console.print(f"[bold cyan]{'='*60}[/bold cyan]\n")
+            try:
+                run_experiment(name, method=method)
+            except Exception as e:
+                console.print(f"[red]FAILED: {name} — {e}[/red]")
+        console.print(f"\n[bold green]All {len(exp_names)} experiments complete.[/bold green]")
+        return
 
-    console.print(f"[bold]CHP Loop starting:[/bold] {config.project_name}")
-    console.print(f"  Max turns: {config.max_turns}")
-    console.print(f"  Mode: {orch.current_mode}")
-    console.print()
-
-    result = orch.step()
-
-    if "exit" in result:
-        console.print(f"[bold red]EXIT:[/bold red] {result['exit']}")
-    else:
-        console.print(f"[bold]Turn {result['turn']}[/bold] — Mode: {result['mode']}")
-        console.print(f"  Dead ends avoided: {result['dead_ends_avoided'] or 'none'}")
-        console.print(f"  Status: {result['status']}")
+    if experiment:
+        # Run specific experiment through the full loop
+        console.print(f"[bold]CHP Loop starting:[/bold] {experiment}")
+        console.print(f"  Method: {method}")
         console.print()
-        console.print("[dim]Complete the build, then call 'chp status' to check gates.[/dim]")
+        run_experiment(experiment, method=method)
+        return
+
+    # Default: detect experiment from config.yaml and run it
+    import yaml
+    with open(config_path) as f:
+        cfg = yaml.safe_load(f) or {}
+    project_name = cfg.get("project", {}).get("name", "")
+
+    if project_name and project_name != "my-project":
+        console.print(f"[bold]CHP Loop starting:[/bold] {project_name}")
+        console.print(f"  Method: {method}")
+        console.print()
+        run_experiment(project_name, method=method)
+    else:
+        # Fallback: just do one orchestrator step (original behavior)
+        from context_hacking.core.orchestrator import Config, Orchestrator
+        config = Config.from_yaml(config_path)
+        orch = Orchestrator(config)
+        console.print(f"[bold]CHP Loop starting:[/bold] {config.project_name}")
+        console.print(f"  Max turns: {config.max_turns}")
+        console.print(f"  Mode: {orch.current_mode}")
+        console.print()
+        result = orch.step()
+        if "exit" in result:
+            console.print(f"[bold red]EXIT:[/bold red] {result['exit']}")
+        else:
+            console.print(f"[bold]Turn {result['turn']}[/bold] — Mode: {result['mode']}")
+            console.print(f"  Dead ends avoided: {result['dead_ends_avoided'] or 'none'}")
+            console.print()
+            console.print("[dim]Tip: use --experiment <name> to run the full autonomous loop.[/dim]")
 
 
 @main.command()
