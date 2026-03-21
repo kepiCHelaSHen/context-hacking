@@ -41,83 +41,83 @@ Full proof: [SIMSIV repository](https://github.com/kepiCHelaSHen/SIMSIV)
 
 ---
 
-## The 9 Layers
+## The Core Idea: 9 LLM Weaknesses Turned Into Strengths
 
-| # | Layer | Core Idea |
-|---|-------|-----------|
-| 1 | **Prior-as-Detector** | LLM hallucination becomes a drift tripwire |
-| 2 | **Synthetic Dialectic** | Builder/Critic/Reviewer with opposing goals |
-| 3 | **Frozen Code Forcing** | Immutable published code grounds all generation |
-| 4 | **Multi-Model Council** | Different LLM priors = disagreement = drift signal |
-| 5 | **Context Window Management** | State vectors, innovation logs, dead-end tracking |
-| 6 | **sigma-Gated Verification** | Multi-seed statistical gates block noisy code |
-| 7 | **Two-Mode Negative Feedback** | Validation/Exploration with automatic switching |
-| 8 | **Token-Efficient Architecture** | Targeted prompts, incremental saves, health checks |
-| 9 | **Self-Correcting Loop** | Build, critique, fix, verify, commit, repeat |
+Every layer in CHP maps to a specific, well-documented LLM weakness. We don't fix
+these weaknesses. We **flip them** — turning each failure mode into the mechanism
+that prevents it.
 
-### Layer 1: Prior-as-Detector
+| # | The LLM Weakness | The Flip | CHP Layer |
+|---|-------------------|----------|-----------|
+| 1 | **Hallucination** — generates plausible values from training priors instead of reading specs | The gap between prior and spec **IS the drift detector**. When the LLM produces 0.30 for a 0.10 parameter, the divergence triggers the alarm. | **Prior-as-Detector** |
+| 2 | **Sycophancy** — agrees with itself, never challenges its own output | Force **three opposing roles** (Builder/Critic/Reviewer) so agreement means convergence, not self-confirmation. The Critic's job is to argue AGAINST the science before scoring it. | **Synthetic Dialectic** |
+| 3 | **Boundary violation** — modifies what it shouldn't, ignores constraints | Declare published code **physically immutable**. All new code composes WITH frozen files. The LLM literally cannot edit the spec — only build on top of it. | **Frozen Code Forcing** |
+| 4 | **Model-specific bias** — each LLM has different blind spots baked into training | Send the same work to **multiple models** (GPT-4o, Grok, Claude). Different priors = different errors. Disagreement between models IS the drift signal. | **Multi-Model Council** |
+| 5 | **Amnesia** — forgets everything across sessions and context resets | Write **three external files** (state vector, innovation log, dead ends) that persist outside the context window. The LLM reads them at the start of every turn. Memory survives infinite resets. | **Context Window Mgmt** |
+| 6 | **Vibes-based evaluation** — can't judge statistical significance, cherry-picks results | Replace judgment with **math**. Multi-seed runs with hard sigma thresholds. If variance across seeds > 0.15, the build is blocked. No amount of persuasive text overrides a failed statistical gate. | **Sigma-Gated Verification** |
+| 7 | **Mode collapse** — either too conservative (copies spec verbatim) or too creative (ignores spec entirely) | **Two modes with automatic switching.** Validation (strict, Critic blocks) for known mechanisms. Exploration (loose, Critic advises) when stuck. Stagnation triggers creativity. Anomaly triggers reversion. Neither extreme persists. | **Two-Mode Feedback** |
+| 8 | **Context waste** — fills the window with irrelevant information, loses track of what matters | **Targeted 3-line health checks** instead of full-context reviews. Single source of truth (CHAIN_PROMPT.md). State vectors compress 50 turns into 15 lines. Every token in the context is there for a reason. | **Token-Efficient Arch** |
+| 9 | **No stopping criterion** — keeps generating forever, doesn't know when it's done or going in circles | **Five kill-switches** that halt the loop automatically: science complete, performance plateau, unresolvable anomaly, fundamental misalignment, human stop. The system terminates itself. | **Self-Correcting Loop** |
 
-LLMs generate from training priors, not your specification. CHP exploits this: when
-the Builder's output matches the "textbook answer" instead of your frozen source code,
-the Critic flags it. The model's tendency to hallucinate becomes the detection mechanism.
+### How each flip works in practice
 
-### Layer 2: Synthetic Dialectic
+**Layer 1 — Prior-as-Detector.** We asked GPT-4o and Grok-3 to implement a cooperation
+function 10 times each. GPT-4o produced an empathy coefficient of 0.362 on average
+(truth: 0.15). Grok-3 produced `social_skill = 0.30` on ALL 10 trials (truth: 0.10,
+zero variance). The LLM's prior is so strong it becomes **deterministic** — and that
+determinism is what makes it detectable. If you know the LLM will always guess 0.30,
+you just check whether the output says 0.30. If it does, it didn't read your spec.
 
-Three agents with deliberately opposing goals:
+**Layer 2 — Synthetic Dialectic.** The Builder proposed `empathy = 0.20`. Left
+unchecked, this ships. But the Critic's instruction is: *"Assume the build failed
+until proven otherwise. Argue AGAINST the science."* The Critic cross-references
+`resources.py:289` and finds the frozen value is 0.15. Hard block. The Builder's
+sycophantic tendency to produce "reasonable" code is defeated by the Critic's
+adversarial mandate.
 
-| Agent | Goal | Mindset |
-|-------|------|---------|
-| **Builder** | Implement exactly what's specified | "Read the constitution before every build" |
-| **Critic** | Prove the science is wrong | "Argue AGAINST the finding, then score it" |
-| **Reviewer** | Code hygiene only | "No opinions about science or architecture" |
+**Layer 3 — Frozen Code Forcing.** The Builder proposed a multiplicative formula
+`CAC = mean_eff * density * conformity_amp`. This produces zeros in early simulation
+years (density starts near zero). The frozen spec uses an additive decomposition.
+Because the frozen code is immutable, the Builder cannot rationalize changing it —
+it must compose with it. The boundary violation is architecturally impossible.
 
-The system only converges when all three agree. Tension is the feature.
+**Layer 4 — Multi-Model Council.** GPT-4o drifted empathy to 0.362. Grok-3 drifted
+it to 0.235. They're both wrong, but they're wrong in **different ways**. When both
+review the same code and disagree about whether it matches the spec, the disagreement
+itself flags drift. Unanimous wrong answers are rare across models with different
+training distributions.
 
-### Layer 3: Frozen Code Forcing
+**Layer 5 — Context Window Management.** Turn 3 tried asynchronous updates.
+It failed. The dead end was logged: *"Do NOT repeat: async updates contradict
+frozen/schelling_rules.md line 7."* Turn 7 started a new session with a fresh
+context window. First thing the Builder reads: the dead ends file. It skips async
+updates without being told twice. The LLM's amnesia is defeated by an external
+memory it reads before every turn.
 
-A published or submitted codebase is declared immutable. No agent can modify it. All
-new code must compose WITH the frozen code. Every coefficient traces to a source file
-and line number.
+**Layer 6 — Sigma-Gated Verification.** Turn 5 found a positive result at n=3
+seeds: the Bowles mechanism appeared causal (+0.039). A vibes-based system would
+celebrate and ship. CHP's sigma gate said: *"Run at n=10."* At n=10, the effect
+vanished (p = 0.954). False positive killed. The LLM's inability to judge
+significance is replaced by a statistical gate that cannot be argued with.
 
-### Layer 4: Multi-Model Council
+**Layer 7 — Two-Mode Feedback.** After 5 turns of Validation with no improvement,
+the system automatically switches to Exploration mode. The Builder can now propose
+hypotheses beyond the frozen spec. But if an Exploration build produces an anomaly,
+the Reversion Protocol fires: roll back to the last passing tag and return to
+Validation. Neither creative chaos nor conservative stagnation persists.
 
-After every build turn, multiple LLMs review the work against the same grounding
-documents. Different models have different priors. Disagreement IS the drift signal.
+**Layer 8 — Token-Efficient Architecture.** Instead of dumping the entire codebase
+into context, each turn starts with a 3-line health check: *"Builder: what frozen
+file governs this milestone? Critic: what is Gate 1? Reviewer: what architecture
+rules apply?"* If any agent fails its check, the turn aborts before wasting tokens
+on a build. The context window is curated, not stuffed.
 
-Configurable providers: OpenAI (GPT-4o), xAI (Grok-3), Google (Gemini), Anthropic (Claude).
-
-### Layer 5: Context Window Management
-
-- **State Vector**: Every N turns, a 10-15 line "save game" captures the full system state.
-- **Innovation Log**: Persistent memory that survives context resets.
-- **Dead End Tracking**: Failed approaches logged with reasons. The system reads this
-  before every build and cannot repeat logged failures.
-
-### Layer 6: sigma-Gated Statistical Verification
-
-Nothing merges on vibes. Every build runs multi-seed anomaly checks with configurable
-thresholds. Fail any check: blocked. Fail K consecutive turns: EXIT.
-
-### Layer 7: Two Modes with Negative Feedback
-
-**Validation** (default): strict, citation-required, critic blocks.
-**Exploration** (when stuck): hypothesis-driven, critic advisory, reversion protocol active.
-
-Automatic switching prevents both stagnation and chaos.
-
-### Layer 8: Token-Efficient Architecture
-
-Targeted subagent prompts. 3-line health checks. Single source of truth document.
-Incremental saves. Context compression via state vectors.
-
-### Layer 9: Self-Correcting Loop
-
-Five kill-switches halt the loop automatically:
-1. Science complete
-2. Performance gate (no improvement for N turns)
-3. Unresolvable anomaly (K consecutive failures)
-4. Fundamental misalignment (critic says root is broken)
-5. Human stop (STOP file)
+**Layer 9 — Self-Correcting Loop.** At turn 10, the primary metric stopped
+improving. At turn 11, it still hadn't improved. At turn 12, EXIT 2 fired:
+*"Performance gate: no improvement for N consecutive turns."* The loop terminated
+itself. The human reviewed the innovation log, saw that the mechanism was fully
+characterized, and confirmed the exit. The LLM didn't loop forever — it
+recognized completion and stopped.
 
 ---
 
