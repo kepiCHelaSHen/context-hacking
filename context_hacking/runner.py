@@ -123,6 +123,12 @@ def _run_api_loop(experiment_dir: Path, max_turns: int = 8) -> None:
     spec_text = spec_path.read_text(encoding="utf-8") if spec_path.exists() else ""
     milestones = re.findall(r"^\d+\.\s+(.+?)(?:\s*—|\s*$)", spec_text, re.MULTILINE)
 
+    # Initialize telemetry
+    from context_hacking.core.telemetry import TelemetryStore, TurnMetrics, TurnTimer
+    telemetry = TelemetryStore.load()
+    telemetry.project_name = exp_name
+    telemetry.start_time = time.strftime("%Y-%m-%d %H:%M")
+
     _log.info("Starting CHP loop: %s (%d milestones detected)", exp_name, len(milestones))
     print(f"\n{'='*60}")
     print(f"CHP Autonomous Loop — {exp_name}")
@@ -168,43 +174,61 @@ def _run_api_loop(experiment_dir: Path, max_turns: int = 8) -> None:
 
         messages.append({"role": "user", "content": user_msg})
 
+        # ── Initialize turn metrics ────────────────────────────────
+        metrics = TurnMetrics(turn=turn, timestamp=time.strftime("%Y-%m-%d %H:%M"),
+                              mode="EXPLORATION" if "EXPLORATION" in user_msg.upper() else "VALIDATION")
+
         # ── Call API ─────────────────────────────────────────────────
         print(f"--- Turn {turn}/{max_turns} ---")
         _log.info("Turn %d: sending to API...", turn)
-        t0 = time.time()
 
-        try:
-            response = client.messages.create(
-                model="claude-sonnet-4-20250514",
-                max_tokens=16000,
-                system=system_prompt,
-                messages=messages,
-            )
-            elapsed = time.time() - t0
-            reply = response.content[0].text
-            _log.info("Turn %d: received %d chars in %.1fs", turn, len(reply), elapsed)
-        except Exception as e:
-            _log.error("API error on turn %d: %s", turn, e)
-            print(f"API ERROR: {e}")
-            break
+        with TurnTimer(metrics):
+            try:
+                response = client.messages.create(
+                    model="claude-sonnet-4-20250514",
+                    max_tokens=16000,
+                    system=system_prompt,
+                    messages=messages,
+                )
+                reply = response.content[0].text
+                _log.info("Turn %d: received %d chars in %.1fs", turn, len(reply), metrics.duration_seconds)
+
+                # Record token usage
+                if hasattr(response, "usage"):
+                    metrics.tokens_input = getattr(response.usage, "input_tokens", 0)
+                    metrics.tokens_output = getattr(response.usage, "output_tokens", 0)
+                    metrics.tokens_total = metrics.tokens_input + metrics.tokens_output
+            except Exception as e:
+                _log.error("API error on turn %d: %s", turn, e)
+                print(f"API ERROR: {e}")
+                break
 
         messages.append({"role": "assistant", "content": reply})
 
         # ── Extract and write code blocks ────────────────────────────
         code_blocks = _extract_code_blocks(reply)
+        total_lines = 0
         for filename, code in code_blocks.items():
             filepath = experiment_dir / filename
             filepath.parent.mkdir(parents=True, exist_ok=True)
             filepath.write_text(code, encoding="utf-8")
-            print(f"  Wrote: {filepath.name} ({len(code)} chars)")
+            lines = code.count("\n") + 1
+            total_lines += lines
+            print(f"  Wrote: {filepath.name} ({len(code)} chars, {lines} lines)")
             _log.info("Wrote %s (%d chars)", filepath, len(code))
+        metrics.files_written = len(code_blocks)
+        metrics.lines_written = total_lines
 
         # ── Run tests if any code was written ────────────────────────
         test_dir = experiment_dir / "tests"
         if code_blocks and test_dir.exists():
             print(f"  Running tests...")
             test_result = _run_tests(experiment_dir)
-            # Send test results back as next user message
+            metrics.tests_passed = test_result["passed"]
+            metrics.tests_failed = test_result["failed"]
+            metrics.tests_skipped = test_result.get("skipped", 0)
+            metrics.tests_passed_first_try = test_result["failed"] == 0
+
             if test_result["failed"] > 0:
                 messages.append({
                     "role": "user",
@@ -218,6 +242,35 @@ def _run_api_loop(experiment_dir: Path, max_turns: int = 8) -> None:
                 print(f"  Tests: {test_result['passed']} passed, {test_result['failed']} FAILED")
             else:
                 print(f"  Tests: {test_result['passed']} passed, 0 failed")
+
+        # ── Parse critic scores from reply ───────────────────────────
+        from context_hacking.agents.critic import parse_verdict
+        verdict = parse_verdict(reply)
+        metrics.gate_1_frozen = verdict.gate_1_frozen
+        metrics.gate_2_architecture = verdict.gate_2_architecture
+        metrics.gate_3_scientific = verdict.gate_3_scientific
+        metrics.gate_4_drift = verdict.gate_4_drift
+        metrics.critic_verdict = verdict.verdict
+        metrics.blocking_issues_found = len(verdict.blocking_issues or [])
+
+        # ── Detect false positive ────────────────────────────────────
+        if "FALSE POSITIVE" in reply.upper():
+            metrics.false_positive_caught = True
+            fp_match = re.search(r"FALSE POSITIVE[^:]*:\s*(.{10,200})", reply, re.IGNORECASE)
+            metrics.false_positive_description = fp_match.group(1).strip() if fp_match else "see log"
+
+        # ── Dead ends ────────────────────────────────────────────────
+        de_path = experiment_dir / "dead_ends.md"
+        if de_path.exists():
+            metrics.dead_ends_checked = len(_dead_ends_from_file(de_path))
+        if "DEAD END" in reply.upper() and "DO NOT REPEAT" in reply.upper():
+            metrics.new_dead_ends_logged = 1
+
+        # ── Record telemetry ─────────────────────────────────────────
+        telemetry.add_turn(metrics)
+        print(f"  Telemetry: {metrics.tokens_total} tokens, {metrics.lines_written} lines, "
+              f"gate3={metrics.gate_3_scientific:.2f}, "
+              f"{'FP CAUGHT' if metrics.false_positive_caught else 'no FP'}")
 
         # ── Check for completion ─────────────────────────────────────
         if _check_completion(reply):
@@ -315,6 +368,12 @@ def _run_tests(experiment_dir: Path) -> dict[str, Any]:
     except Exception as e:
         return {"passed": 0, "failed": 1, "skipped": 0,
                 "output": str(e), "returncode": -1}
+
+
+def _dead_ends_from_file(path: Path) -> list[str]:
+    """Read dead ends file and return list of titles."""
+    text = path.read_text(encoding="utf-8") if path.exists() else ""
+    return re.findall(r"^## DEAD END \d+ — (.+)$", text, re.MULTILINE)
 
 
 def _check_completion(reply: str) -> bool:

@@ -26,6 +26,31 @@ import numpy as np
 
 _log = logging.getLogger(__name__)
 
+# Publication-quality figure caption descriptions
+FIGURE_DESCRIPTIONS: dict[str, str] = {
+    "schelling_comparison": "Baseline vs CHP dynamic tolerance — segregation comparison",
+    "grid_final": "Final agent grid — segregation index measured from this state",
+    "segregation_over_time": "Segregation index over simulation steps",
+    "spatial_pd_lattice": "Nowak & May spatial PD — cooperator/defector pattern",
+    "lattice_final": "Final cooperator/defector lattice (blue=cooperate, red=defect)",
+    "lotka_volterra_dynamics": "Agent-based predator-prey time series + phase portrait",
+    "population_timeseries": "Prey and predator population dynamics",
+    "sir_epidemic_curve": "SIR epidemic — I(t) is integer, not float (stochastic)",
+    "epidemic_curve": "Stochastic SIR epidemic curve — one representative run",
+    "lorenz_attractor": "Lorenz butterfly — RK45 adaptive, sigma=10 rho=28 beta=8/3",
+    "attractor_3d": "Lorenz strange attractor — 3D phase space trajectory",
+    "grover_amplitude": "Grover success probability vs iteration count (sinusoidal)",
+    "grover_states": "Grover state amplitudes at k=25 — target state highlighted",
+    "amplitude_bars": "Grover amplitude per basis state at optimal iterations",
+    "izhikevich_patterns": "5 firing patterns: RS, IB, FS, CH, LTS (NOT Hodgkin-Huxley)",
+    "voltage_raster": "Izhikevich neuron membrane voltage traces",
+    "blockchain_safety": "Safety vs f Byzantine nodes — threshold f < N/3",
+    "byzantine_threshold": "Safety boundary — PBFT vs Raft under equivocation",
+    "metal_vs_classical": "Classical flags 6-9 errors per Pantera riff. Metal: zero.",
+    "convergence": "Bayesian optimization convergence — best validation accuracy",
+    "search_space": "2D hyperparameter search space heatmap",
+}
+
 
 def generate_figures(experiment_name: str, experiment_dir: Path) -> list[Path]:
     """Generate all figures for an experiment. Returns list of saved paths."""

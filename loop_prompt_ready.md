@@ -9,23 +9,23 @@ CONTEXT INJECTION — READ FIRST (non-negotiable)
 
 Before doing ANYTHING, read ALL of these in order:
 
-  1. D:\experiments\context-hacking\chp-test-run\experiments\schelling-segregation/CHAIN_PROMPT.md     — master design doc
-  2. D:\experiments\context-hacking\chp-test-run\experiments\schelling-segregation/frozen/*            — immutable specification
-  3. D:\experiments\context-hacking\chp-test-run\experiments\schelling-segregation/dead_ends.md        — failed approaches (do NOT repeat)
-  4. D:\experiments\context-hacking\chp-test-run\experiments\schelling-segregation/state_vector.md     — your save game
-  5. D:\experiments\context-hacking\chp-test-run\experiments\schelling-segregation/innovation_log.md   — your memory
-  6. D:\experiments\context-hacking\chp-test-run\experiments\schelling-segregation/config.yaml         — gates and thresholds
-  7. D:\experiments\context-hacking\chp-test-run\experiments\schelling-segregation/spec.md             — what to build
+  1. D:\EXPERIMENTS\context-hacking/CHAIN_PROMPT.md     — master design doc
+  2. D:\EXPERIMENTS\context-hacking/frozen/*            — immutable specification
+  3. D:\EXPERIMENTS\context-hacking/dead_ends.md        — failed approaches (do NOT repeat)
+  4. D:\EXPERIMENTS\context-hacking/state_vector.md     — your save game
+  5. D:\EXPERIMENTS\context-hacking/innovation_log.md   — your memory
+  6. D:\EXPERIMENTS\context-hacking/config.yaml         — gates and thresholds
+  7. D:\EXPERIMENTS\context-hacking/spec.md             — what to build
 
 ================================================================================
 FROZEN CODE — ABSOLUTE RULE
 ================================================================================
 
-DO NOT modify any file in D:\experiments\context-hacking\chp-test-run\experiments\schelling-segregation/frozen/
+DO NOT modify any file in D:\EXPERIMENTS\context-hacking/frozen/
 Every coefficient in your code MUST match the frozen spec EXACTLY.
 If unsure whether a value matches — read the frozen file again.
 
-Build ONLY in D:\experiments\context-hacking\chp-test-run\experiments\schelling-segregation/
+Build ONLY in D:\EXPERIMENTS\context-hacking/
 
 ================================================================================
 SUBAGENT ROLES
@@ -64,7 +64,7 @@ STEP 2 — READ state_vector.md. Know where you are.
 STEP 3 — DECIDE what to build this turn (one milestone at a time).
 
 STEP 4 — BUILD it.
-  Write the code to D:\experiments\context-hacking\chp-test-run\experiments\schelling-segregation/
+  Write the code to D:\EXPERIMENTS\context-hacking/
   All randomness via seeded numpy.random.Generator.
   No print() — use logging.getLogger(__name__).
   Same seed = identical output.
@@ -80,7 +80,7 @@ STEP 7 — CODE REVIEW (Reviewer hat).
   Check hygiene. Fix CRITICAL.
 
 STEP 8 — RUN TESTS.
-  Run: python -m pytest D:\experiments\context-hacking\chp-test-run\experiments\schelling-segregation/tests/ -v
+  Run: python -m pytest D:\EXPERIMENTS\context-hacking/tests/ -v
   ALL tests that can run must pass.
 
 STEP 9 — MULTI-SEED ANOMALY CHECK.
@@ -89,7 +89,7 @@ STEP 9 — MULTI-SEED ANOMALY CHECK.
   If any gate fails: log it, fix it, re-run.
 
 STEP 10 — UPDATE LOGS.
-  Append to D:\experiments\context-hacking\chp-test-run\experiments\schelling-segregation/innovation_log.md:
+  Append to D:\EXPERIMENTS\context-hacking/innovation_log.md:
     Turn number and mode
     What was built
     Dead ends avoided
@@ -98,7 +98,7 @@ STEP 10 — UPDATE LOGS.
     Metric deltas
     What next turn should focus on
 
-  Update D:\experiments\context-hacking\chp-test-run\experiments\schelling-segregation/state_vector.md with current state.
+  Update D:\EXPERIMENTS\context-hacking/state_vector.md with current state.
 
 STEP 11 — LOOP back to STEP 1 for the next milestone.
 
@@ -106,7 +106,7 @@ STEP 11 — LOOP back to STEP 1 for the next milestone.
 MILESTONES (read from spec.md)
 ================================================================================
 
-Follow the milestones defined in D:\experiments\context-hacking\chp-test-run\experiments\schelling-segregation/spec.md exactly.
+Follow the milestones defined in D:\EXPERIMENTS\context-hacking/spec.md exactly.
 One milestone per turn. Do not skip ahead.
 
 ================================================================================
@@ -136,7 +136,7 @@ EXIT when ALL milestones in spec.md are complete AND:
   - Innovation log documents the full journey
 
 Write a final COMPLETION entry in innovation_log.md.
-Write a REPORT to D:\experiments\context-hacking\chp-test-run\experiments\schelling-segregation/REPORT.md with:
+Write a REPORT to D:\EXPERIMENTS\context-hacking/REPORT.md with:
   - What was built
   - False positive caught (what, how, fix)
   - Final gate scores
@@ -148,4 +148,4 @@ DONE
 ================================================================================
 
 When complete, print:
-"Experiment schelling-segregation complete. See D:\experiments\context-hacking\chp-test-run\experiments\schelling-segregation/REPORT.md"
+"Experiment context-hacking complete. See D:\EXPERIMENTS\context-hacking/REPORT.md"
