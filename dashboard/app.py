@@ -487,7 +487,7 @@ def main() -> None:
                     break
 
             if exp_dir:
-                detail_tabs = st.tabs(["📋 Spec", "🔒 Frozen Rules", "🚫 Dead Ends", "📄 Report"])
+                detail_tabs = st.tabs(["📋 Spec", "🔒 Frozen Rules", "🚫 Dead Ends", "📊 Figures", "📄 Report"])
 
                 with detail_tabs[0]:
                     spec_file = exp_dir / "spec.md"
@@ -528,6 +528,19 @@ def main() -> None:
                         st.caption("No dead_ends.md found.")
 
                 with detail_tabs[3]:
+                    fig_dir = exp_dir / "figures"
+                    if fig_dir.exists():
+                        figs = sorted(fig_dir.glob("*.png"))
+                        if figs:
+                            for fig_path in figs:
+                                st.image(str(fig_path), use_container_width=True)
+                                st.caption(fig_path.stem.replace("_", " ").title())
+                        else:
+                            st.info("No figures generated yet. Run the experiment to generate publication-quality figures.")
+                    else:
+                        st.info("No figures directory found.")
+
+                with detail_tabs[4]:
                     report_file = exp_dir / "REPORT.md"
                     if report_file.exists():
                         st.markdown(
