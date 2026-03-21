@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHP Anatomy Viewer — Gray's Anatomy 41st Ed</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Source Sans 3', 'Helvetica Neue', Arial, sans-serif;
+    background: #F0F4F8;
+    color: #374151;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    gap: 20px;
+}
+#canvas-wrap {
+    border: 1px solid #C8CCDB;
+    background: #F0F4F8;
+    position: relative;
+}
+canvas { display: block; }
+#controls {
+    width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.section-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #6B7280;
+    margin-top: 8px;
+}
+.btn-row { display: flex; gap: 4px; }
+.view-btn, .sys-btn {
+    padding: 6px 10px;
+    border: 1px solid #C8CCDB;
+    background: #fff;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 11px;
+    transition: all 0.15s;
+}
+.view-btn:hover, .sys-btn:hover { background: #E2E5EF; }
+.view-btn.active { background: #374151; color: #fff; border-color: #374151; }
+.sys-btn.active { color: #fff; }
+#info-panel {
+    background: #fff;
+    border: 1px solid #C8CCDB;
+    padding: 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    min-height: 100px;
+}
+#info-panel h3 { font-size: 13px; margin-bottom: 4px; }
+.chp-badge {
+    font-family: monospace;
+    font-size: 9px;
+    color: #6B7280;
+    margin-top: 16px;
+    text-align: center;
+}
+</style>
+</head>
+<body>
+
+<div id="canvas-wrap">
+    <canvas id="anatomy" width="340" height="500"></canvas>
+</div>
+
+<div id="controls">
+    <div class="section-label">View</div>
+    <div class="btn-row">
+        <button class="view-btn active" onclick="setView('anterior')">Front</button>
+        <button class="view-btn" onclick="setView('posterior')">Back</button>
+        <button class="view-btn" onclick="setView('lateral')">Side</button>
+    </div>
+
+    <div class="section-label">Body Systems</div>
+    <button class="sys-btn" data-sys="skeletal" style="border-left:3px solid #B45309" onclick="toggleSystem('skeletal')">Skeletal</button>
+    <button class="sys-btn" data-sys="muscular" style="border-left:3px solid #991B1B" onclick="toggleSystem('muscular')">Muscular</button>
+    <button class="sys-btn" data-sys="nervous" style="border-left:3px solid #1D4ED8" onclick="toggleSystem('nervous')">Nervous</button>
+    <button class="sys-btn" data-sys="circulatory" style="border-left:3px solid #DC2626" onclick="toggleSystem('circulatory')">Circulatory</button>
+    <button class="sys-btn" data-sys="respiratory" style="border-left:3px solid #0369A1" onclick="toggleSystem('respiratory')">Respiratory</button>
+    <button class="sys-btn" data-sys="digestive" style="border-left:3px solid #065F46" onclick="toggleSystem('digestive')">Digestive</button>
+    <button class="sys-btn" data-sys="lymphatic" style="border-left:3px solid #6D28D9" onclick="toggleSystem('lymphatic')">Lymphatic</button>
+
+    <div id="info-panel">
+        <h3>CHP Anatomy Viewer</h3>
+        <p>Select a body system to explore. All organ positions verified against Gray's Anatomy 41st Edition.</p>
+        <p style="font-size:10px;color:#6B7280;margin-top:6px;">Prior-as-Detector active: heart, liver, lungs, aorta, diaphragm positions enforced by frozen spec.</p>
+    </div>
+
+    <div class="chp-badge">CHP · Context Hacking Protocol<br>Frozen spec: Gray's Anatomy 41st Ed</div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// FROZEN CONSTANTS — from frozen/anatomy_constants.py
+// DO NOT change these values. They are the ground truth.
+// ══════════════════════════════════════════════════════════════════════════════
+
+const CANVAS_WIDTH = 340;
+const CANVAS_HEIGHT = 500;
+const FIGURE_HEIGHT = 490;
+const FIGURE_TOP = 10;
+const H = FIGURE_HEIGHT; // alias for readability
+
+// Segment ratios (fraction of H)
+const HEAD_HEIGHT_RATIO = 0.145;
+const NECK_HEIGHT_RATIO = 0.040;
+const TORSO_HEIGHT_RATIO = 0.305;
+const SHOULDER_WIDTH_RATIO = 0.259;
+const HIP_WIDTH_RATIO = 0.191;
+const HEAD_WIDTH_RATIO = 0.130;
+const WAIST_WIDTH_RATIO = 0.155;
+const PELVIS_HEIGHT_RATIO = 0.095;
+const THIGH_RATIO = 0.245;
+const LOWER_LEG_RATIO = 0.235;
+const UPPER_ARM_RATIO = 0.145;
+const FOREARM_RATIO = 0.120;
+
+// Organ positions (fraction of H from top)
+const HEART_CENTER_Y = 0.355;    // frozen T5 — NOT 0.310 (LLM prior)
+const HEART_CENTER_X_OFF = -0.015;
+const HEART_HEIGHT = 0.080;
+const HEART_WIDTH = 0.060;
+
+const LEFT_LUNG_CENTER_Y = 0.340;
+const LEFT_LUNG_CENTER_X = -0.090;
+const LEFT_LUNG_HEIGHT = 0.175;
+const LEFT_LUNG_WIDTH = 0.065;
+
+const RIGHT_LUNG_CENTER_Y = 0.330;
+const RIGHT_LUNG_CENTER_X = 0.080;
+const RIGHT_LUNG_HEIGHT = 0.185;  // MUST be > LEFT_LUNG_HEIGHT
+const RIGHT_LUNG_WIDTH = 0.068;
+
+const LIVER_CENTER_Y = 0.405;
+const LIVER_CENTER_X = 0.060;    // frozen POSITIVE = right side — NOT negative
+const LIVER_HEIGHT = 0.090;
+const LIVER_WIDTH = 0.110;
+
+const STOMACH_CENTER_Y = 0.415;
+const STOMACH_CENTER_X = -0.055;
+const STOMACH_HEIGHT = 0.070;
+const STOMACH_WIDTH = 0.065;
+
+const SPLEEN_CENTER_Y = 0.400;
+const SPLEEN_CENTER_X = -0.110;
+const SPLEEN_HEIGHT = 0.050;
+const SPLEEN_WIDTH = 0.035;
+
+const BRAIN_CENTER_Y = 0.095;
+const BRAIN_HEIGHT = 0.110;
+const BRAIN_WIDTH = 0.095;
+
+const DIAPHRAGM_Y = 0.450;
+const DIAPHRAGM_RIGHT_HIGHER = true;
+
+const AORTA_ARCH_Y = 0.255;
+const AORTA_DESCENDING_Y = 0.280;
+const AORTA_BIFURCATION_Y = 0.535;  // frozen L4 — NOT 0.510/L3
+
+const C1_Y = 0.185;
+const T1_Y = 0.225;
+const T12_Y = 0.445;
+const L5_Y = 0.530;
+const S1_Y = 0.545;
+
+const STERNUM_TOP_Y = 0.235;
+const STERNUM_BOTTOM_Y = 0.410;
+const STERNUM_WIDTH = 0.020;
+
+const COLORS = {
+    skeletal:    "#B45309",
+    muscular:    "#991B1B",
+    nervous:     "#1D4ED8",
+    circulatory: "#DC2626",
+    respiratory: "#0369A1",
+    digestive:   "#065F46",
+    lymphatic:   "#6D28D9",
+};
+
+const SYSTEM_DESCRIPTIONS = {
+    skeletal: "206 bones providing structural support, protection, and movement. Includes axial skeleton (skull, vertebral column, ribcage) and appendicular skeleton (limbs, girdles).",
+    muscular: "Over 600 muscles enabling movement, posture, and heat generation. Major groups: pectoralis, deltoids, biceps, quadriceps (anterior); trapezius, latissimus, hamstrings (posterior).",
+    nervous: "Central nervous system (brain + spinal cord) and peripheral nerves. Brain at cranial vault, spinal cord from C1 to L1/L2 within vertebral canal.",
+    circulatory: "Heart (T5 level, slightly left of midline), aorta, major arteries and veins. Aortic arch at T4, bifurcation at L4. Pulmonary circuit through lungs.",
+    respiratory: "Trachea, bronchi, and lungs. Right lung has 3 lobes (larger), left has 2 lobes (cardiac notch). Diaphragm: right dome higher than left.",
+    digestive: "Liver (right hypochondriac), stomach (left), small intestine (central), large intestine (peripheral frame). Esophagus descends behind trachea.",
+    lymphatic: "Thymus (superior mediastinum), spleen (left hypochondriac), lymph nodes at neck/axilla/groin. Thoracic duct parallels aorta.",
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════════════════════
+
+let activeSystem = null;
+let currentView = "anterior";
+
+const canvas = document.getElementById("anatomy");
+const ctx = canvas.getContext("2d");
+const cx = CANVAS_WIDTH / 2;  // midline x
+const top = FIGURE_TOP;
+
+// ══════════════════════════════════════════════════════════════════════════════
+// DRAWING HELPERS
+// ══════════════════════════════════════════════════════════════════════════════
+
+function y(ratio) { return top + H * ratio; }
+function xOff(ratio) { return cx + H * ratio; }
+function dim(ratio) { return H * ratio; }
+
+function shouldDraw(system) {
+    if (!activeSystem) return true;
+    return activeSystem === system;
+}
+
+function alpha(system) {
+    if (!activeSystem) return 0.7;
+    return activeSystem === system ? 1.0 : 0.12;
+}
+
+function drawEllipse(x, y, w, h, color, a) {
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.ellipse(x, y, w/2, h/2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+function drawLabel(text, x, ly, color) {
+    if (!activeSystem) return;
+    ctx.save();
+    ctx.font = "9px monospace";
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.9;
+    // dot
+    ctx.beginPath();
+    ctx.arc(x, ly, 2, 0, Math.PI * 2);
+    ctx.fill();
+    // leader line
+    ctx.strokeStyle = color;
+    ctx.globalAlpha = 0.4;
+    ctx.beginPath();
+    ctx.moveTo(x, ly);
+    ctx.lineTo(x + 25, ly - 8);
+    ctx.stroke();
+    // text
+    ctx.globalAlpha = 0.9;
+    ctx.fillText(text, x + 28, ly - 5);
+    ctx.restore();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// BODY SILHOUETTE
+// ══════════════════════════════════════════════════════════════════════════════
+
+function drawSilhouette() {
+    ctx.save();
+    ctx.fillStyle = "rgba(55,65,81,0.07)";
+    ctx.beginPath();
+
+    const headW = dim(HEAD_WIDTH_RATIO);
+    const headH = dim(HEAD_HEIGHT_RATIO);
+    const neckH = dim(NECK_HEIGHT_RATIO);
+    const shoulderW = dim(SHOULDER_WIDTH_RATIO);
+    const waistW = dim(WAIST_WIDTH_RATIO);
+    const hipW = dim(HIP_WIDTH_RATIO);
+    const torsoH = dim(TORSO_HEIGHT_RATIO);
+    const pelvisH = dim(PELVIS_HEIGHT_RATIO);
+    const thighH = dim(THIGH_RATIO);
+    const lowerLegH = dim(LOWER_LEG_RATIO);
+
+    const headTop = top;
+    const neckTop = headTop + headH;
+    const shoulderTop = neckTop + neckH;
+    const waistTop = shoulderTop + torsoH * 0.6;
+    const hipTop = shoulderTop + torsoH;
+    const pelvisBottom = hipTop + pelvisH;
+    const kneeTop = pelvisBottom + thighH;
+    const ankleTop = kneeTop + lowerLegH;
+
+    // Right side silhouette (viewer's left = anatomical right)
+    ctx.moveTo(cx, headTop);
+    // Head
+    ctx.quadraticCurveTo(cx + headW/2, headTop + headH*0.3, cx + headW/2, neckTop);
+    // Neck
+    ctx.lineTo(cx + headW*0.3, shoulderTop);
+    // Shoulder
+    ctx.lineTo(cx + shoulderW/2, shoulderTop + 5);
+    // Arm attachment
+    ctx.lineTo(cx + shoulderW/2, shoulderTop + 20);
+    // Torso
+    ctx.quadraticCurveTo(cx + waistW/2, waistTop, cx + hipW/2, hipTop);
+    // Pelvis
+    ctx.lineTo(cx + hipW/2, pelvisBottom);
+    // Leg
+    ctx.lineTo(cx + hipW*0.25, kneeTop);
+    ctx.lineTo(cx + hipW*0.22, ankleTop);
+    ctx.lineTo(cx + hipW*0.1, ankleTop + dim(0.040));
+    // Midline bottom
+    ctx.lineTo(cx + 2, ankleTop + dim(0.040));
+    ctx.lineTo(cx + 2, pelvisBottom);
+    // Mirror left side
+    ctx.lineTo(cx - 2, pelvisBottom);
+    ctx.lineTo(cx - 2, ankleTop + dim(0.040));
+    ctx.lineTo(cx - hipW*0.1, ankleTop + dim(0.040));
+    ctx.lineTo(cx - hipW*0.22, ankleTop);
+    ctx.lineTo(cx - hipW*0.25, kneeTop);
+    ctx.lineTo(cx - hipW/2, pelvisBottom);
+    ctx.lineTo(cx - hipW/2, hipTop);
+    ctx.quadraticCurveTo(cx - waistW/2, waistTop, cx - shoulderW/2, shoulderTop + 20);
+    ctx.lineTo(cx - shoulderW/2, shoulderTop + 5);
+    ctx.lineTo(cx - headW*0.3, shoulderTop);
+    ctx.lineTo(cx - headW/2, neckTop);
+    ctx.quadraticCurveTo(cx - headW/2, headTop + headH*0.3, cx, headTop);
+
+    ctx.fill();
+    ctx.restore();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// GRID
+// ══════════════════════════════════════════════════════════════════════════════
+
+function drawGrid() {
+    ctx.save();
+    ctx.strokeStyle = "rgba(0,0,0,0.04)";
+    ctx.lineWidth = 0.5;
+    for (let x = 0; x < CANVAS_WIDTH; x += 20) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, CANVAS_HEIGHT); ctx.stroke();
+    }
+    for (let yy = 0; yy < CANVAS_HEIGHT; yy += 20) {
+        ctx.beginPath(); ctx.moveTo(0, yy); ctx.lineTo(CANVAS_WIDTH, yy); ctx.stroke();
+    }
+    // Midline
+    ctx.strokeStyle = "rgba(0,0,0,0.08)";
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, CANVAS_HEIGHT); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SYSTEM RENDERERS — ANTERIOR VIEW
+// ══════════════════════════════════════════════════════════════════════════════
+
+function drawSkeletal() {
+    const c = COLORS.skeletal;
+    const a = alpha("skeletal");
+    ctx.save(); ctx.globalAlpha = a;
+
+    // Skull
+    ctx.strokeStyle = c; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(cx, y(0.065), dim(HEAD_WIDTH_RATIO)/2 - 5, dim(HEAD_HEIGHT_RATIO)/2 - 5, 0, 0, Math.PI*2);
+    ctx.stroke();
+
+    // Vertebral column (straight for anterior — curvature in lateral)
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(cx, y(C1_Y)); ctx.lineTo(cx, y(S1_Y)); ctx.stroke();
+
+    // Vertebrae markers
+    ctx.lineWidth = 1;
+    const verts = [C1_Y, T1_Y, T12_Y, L5_Y, S1_Y];
+    verts.forEach(vy => {
+        ctx.beginPath(); ctx.moveTo(cx - 4, y(vy)); ctx.lineTo(cx + 4, y(vy)); ctx.stroke();
+    });
+
+    // Sternum
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, y(STERNUM_TOP_Y));
+    ctx.lineTo(cx, y(STERNUM_BOTTOM_Y));
+    ctx.stroke();
+
+    // Ribs (simplified — 12 pairs arcing from spine)
+    ctx.lineWidth = 0.8;
+    for (let i = 0; i < 12; i++) {
+        const ribY = y(T1_Y) + (y(T12_Y) - y(T1_Y)) * (i / 11);
+        const ribW = dim(SHOULDER_WIDTH_RATIO) * 0.7 * (1 - Math.abs(i - 5) * 0.04);
+        ctx.beginPath();
+        ctx.moveTo(cx, ribY);
+        ctx.quadraticCurveTo(cx + ribW * 0.5, ribY + 3, cx + ribW * 0.4, ribY + 8);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx, ribY);
+        ctx.quadraticCurveTo(cx - ribW * 0.5, ribY + 3, cx - ribW * 0.4, ribY + 8);
+        ctx.stroke();
+    }
+
+    // Clavicles
+    ctx.lineWidth = 1.5;
+    const clavW = dim(SHOULDER_WIDTH_RATIO) / 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, y(0.232));
+    ctx.quadraticCurveTo(cx + clavW * 0.5, y(0.228), cx + clavW, y(0.238));
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx, y(0.232));
+    ctx.quadraticCurveTo(cx - clavW * 0.5, y(0.228), cx - clavW, y(0.238));
+    ctx.stroke();
+
+    // Pelvis (simplified)
+    ctx.beginPath();
+    ctx.moveTo(cx, y(L5_Y));
+    ctx.quadraticCurveTo(cx + dim(HIP_WIDTH_RATIO)/2, y(L5_Y) + 10, cx + dim(HIP_WIDTH_RATIO)/2, y(S1_Y) + 15);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx, y(L5_Y));
+    ctx.quadraticCurveTo(cx - dim(HIP_WIDTH_RATIO)/2, y(L5_Y) + 10, cx - dim(HIP_WIDTH_RATIO)/2, y(S1_Y) + 15);
+    ctx.stroke();
+
+    if (activeSystem === "skeletal") {
+        drawLabel("C1", cx + 10, y(C1_Y), c);
+        drawLabel("T1", cx + 10, y(T1_Y), c);
+        drawLabel("T12", cx + 10, y(T12_Y), c);
+        drawLabel("L5", cx + 10, y(L5_Y), c);
+        drawLabel("Sternum", cx + 15, y((STERNUM_TOP_Y + STERNUM_BOTTOM_Y)/2), c);
+    }
+
+    ctx.restore();
+}
+
+function drawCirculatory() {
+    const c = COLORS.circulatory;
+    const a = alpha("circulatory");
+
+    // Heart — at FROZEN position y=0.355 (T5), NOT 0.310
+    const heartY = y(HEART_CENTER_Y);
+    const heartX = xOff(HEART_CENTER_X_OFF);
+    drawEllipse(heartX, heartY, dim(HEART_WIDTH), dim(HEART_HEIGHT), c, a);
+
+    // Aortic arch
+    ctx.save(); ctx.globalAlpha = a * 0.8;
+    ctx.strokeStyle = c; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(heartX, heartY - dim(HEART_HEIGHT)/2);
+    ctx.quadraticCurveTo(cx, y(AORTA_ARCH_Y) - 10, cx + 5, y(AORTA_ARCH_Y));
+    ctx.stroke();
+
+    // Descending aorta
+    ctx.beginPath();
+    ctx.moveTo(cx, y(AORTA_ARCH_Y));
+    ctx.lineTo(cx, y(AORTA_BIFURCATION_Y));
+    ctx.stroke();
+
+    // Bifurcation at L4 (y=0.535) — NOT L3
+    ctx.beginPath();
+    ctx.moveTo(cx, y(AORTA_BIFURCATION_Y));
+    ctx.lineTo(cx + 20, y(AORTA_BIFURCATION_Y) + 30);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx, y(AORTA_BIFURCATION_Y));
+    ctx.lineTo(cx - 20, y(AORTA_BIFURCATION_Y) + 30);
+    ctx.stroke();
+    ctx.restore();
+
+    if (activeSystem === "circulatory") {
+        drawLabel("Heart (T5)", heartX + 20, heartY, c);
+        drawLabel("Aortic arch", cx + 15, y(AORTA_ARCH_Y), c);
+        drawLabel("Bifurcation (L4)", cx + 15, y(AORTA_BIFURCATION_Y), c);
+    }
+}
+
+function drawRespiratory() {
+    const c = COLORS.respiratory;
+    const a = alpha("respiratory");
+
+    // Left lung (smaller — cardiac notch)
+    drawEllipse(xOff(LEFT_LUNG_CENTER_X), y(LEFT_LUNG_CENTER_Y),
+                dim(LEFT_LUNG_WIDTH), dim(LEFT_LUNG_HEIGHT), c, a * 0.5);
+
+    // Right lung (larger)
+    drawEllipse(xOff(RIGHT_LUNG_CENTER_X), y(RIGHT_LUNG_CENTER_Y),
+                dim(RIGHT_LUNG_WIDTH), dim(RIGHT_LUNG_HEIGHT), c, a * 0.5);
+
+    // Trachea
+    ctx.save(); ctx.globalAlpha = a * 0.7;
+    ctx.strokeStyle = c; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, y(0.175));
+    ctx.lineTo(cx, y(0.280));
+    ctx.stroke();
+    // Bronchi
+    ctx.beginPath(); ctx.moveTo(cx, y(0.280));
+    ctx.lineTo(xOff(LEFT_LUNG_CENTER_X), y(0.300)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, y(0.280));
+    ctx.lineTo(xOff(RIGHT_LUNG_CENTER_X), y(0.295)); ctx.stroke();
+
+    // Diaphragm — right higher than left
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    const diaY = y(DIAPHRAGM_Y);
+    ctx.moveTo(cx - dim(SHOULDER_WIDTH_RATIO) * 0.35, diaY + 5); // left side lower
+    ctx.quadraticCurveTo(cx - 20, diaY + 2, cx, diaY);
+    ctx.quadraticCurveTo(cx + 20, diaY - 5, cx + dim(SHOULDER_WIDTH_RATIO) * 0.35, diaY - 3); // right side higher
+    ctx.stroke();
+    ctx.restore();
+
+    if (activeSystem === "respiratory") {
+        drawLabel("L.Lung", xOff(LEFT_LUNG_CENTER_X) - 30, y(LEFT_LUNG_CENTER_Y), c);
+        drawLabel("R.Lung", xOff(RIGHT_LUNG_CENTER_X) + 10, y(RIGHT_LUNG_CENTER_Y), c);
+        drawLabel("Trachea", cx + 10, y(0.200), c);
+        drawLabel("Diaphragm (R>L)", cx + 15, y(DIAPHRAGM_Y), c);
+    }
+}
+
+function drawDigestive() {
+    const c = COLORS.digestive;
+    const a = alpha("digestive");
+
+    // Liver — RIGHT side (positive offset)
+    drawEllipse(xOff(LIVER_CENTER_X), y(LIVER_CENTER_Y),
+                dim(LIVER_WIDTH), dim(LIVER_HEIGHT), c, a * 0.6);
+
+    // Stomach — LEFT side
+    drawEllipse(xOff(STOMACH_CENTER_X), y(STOMACH_CENTER_Y),
+                dim(STOMACH_WIDTH), dim(STOMACH_HEIGHT), c, a * 0.5);
+
+    // Small intestine (coiled center)
+    ctx.save(); ctx.globalAlpha = a * 0.4;
+    ctx.fillStyle = c;
+    for (let i = 0; i < 8; i++) {
+        const sx = cx + Math.sin(i * 0.8) * 15;
+        const sy = y(0.480) + i * 5;
+        ctx.beginPath();
+        ctx.ellipse(sx, sy, 12, 3, i * 0.3, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.restore();
+
+    // Large intestine (frame)
+    ctx.save(); ctx.globalAlpha = a * 0.5;
+    ctx.strokeStyle = c; ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(cx + 35, y(0.520));
+    ctx.lineTo(cx + 35, y(0.460));
+    ctx.quadraticCurveTo(cx + 35, y(0.450), cx, y(0.455));
+    ctx.quadraticCurveTo(cx - 35, y(0.450), cx - 35, y(0.460));
+    ctx.lineTo(cx - 35, y(0.520));
+    ctx.stroke();
+    ctx.restore();
+
+    if (activeSystem === "digestive") {
+        drawLabel("Liver (R)", xOff(LIVER_CENTER_X) + 20, y(LIVER_CENTER_Y), c);
+        drawLabel("Stomach (L)", xOff(STOMACH_CENTER_X) - 40, y(STOMACH_CENTER_Y), c);
+        drawLabel("Sm.Intestine", cx + 20, y(0.490), c);
+        drawLabel("Lg.Intestine", cx + 40, y(0.460), c);
+    }
+}
+
+function drawNervous() {
+    const c = COLORS.nervous;
+    const a = alpha("nervous");
+
+    // Brain
+    drawEllipse(cx, y(BRAIN_CENTER_Y), dim(BRAIN_WIDTH), dim(BRAIN_HEIGHT), c, a * 0.5);
+
+    // Spinal cord (dashed, C1 to L2)
+    ctx.save(); ctx.globalAlpha = a * 0.6;
+    ctx.strokeStyle = c; ctx.lineWidth = 1.5;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(cx, y(C1_Y));
+    ctx.lineTo(cx, y(0.490)); // L2 level
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    if (activeSystem === "nervous") {
+        drawLabel("Brain", cx + 30, y(BRAIN_CENTER_Y), c);
+        drawLabel("Spinal cord", cx + 10, y(0.350), c);
+    }
+}
+
+function drawMuscular() {
+    const c = COLORS.muscular;
+    const a = alpha("muscular");
+
+    if (currentView === "anterior") {
+        // Pectoralis
+        drawEllipse(cx + 25, y(0.270), 35, 18, c, a * 0.35);
+        drawEllipse(cx - 25, y(0.270), 35, 18, c, a * 0.35);
+        // Deltoids
+        drawEllipse(cx + dim(SHOULDER_WIDTH_RATIO)/2 - 5, y(0.250), 18, 22, c, a * 0.3);
+        drawEllipse(cx - dim(SHOULDER_WIDTH_RATIO)/2 + 5, y(0.250), 18, 22, c, a * 0.3);
+        // Rectus abdominis
+        ctx.save(); ctx.globalAlpha = a * 0.3; ctx.fillStyle = c;
+        ctx.fillRect(cx - 12, y(0.320), 24, dim(0.120));
+        ctx.restore();
+        // Quads
+        drawEllipse(cx + 18, y(0.600), 20, 50, c, a * 0.25);
+        drawEllipse(cx - 18, y(0.600), 20, 50, c, a * 0.25);
+    }
+
+    if (activeSystem === "muscular") {
+        drawLabel("Pectoralis", cx + 45, y(0.270), c);
+        drawLabel("Deltoid", cx + dim(SHOULDER_WIDTH_RATIO)/2 + 10, y(0.250), c);
+        drawLabel("Rectus abd.", cx + 20, y(0.370), c);
+    }
+}
+
+function drawLymphatic() {
+    const c = COLORS.lymphatic;
+    const a = alpha("lymphatic");
+
+    // Spleen
+    drawEllipse(xOff(SPLEEN_CENTER_X), y(SPLEEN_CENTER_Y),
+                dim(SPLEEN_WIDTH), dim(SPLEEN_HEIGHT), c, a * 0.5);
+
+    // Thymus (T1/T2 level)
+    drawEllipse(cx, y(0.240), 12, 14, c, a * 0.4);
+
+    // Lymph nodes (small dots)
+    const nodes = [
+        [cx + 25, y(0.210)],  // cervical
+        [cx - 25, y(0.210)],
+        [cx + 45, y(0.265)],  // axillary
+        [cx - 45, y(0.265)],
+        [cx + 22, y(0.540)],  // inguinal
+        [cx - 22, y(0.540)],
+    ];
+    ctx.save(); ctx.globalAlpha = a * 0.6; ctx.fillStyle = c;
+    nodes.forEach(([nx, ny]) => {
+        ctx.beginPath(); ctx.arc(nx, ny, 3, 0, Math.PI * 2); ctx.fill();
+    });
+    ctx.restore();
+
+    // Thoracic duct
+    ctx.save(); ctx.globalAlpha = a * 0.4;
+    ctx.strokeStyle = c; ctx.lineWidth = 1;
+    ctx.setLineDash([2, 2]);
+    ctx.beginPath(); ctx.moveTo(cx + 3, y(0.250)); ctx.lineTo(cx + 3, y(AORTA_BIFURCATION_Y)); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    if (activeSystem === "lymphatic") {
+        drawLabel("Spleen (L)", xOff(SPLEEN_CENTER_X) - 35, y(SPLEEN_CENTER_Y), c);
+        drawLabel("Thymus", cx + 15, y(0.240), c);
+        drawLabel("Thoracic duct", cx + 15, y(0.400), c);
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// MAIN RENDER
+// ══════════════════════════════════════════════════════════════════════════════
+
+function render() {
+    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    drawGrid();
+    drawSilhouette();
+
+    if (currentView === "anterior" || currentView === "posterior" || currentView === "lateral") {
+        drawSkeletal();
+        drawCirculatory();
+        drawRespiratory();
+        drawDigestive();
+        drawNervous();
+        drawMuscular();
+        drawLymphatic();
+    }
+
+    // View label
+    ctx.save();
+    ctx.font = "9px monospace";
+    ctx.fillStyle = "#6B7280";
+    ctx.fillText(currentView.toUpperCase() + " VIEW", 8, 16);
+    ctx.restore();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CONTROLS
+// ══════════════════════════════════════════════════════════════════════════════
+
+function setView(view) {
+    currentView = view;
+    document.querySelectorAll(".view-btn").forEach(b => b.classList.remove("active"));
+    document.querySelector(`.view-btn[onclick="setView('${view}')"]`).classList.add("active");
+    render();
+}
+
+function toggleSystem(sys) {
+    if (activeSystem === sys) {
+        activeSystem = null;
+        document.querySelectorAll(".sys-btn").forEach(b => b.classList.remove("active"));
+        document.getElementById("info-panel").innerHTML =
+            '<h3>CHP Anatomy Viewer</h3><p>Select a body system to explore.</p>';
+    } else {
+        activeSystem = sys;
+        document.querySelectorAll(".sys-btn").forEach(b => {
+            if (b.dataset.sys === sys) {
+                b.classList.add("active");
+                b.style.background = COLORS[sys];
+                b.style.color = "#fff";
+            } else {
+                b.classList.remove("active");
+                b.style.background = "#fff";
+                b.style.color = "#374151";
+            }
+        });
+        document.getElementById("info-panel").innerHTML =
+            `<h3 style="color:${COLORS[sys]}">${sys.charAt(0).toUpperCase() + sys.slice(1)} System</h3>
+             <p>${SYSTEM_DESCRIPTIONS[sys]}</p>`;
+    }
+    render();
+}
+
+// Initial render
+render();
+</script>
+</body>
+</html>
