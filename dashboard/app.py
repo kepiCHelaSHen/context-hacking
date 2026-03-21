@@ -432,20 +432,116 @@ def main() -> None:
         st.markdown("### 9 Built-in Showcase Experiments")
         st.markdown("Each experiment demonstrates the Context Hacking Protocol "
                      "on a different scientific domain with domain-specific "
-                     "σ-gates and pre-loaded false-positive stories.")
+                     "σ-gates and pre-loaded false-positive stories. "
+                     "**Click any experiment to view its details.**")
+
+        # Track selected experiment in session state
+        if "selected_experiment" not in st.session_state:
+            st.session_state.selected_experiment = None
 
         cols = st.columns(3)
         for idx, (key, meta) in enumerate(EXPERIMENT_CATALOG.items()):
             with cols[idx % 3]:
                 active = key == experiment
-                cls = "experiment-card-active" if active else "experiment-card"
-                badge = '<span style="color:#00ff88;font-weight:bold;"> ✓ ACTIVE</span>' if active else ""
+                selected = st.session_state.selected_experiment == key
+                if active:
+                    cls = "experiment-card-active"
+                    badge = '<span style="color:#00ff88;font-weight:bold;"> ✓ ACTIVE</span>'
+                elif selected:
+                    cls = "experiment-card-active"
+                    badge = '<span style="color:#4488ff;font-weight:bold;"> 👁 VIEWING</span>'
+                else:
+                    cls = "experiment-card"
+                    badge = ""
+
                 st.markdown(
                     f'<div class="{cls}">'
                     f'<span style="font-size:28px;">{meta["icon"]}</span> '
                     f'<b>{key}</b>{badge}<br/>'
                     f'<span style="color:#666;font-size:12px;">{meta["domain"]}</span>'
                     f'</div>', unsafe_allow_html=True)
+
+                if st.button(f"View {key}", key=f"btn_{key}", use_container_width=True):
+                    st.session_state.selected_experiment = key
+
+        # ── Selected experiment detail view ──────────────────────────
+        selected = st.session_state.selected_experiment
+        if selected:
+            st.markdown(f'<div class="section-divider"></div>', unsafe_allow_html=True)
+            st.markdown(f"### {EXPERIMENT_CATALOG[selected]['icon']} {selected}")
+
+            # Find experiment directory
+            exp_dirs = [
+                Path("experiments") / selected,
+                Path("..") / "experiments" / selected,
+                Path.cwd().parent / "experiments" / selected,
+            ]
+            # Also check the package experiments directory
+            pkg_exp = Path(__file__).parent.parent / "experiments" / selected
+            exp_dirs.append(pkg_exp)
+
+            exp_dir = None
+            for d in exp_dirs:
+                if d.exists() and (d / "frozen").exists():
+                    exp_dir = d
+                    break
+
+            if exp_dir:
+                detail_tabs = st.tabs(["📋 Spec", "🔒 Frozen Rules", "🚫 Dead Ends", "📄 Report"])
+
+                with detail_tabs[0]:
+                    spec_file = exp_dir / "spec.md"
+                    if spec_file.exists():
+                        st.markdown(spec_file.read_text(encoding="utf-8"))
+                    else:
+                        st.caption("No spec.md found.")
+
+                with detail_tabs[1]:
+                    frozen_dir = exp_dir / "frozen"
+                    if frozen_dir.exists():
+                        for fp in sorted(frozen_dir.glob("*.md")):
+                            with st.expander(fp.name, expanded=True):
+                                st.markdown(fp.read_text(encoding="utf-8")[:5000])
+                    else:
+                        st.caption("No frozen specs found.")
+
+                with detail_tabs[2]:
+                    de_file = exp_dir / "dead_ends.md"
+                    if de_file.exists():
+                        de_text = de_file.read_text(encoding="utf-8")
+                        des = _dead_ends(de_text)
+                        if des:
+                            for de in des:
+                                rule_html = ""
+                                if de["rule"]:
+                                    rule_html = (
+                                        '<br/><span style="font-size:12px;color:#aa4444;">'
+                                        f'Do NOT repeat: {de["rule"]}</span>'
+                                    )
+                                st.markdown(
+                                    f'<div class="dead-end-card">'
+                                    f'<b>🚫 {de["title"]}</b>{rule_html}'
+                                    f'</div>', unsafe_allow_html=True)
+                        else:
+                            st.caption("No dead ends logged.")
+                    else:
+                        st.caption("No dead_ends.md found.")
+
+                with detail_tabs[3]:
+                    report_file = exp_dir / "REPORT.md"
+                    if report_file.exists():
+                        st.markdown(
+                            f'<div class="report-section">',
+                            unsafe_allow_html=True)
+                        st.markdown(report_file.read_text(encoding="utf-8"))
+                        st.markdown('</div>', unsafe_allow_html=True)
+                    else:
+                        st.info(
+                            f"No REPORT.md yet for {selected}. "
+                            f"Run the experiment to generate it."
+                        )
+            else:
+                st.warning(f"Experiment directory not found for {selected}.")
 
     # ── FOOTER ───────────────────────────────────────────────────────────
     st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
