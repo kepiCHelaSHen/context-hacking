@@ -1,0 +1,35 @@
+# ML Hyperparameter Search — CHP Experiment Config
+
+project:
+  name: "ml-hyperparam-search"
+  description: "Bayesian optimization for neural net hyperparameters with strict data hygiene"
+  frozen_paths: ["frozen/"]
+  chain_prompt: "CHAIN_PROMPT.md"
+
+gates:
+  seeds: 3
+  convergence_seeds: 30
+  sigma_threshold: 0.15
+  anomaly_checks:
+    - metric: "best_val_accuracy"
+      operator: ">"
+      threshold: 0.85
+      description: "BO should find a decent config in 50 evals"
+    - metric: "best_val_accuracy"
+      operator: "<"
+      threshold: 0.98
+      description: "Val accuracy > 0.98 = data leakage alarm"
+    - metric: "overfitting_gap"
+      operator: "<"
+      threshold: 0.10
+      description: "Train-val gap must be small"
+    - metric: "total_evaluations"
+      operator: "<="
+      threshold: 50
+      description: "Must not exceed budget"
+  max_consecutive_anomalies: 3
+
+critic:
+  mindset: "Assume the build failed until proven otherwise"
+  instruction: "Argue AGAINST the science before scoring it"
+  specific_mission: "Check for data leakage: is the Builder evaluating on train indices? Is the test set accessed during search? Is this grid search disguised as BO?"
