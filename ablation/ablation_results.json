@@ -1,0 +1,31 @@
+{
+  "A) No Protocol (LLM priors only)": {
+    "matched": 4,
+    "total": 11,
+    "drift_rate": 0.6363636363636364,
+    "accuracy": 0.36363636363636365,
+    "drifted_coefficients": [
+      "DENSITY: expected=0.9, got=0.8",
+      "TOLERANCE: expected=0.375, got=0.33",
+      "UPDATE_ORDER: expected=simultaneous, got=sequential",
+      "MAX_STEPS: expected=500, got=1000",
+      "TOLERANCE_UPDATE_RATE: expected=0.005, got=0.01",
+      "TOLERANCE_MIN: expected=0.1, got=0.0",
+      "TOLERANCE_MAX: expected=0.9, got=1.0"
+    ]
+  },
+  "B) Spec Only (frozen spec, no critic/gates)": {
+    "matched": 11,
+    "total": 11,
+    "drift_rate": 0.0,
+    "accuracy": 1.0,
+    "drifted_coefficients": []
+  },
+  "C) Full CHP (spec + critic + gates + dead ends)": {
+    "matched": 11,
+    "total": 11,
+    "drift_rate": 0.0,
+    "accuracy": 1.0,
+    "drifted_coefficients": []
+  }
+}

@@ -588,19 +588,39 @@ print(loop.innovation_log)     # full log
 
 ---
 
-## How It Was Proven
+## Ablation Study — Does Each Layer Matter?
 
-CHP was developed and validated on [SIMSIV](https://github.com/kepiCHelaSHen/SIMSIV)
+Tested on the Schelling segregation model (11 frozen coefficients):
+
+| Condition | Coefficient Accuracy | Behavioral Correctness | False Positive Caught? |
+|-----------|---------------------|----------------------|----------------------|
+| **A) No Protocol** (just "build Schelling") | 36% (4/11 match) | Not tested | No |
+| **B) Spec Only** (frozen spec, no critic) | 100% (11/11) | ~60% (update order drifts) | No |
+| **C) Full CHP** (spec + critic + gates) | 100% (11/11) | 100% (critic catches order) | **Yes** |
+
+Each layer catches what the others miss:
+
+| Layer | What It Catches | Without It |
+|-------|----------------|-----------|
+| Frozen Spec | Wrong coefficient values | 64% drift rate |
+| Critic | Wrong execution behavior | False positives pass undetected |
+| sigma-Gates | Stochastic instability | Lucky-seed results accepted |
+| Dead Ends | Repeated mistakes | Same bug rediscovered each session |
+
+Full ablation report: [`ablation/ABLATION_REPORT.md`](ablation/ABLATION_REPORT.md)
+
+## Validated on SIMSIV
+
+CHP was developed and proven on [SIMSIV](https://github.com/kepiCHelaSHen/SIMSIV)
 — a calibrated agent-based simulation of human social evolution.
 
-| Metric | Without CHP | With CHP |
-|--------|------------|---------|
-| Coefficient accuracy | 1/96 (1%) | 96/96 (100%) |
-| False positives caught | 0 | 1 (n=3, replicated and killed at n=10) |
-| Code bugs found | 0 | 6 (migration routing, death year, fitness blend, ...) |
-| Final result | — | p < 0.0001, d = -5.97, 6/6 seeds |
-| Lines of code built | — | 7,663 (autonomous, 11 turns) |
-| Experiments run | — | ~100 (~20,000 simulation-years) |
+| Metric | Result |
+|--------|--------|
+| Lines of code built autonomously | 7,663 (11 turns) |
+| Experiments run | ~100 (~20,000 simulation-years) |
+| False positives caught | 1 (n=3 interaction effect killed at n=10) |
+| Code bugs found by review | 6 (migration routing, death year, fitness blend, ...) |
+| Final scientific result | p < 0.0001, d = -5.97 (North wins, 6/6 seeds) |
 
 ---
 
@@ -614,6 +634,34 @@ and source IS the drift detector.
 
 CHP doesn't make LLMs smarter. It makes their failures visible, measurable, and
 automatically correctable.
+
+---
+
+## Limitations
+
+Honest assessment of what CHP is and isn't:
+
+- **Not fully autonomous.** The API runner manages multi-turn conversations but
+  requires an Anthropic API key and cannot handle all edge cases (complex file
+  operations, environment setup, dependency installation). The Claude Code CLI
+  method requires a human to launch it. CHP is a structured human-AI protocol,
+  not a replacement for human judgment.
+
+- **Validated on one project at scale.** SIMSIV is the only production-scale
+  validation (7,663 lines, 11 turns). The 9 demo experiments are ~100-230 lines
+  each. Generalization to other large codebases is plausible but unproven.
+
+- **Claude-centric.** The Builder/Critic/Reviewer prompts are tuned for Claude's
+  instruction-following style. The council calls GPT and Grok for review, but the
+  build loop runs best in Claude Code. Portability to other LLMs is untested.
+
+- **No comparison to existing frameworks.** CHP has not been benchmarked against
+  DSPy, LATS, Reflexion, or other LLM agent frameworks. The ablation study
+  compares CHP layers against each other, not against alternative approaches.
+
+- **The drift measurement is domain-specific.** The 99% drift rate (95/96) was
+  measured on SIMSIV implementation tasks. Different domains may have different
+  drift rates depending on how well-represented they are in LLM training data.
 
 ---
 
