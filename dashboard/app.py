@@ -221,7 +221,15 @@ def main() -> None:
 
         # ── Council Status ───────────────────────────────────────────────
         st.subheader("Council Votes")
-        if "DRIFT" in log_text.upper()[-3000:]:
+        # Only flag DRIFT if it appears in a council review context,
+        # not just any mention of the word "drift" in the log.
+        recent_log = log_text[-3000:].upper()
+        drift_flagged = (
+            ("DRIFT:" in recent_log and ("YES" in recent_log or "CONCERN" in recent_log or "RISK" in recent_log))
+            or "BOTH FLAG DRIFT" in recent_log
+            or "COUNCIL: DRIFT" in recent_log
+        )
+        if drift_flagged:
             st.warning("⚠️ DRIFT flagged in recent council review")
         else:
             st.success("No drift detected")
