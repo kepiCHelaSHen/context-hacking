@@ -1,0 +1,35 @@
+# Lorenz Attractor — CHP Experiment Config
+
+project:
+  name: "lorenz-attractor"
+  description: "Lorenz (1963) chaotic system with adaptive integration and Lyapunov verification"
+  frozen_paths: ["frozen/"]
+  chain_prompt: "CHAIN_PROMPT.md"
+
+gates:
+  seeds: 3  # actually IC perturbations, not random seeds
+  convergence_seeds: 30
+  sigma_threshold: 0.15
+  anomaly_checks:
+    - metric: "lyapunov_exponent"
+      operator: ">"
+      threshold: 0.80
+      description: "Lyapunov must indicate chaos"
+    - metric: "lyapunov_exponent"
+      operator: "<"
+      threshold: 1.00
+      description: "Lyapunov should be ~0.906, not wildly high"
+    - metric: "attractor_bounded"
+      operator: "=="
+      threshold: 1.0
+      description: "Trajectory must stay bounded"
+    - metric: "not_fixed_point"
+      operator: "=="
+      threshold: 1.0
+      description: "Must not converge to equilibrium"
+  max_consecutive_anomalies: 3
+
+critic:
+  mindset: "Assume the build failed until proven otherwise"
+  instruction: "Argue AGAINST the science before scoring it"
+  specific_mission: "Check for Euler contamination: fixed dt variable, no solve_ivp call, beta rounded to 2.667, IC from paper (0,1,0)."
