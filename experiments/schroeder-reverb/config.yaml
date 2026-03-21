@@ -1,0 +1,75 @@
+# Schroeder/Freeverb Reverb — CHP Experiment Config
+
+project:
+  name: "schroeder-reverb"
+  description: "Freeverb digital reverb — catch textbook Schroeder prior vs Jezar's tuned values"
+  frozen_paths: ["frozen/"]
+  chain_prompt: "spec.md"
+
+models:
+  builder: "claude-sonnet-4-20250514"
+  critic: "claude-sonnet-4-20250514"
+  reviewer: "claude-sonnet-4-20250514"
+  council:
+    - provider: "openai"
+      model: "gpt-4o"
+      api_key_env: "OPENAI_API_KEY"
+    - provider: "xai"
+      model: "grok-3"
+      api_key_env: "GROK_API_KEY"
+
+gates:
+  seeds: 3
+  convergence_seeds: 30
+  sigma_threshold: 0.15
+  anomaly_checks:
+    - metric: "n_comb_filters"
+      operator: "=="
+      threshold: 8
+      description: "Must have exactly 8 comb filters (not 4 or 6)"
+    - metric: "n_allpass_filters"
+      operator: "=="
+      threshold: 4
+      description: "Must have exactly 4 allpass filters (not 2)"
+    - metric: "comb_delay_match"
+      operator: "=="
+      threshold: 1.0
+      description: "All comb delays must match frozen spec exactly"
+    - metric: "allpass_delay_match"
+      operator: "=="
+      threshold: 1.0
+      description: "All allpass delays must match frozen spec exactly"
+    - metric: "spectral_flatness"
+      operator: ">"
+      threshold: 0.3
+      description: "Impulse response must not have metallic coloring (comb peaks)"
+    - metric: "rt60"
+      operator: ">"
+      threshold: 0.5
+      description: "Reverb tail must be at least 0.5 seconds"
+  max_consecutive_anomalies: 3
+
+loop:
+  max_turns: 15
+  stagnation_threshold: 5
+  max_consecutive_exploration: 3
+  state_vector_interval: 5
+  auto_tag: true
+
+critic:
+  mindset: "Assume the build failed until proven otherwise"
+  instruction: "Argue AGAINST the science before scoring it"
+  specific_mission: "Check every delay line length and coefficient against frozen/reverb_rules.md. The EXACT numbers matter — 1116, 1188, 1277, 1356, 1422, 1491, 1557, 1617 for combs; 556, 441, 341, 225 for allpasses. Any deviation is specification drift."
+  gates:
+    - name: "frozen_compliance"
+      threshold: 1.0
+      blocking: true
+    - name: "architecture"
+      threshold: 0.85
+      blocking: false
+    - name: "scientific_validity"
+      threshold: 0.85
+      blocking: false
+    - name: "drift_check"
+      threshold: 0.85
+      blocking: false
