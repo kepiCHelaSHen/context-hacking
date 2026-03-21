@@ -1,0 +1,31 @@
+# Blockchain Consensus — CHP Experiment Config
+
+project:
+  name: "blockchain-consensus"
+  description: "Simplified PBFT with Byzantine fault injection and safety verification"
+  frozen_paths: ["frozen/"]
+  chain_prompt: "CHAIN_PROMPT.md"
+
+gates:
+  seeds: 3
+  convergence_seeds: 30
+  sigma_threshold: 0.15
+  anomaly_checks:
+    - metric: "safety_violated"
+      operator: "=="
+      threshold: 0.0
+      description: "Safety must NEVER be violated at f < N/3 (hard guarantee)"
+    - metric: "consensus_reached"
+      operator: "=="
+      threshold: 1.0
+      description: "Consensus must be reached at f=0"
+    - metric: "quorum_size"
+      operator: ">="
+      threshold: 7
+      description: "Quorum must be 2f+1=7 for N=10 (NOT f+1=4)"
+  max_consecutive_anomalies: 3
+
+critic:
+  mindset: "Assume the build failed until proven otherwise"
+  instruction: "Argue AGAINST the science before scoring it"
+  specific_mission: "Inject equivocating Byzantine nodes and check if safety breaks. If it does, the protocol is Raft (crash-fault only), not PBFT. Check: quorum 2f+1 not f+1, three phases not two, no Raft/Paxos patterns in source."
