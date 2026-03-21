@@ -339,10 +339,16 @@ def main() -> None:
             des = _dead_ends(dead_text)
             if des:
                 for de in des:
+                    rule_html = ""
+                    if de["rule"]:
+                        rule_html = (
+                            '<br/><span style="font-size:12px;color:#aa4444;">'
+                            f'→ {de["rule"]}</span>'
+                        )
                     st.markdown(
                         f'<div class="dead-end-card">'
                         f'<b>🚫 {de["title"]}</b>'
-                        f'{"<br/><span style=\"font-size:12px;color:#aa4444;\">→ " + de["rule"] + "</span>" if de["rule"] else ""}'
+                        f'{rule_html}'
                         f'</div>', unsafe_allow_html=True)
             else:
                 st.caption("No dead ends logged.")
