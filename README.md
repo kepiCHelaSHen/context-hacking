@@ -6,7 +6,9 @@
 
 **A 9-layer anti-drift framework for trustworthy LLM-assisted scientific code generation.**
 
-LLMs get scientific code wrong 99% of the time. We measured it (95/96 coefficients incorrect, Fisher's exact p = 4x10^-10). Then we built a system that turns that weakness into a feature.
+LLMs get scientific code wrong 99% of the time. We measured it (95/96 coefficients
+incorrect across GPT-4o, Grok-3, and Claude; Fisher's exact p = 4x10^-10). Then we
+built a system that turns that weakness into a feature.
 
 ```bash
 pip install context-hacking
@@ -16,120 +18,205 @@ chp run
 
 ---
 
-## The Origin Story
+## Why This Exists
 
-We pointed an autonomous AI loop at a 30-year debate in evolutionary biology: does war make humans cooperative (Bowles 2006) or do institutions (North 1990)?
+We pointed an autonomous AI loop at a 30-year debate in evolutionary biology: does
+war make humans cooperative (Bowles 2006) or do institutions (North 1990)?
 
-The loop built 7,663 lines of simulation code. Ran 100 experiments. Got a positive result at n=3 seeds — the Bowles mechanism appeared to be causally operative (interaction effect +0.039).
+The loop built 7,663 lines of simulation code. Ran 100 experiments. Got a positive
+result at n=3 seeds — the Bowles mechanism appeared causally operative (+0.039).
 
 **Then the loop's own Critic said: "Replicate it."**
 
-At n=10 seeds the effect vanished. p = 0.954. It was a false positive.
+At n=10 the effect vanished. p = 0.954. False positive.
 
-The loop logged it as a dead end. Scaled up to 20 competing tribes. Found the real answer: institutions win, p < 0.0001, Cohen's d = -5.97, 6/6 seeds consistent.
+The loop logged the dead end. Scaled to 20 competing tribes. Found the real answer:
+institutions win, p < 0.0001, Cohen's d = -5.97, 6/6 seeds.
 
 **The false positive wasn't a failure. It was the system working correctly.**
 
-Error → Detection → Correction → Stronger result. That sequence — fully documented in a git log — is what CHP produces.
+CHP is that system, extracted into a pip-installable framework.
+
+Full proof: [SIMSIV repository](https://github.com/kepiCHelaSHen/SIMSIV)
 
 ---
 
 ## The 9 Layers
 
+| # | Layer | Core Idea |
+|---|-------|-----------|
+| 1 | **Prior-as-Detector** | LLM hallucination becomes a drift tripwire |
+| 2 | **Synthetic Dialectic** | Builder/Critic/Reviewer with opposing goals |
+| 3 | **Frozen Code Forcing** | Immutable published code grounds all generation |
+| 4 | **Multi-Model Council** | Different LLM priors = disagreement = drift signal |
+| 5 | **Context Window Management** | State vectors, innovation logs, dead-end tracking |
+| 6 | **sigma-Gated Verification** | Multi-seed statistical gates block noisy code |
+| 7 | **Two-Mode Negative Feedback** | Validation/Exploration with automatic switching |
+| 8 | **Token-Efficient Architecture** | Targeted prompts, incremental saves, health checks |
+| 9 | **Self-Correcting Loop** | Build, critique, fix, verify, commit, repeat |
+
 ### Layer 1: Prior-as-Detector
 
-LLMs generate from training priors, not from your specification. CHP exploits this: when the Builder's output matches the "textbook answer" instead of your frozen source code, the Critic flags it as drift.
-
-The model's tendency to hallucinate becomes a tripwire.
+LLMs generate from training priors, not your specification. CHP exploits this: when
+the Builder's output matches the "textbook answer" instead of your frozen source code,
+the Critic flags it. The model's tendency to hallucinate becomes the detection mechanism.
 
 ### Layer 2: Synthetic Dialectic
 
 Three agents with deliberately opposing goals:
 
-| Agent | Role | Mindset |
+| Agent | Goal | Mindset |
 |-------|------|---------|
 | **Builder** | Implement exactly what's specified | "Read the constitution before every build" |
-| **Critic** | Prove the science is wrong | "Assume the build failed until proven otherwise" |
+| **Critic** | Prove the science is wrong | "Argue AGAINST the finding, then score it" |
 | **Reviewer** | Code hygiene only | "No opinions about science or architecture" |
 
-The system only converges when all three agree. Tension is the feature, not the bug.
+The system only converges when all three agree. Tension is the feature.
 
 ### Layer 3: Frozen Code Forcing
 
-A published or submitted codebase is declared immutable. No agent can modify it. All new code must compose WITH the frozen code. Every coefficient traces to a source file and line number.
-
-This forces generation to ground against actual source, not the model's prior beliefs about what the code should look like.
+A published or submitted codebase is declared immutable. No agent can modify it. All
+new code must compose WITH the frozen code. Every coefficient traces to a source file
+and line number.
 
 ### Layer 4: Multi-Model Council
 
-After every build turn, multiple LLMs (configurable: GPT-4o, Grok, Gemini, Claude) review the work against the same grounding documents. Different models have different training priors.
+After every build turn, multiple LLMs review the work against the same grounding
+documents. Different models have different priors. Disagreement IS the drift signal.
 
-- Both flag the same issue → must fix (consensus)
-- One flags, other doesn't → use judgment
-- Both flag DRIFT → halt and re-read the master spec
-
-Disagreement between models IS the drift signal.
+Configurable providers: OpenAI (GPT-4o), xAI (Grok-3), Google (Gemini), Anthropic (Claude).
 
 ### Layer 5: Context Window Management
 
-Long AI sessions collapse. CHP manages context as a resource:
+- **State Vector**: Every N turns, a 10-15 line "save game" captures the full system state.
+- **Innovation Log**: Persistent memory that survives context resets.
+- **Dead End Tracking**: Failed approaches logged with reasons. The system reads this
+  before every build and cannot repeat logged failures.
 
-- **State Vector**: Every N turns, the system writes a 10-15 line "save game" — turn number, milestone, mode, failures, winning parameters, metric status, next focus.
-- **Innovation Log**: Persistent external memory that survives context resets. Every turn appends: what was built, what failed, critic scores, anomaly results, metric deltas.
-- **Dead End Tracking**: Failed approaches are logged with what was tried, why it failed, and why it's a dead end. The system reads this before every build — it cannot repeat logged failures.
+### Layer 6: sigma-Gated Statistical Verification
 
-### Layer 6: σ-Gated Statistical Verification
-
-Nothing merges on vibes. Every build runs multi-seed anomaly checks:
-
-```yaml
-anomaly_checks:
-  cooperation: "> 0.25"
-  aggression: "< 0.70"
-  population: "> 0"
-  cooperation_std: "< 0.15"
-  aggression_std: "< 0.15"
-```
-
-Configurable per project. Fail any check → blocked. Fail three consecutive turns → EXIT (halt and wait for human).
-
-The convergence battery extends this: N milestones x M seeds, all primary metrics must have σ below threshold.
+Nothing merges on vibes. Every build runs multi-seed anomaly checks with configurable
+thresholds. Fail any check: blocked. Fail K consecutive turns: EXIT.
 
 ### Layer 7: Two Modes with Negative Feedback
 
-**Validation Mode** (default): Full literature grounding. Critic is a hard blocker. Council runs before build.
+**Validation** (default): strict, citation-required, critic blocks.
+**Exploration** (when stuck): hypothesis-driven, critic advisory, reversion protocol active.
 
-**Exploration Mode** (when stuck): Hypothesis-driven. Critic is advisory. Reversion protocol active — if anomaly check fails, `git checkout` to last passing tag. No patching broken exploration code.
-
-Automatic switching:
-- No improvement for N turns → forced Exploration
-- Exploration fails anomaly → automatic Reversion
-- K Exploration turns with no improvement → EXIT
-
-The system oscillates between rigor and creativity with automatic damping.
+Automatic switching prevents both stagnation and chaos.
 
 ### Layer 8: Token-Efficient Architecture
 
-Multi-agent workflows burn tokens (4-7x single session). CHP minimizes waste:
-
-- Subagents get targeted prompts, not full project context
-- Health checks are 3 lines (verify role, proceed or re-invoke)
-- One master document (CHAIN_PROMPT.md) is the single source of truth
-- Partial results save incrementally (crash recovery)
-- State vector compression prevents context re-reading
+Targeted subagent prompts. 3-line health checks. Single source of truth document.
+Incremental saves. Context compression via state vectors.
 
 ### Layer 9: Self-Correcting Loop
 
-The system iterates: build → critique → fix → verify → commit → repeat.
+Five kill-switches halt the loop automatically:
+1. Science complete
+2. Performance gate (no improvement for N turns)
+3. Unresolvable anomaly (K consecutive failures)
+4. Fundamental misalignment (critic says root is broken)
+5. Human stop (STOP file)
 
-Exit conditions halt the loop automatically:
-1. **Science complete** — all criteria in the findings doc are met
-2. **Performance gate** — no metric improvement across N turns
-3. **Unresolvable anomaly** — multi-seed anomaly on K consecutive turns
-4. **Fundamental misalignment** — critic says the root is broken
-5. **Human stop** — STOP file exists in project directory
+---
 
-The loop doesn't just execute. It makes scientific judgments: "this needs replication," "n=4 is too small," "this dead end shouldn't be repeated."
+## Built-in Showcase Experiments
+
+CHP ships with four classic models, each fully wired with frozen specs, sigma-gates,
+and pre-loaded false-positive stories demonstrating the protocol in action.
+
+### 1. Schelling Segregation (the star demo)
+
+The 1971 Schelling model of spatial segregation + a 2025 dynamic-tolerance extension.
+
+**Why this is perfect for CHP**: Every LLM has seen the Schelling model in training.
+Ask any frontier model to implement it without source code and it will generate a
+"textbook" version with standard thresholds (tolerance = 0.375, 8-cell Moore
+neighborhood). The Prior-as-Detector layer catches this immediately — if the
+Builder produces the textbook version instead of YOUR frozen spec with modified
+parameters, the Critic flags the divergence.
+
+**sigma-gates**: segregation index in [0.3, 0.8], cluster count > 1, population stable,
+std across 30 seeds < 0.15.
+
+**Pre-loaded false positive**: At low tolerance (0.2), the textbook predicts near-complete
+segregation. The dynamic-tolerance extension shows partial mixing — but only if the
+tolerance-update rule is implemented correctly. LLMs that generate from priors produce
+the textbook result (wrong). The Critic catches it.
+
+```bash
+chp init my-project --experiment schelling
+chp run
+```
+
+### 2. Spatial Prisoner's Dilemma
+
+Nowak & May (1992) Nature paper — spatial PD on a lattice with deterministic imitation.
+
+**Why it matters**: The imitation rule is subtle. Nowak & May use synchronous update
+where each cell copies the HIGHEST-payoff neighbor. Most LLMs implement asynchronous
+update (one cell at a time) because that's more common in ABM tutorials. This single
+difference changes the emergent patterns completely. Prior-as-Detector catches the
+update-order drift.
+
+**sigma-gates**: cooperation rate in [0.2, 0.8], spatial clustering coefficient > 0,
+pattern stability (Hamming distance between generations < threshold), std < 0.15.
+
+**Pre-loaded false positive**: At b=1.8 (benefit-to-cost ratio), cooperators survive in
+the spatial model but go extinct in well-mixed. LLMs that implement well-mixed dynamics
+(the "textbook PD") report extinction — wrong. The frozen spec enforces spatial structure.
+
+```bash
+chp init my-project --experiment spatial-pd
+chp run
+```
+
+### 3. Lotka-Volterra (Agent-Based)
+
+Agent-based predator-prey with oscillation stability metrics. Calibrated against
+classic Lotka-Volterra ODE predictions but with stochastic individual-level dynamics.
+
+**Why it matters**: The ODE version is in every ecology textbook. LLMs generate ODE
+coefficients when asked for "Lotka-Volterra." The agent-based version has DIFFERENT
+dynamics — demographic stochasticity causes extinctions that the ODE cannot predict.
+Prior-as-Detector catches ODE-parameter contamination in the agent-based model.
+
+**sigma-gates**: prey population > 0 (no extinction), predator population > 0,
+oscillation period within +/-20% of target, amplitude coefficient of variation < 0.5,
+std < 0.15.
+
+**Pre-loaded false positive**: Small populations (N=100) show apparent stable oscillations
+for 50 generations, then one species goes extinct. The ODE predicts eternal oscillation.
+If the Builder reports "stable oscillations" without checking for late-time extinction,
+the Critic catches the premature conclusion.
+
+```bash
+chp init my-project --experiment lotka-volterra
+chp run
+```
+
+### 4. SIR Epidemic
+
+Stochastic SIR model with parameter inference and extinction checks.
+
+**Why it matters**: The deterministic SIR has an exact analytical solution (R0 threshold).
+LLMs know this and will generate deterministic dynamics even when asked for stochastic.
+The stochastic version shows fadeout (disease extinction before reaching endemic
+equilibrium) that the deterministic model cannot capture. Prior-as-Detector catches
+deterministic contamination.
+
+**sigma-gates**: final epidemic size within theoretical bounds, R0 recovery within +/-10%
+of input, extinction probability matches analytical prediction for small N, std < 0.15.
+
+**Pre-loaded false positive**: At R0=1.5 with N=200, the deterministic model predicts
+a clean epidemic curve. The stochastic model shows fadeout in ~30% of runs. If the
+Builder reports zero fadeout, it implemented deterministic dynamics — the Critic flags it.
+
+```bash
+chp init my-project --experiment sir
+chp run
+```
 
 ---
 
@@ -141,78 +228,17 @@ The loop doesn't just execute. It makes scientific judgments: "this needs replic
 pip install context-hacking
 ```
 
-### Initialize a project
+### Initialize a new project
 
 ```bash
 chp init my-research-project
 cd my-research-project
 ```
 
-This creates:
+### Initialize with a showcase experiment
 
-```
-my-research-project/
-├── config.yaml              # CHP configuration (all 9 layers tunable)
-├── CHAIN_PROMPT.md           # Master design doc (your single source of truth)
-├── innovation_log.md         # Persistent memory across turns
-├── dead_ends.md              # Failed approaches (never repeated)
-├── state_vector.md           # Context reset anchor
-├── frozen/                   # Immutable published code goes here
-├── prompts/                  # Agent prompt templates
-│   ├── builder.md
-│   ├── critic.md
-│   ├── reviewer.md
-│   ├── council_gpt.md
-│   ├── council_grok.md
-│   └── health_check.md
-└── .chp/                     # Runtime state (gitignored)
-```
-
-### Configure
-
-Edit `config.yaml`:
-
-```yaml
-project:
-  name: "my-research-project"
-  description: "What this project does"
-  frozen_paths: ["src/v1/"]
-
-models:
-  builder: "claude-sonnet-4-20250514"
-  critic: "claude-sonnet-4-20250514"
-  reviewer: "claude-sonnet-4-20250514"
-  council:
-    - provider: "openai"
-      model: "gpt-4o"
-    - provider: "xai"
-      model: "grok-3"
-
-gates:
-  anomaly_checks:
-    - metric: "accuracy"
-      operator: ">"
-      threshold: 0.80
-    - metric: "loss_std"
-      operator: "<"
-      threshold: 0.10
-  seeds: 3
-  convergence_seeds: 30
-  sigma_threshold: 0.15
-
-loop:
-  max_turns: 50
-  validation_to_exploration_threshold: 5  # turns without improvement
-  max_consecutive_exploration: 3
-  context_reset_interval: 15
-  state_vector_interval: 5
-
-exit_conditions:
-  science_complete: true
-  performance_gate: true
-  unresolvable_anomaly: true
-  fundamental_misalignment: true
-  human_stop: true
+```bash
+chp init my-project --experiment schelling
 ```
 
 ### Run the loop
@@ -234,61 +260,100 @@ CHP Status: my-research-project
   Last gate:  PASS (3/3 seeds)
   Streak:     2 turns without improvement
   Dead ends:  1 logged
-  Next focus: "Increase band count to n=20"
+  Next focus: "Increase grid size to 100x100"
 ```
 
----
-
-## How It Was Proven
-
-CHP was developed and validated on [SIMSIV](https://github.com/kepiCHelaSHen/SIMSIV) — a calibrated agent-based simulation of human social evolution (35 heritable traits, 9 engines, 187 tests, calibrated against Hadza/!Kung/Ache ethnographic data).
-
-| Metric | Without CHP | With CHP |
-|--------|------------|---------|
-| Coefficient accuracy | 1% (1/96) | 100% (96/96) |
-| False positives caught | 0 | 1 (Exp 2 n=3, p=0.954 at n=10) |
-| Code bugs found by review | 0 | 6 (migration routing, death year, law_strength read, ...) |
-| Final result significance | — | p < 0.0001, d = -5.97 |
-
-The full development history — every turn, every false positive, every correction — is in the [SIMSIV git log](https://github.com/kepiCHelaSHen/SIMSIV).
-
----
-
-## Drift Experiment
-
-**"LLMs Generate from Priors, Not Specifications"**
-
-We measured specification drift across GPT-4o, Grok-3, and Claude on SIMSIV implementation tasks:
-
-- Without source code in prompt: **99% incorrect** (95/96, Fisher's exact p = 4x10^-10)
-- With CHP Builder/Critic/Reviewer protocol: **0% drift**
-
-Full paper: [SIMSIV v2 Working Paper](https://github.com/kepiCHelaSHen/SIMSIV/blob/main/docs/SIMSIV_V2_White_Paper.md)
-
----
-
-## Integration
-
-### Cursor / Claude Code
+### Export paper appendix
 
 ```bash
-chp init my-project --cursor
+chp export-paper
 ```
 
-Generates `.cursorrules` and a `skills/` folder that auto-inject the Critic, gates, and mode logic into your Cursor or Claude Code sessions.
+Generates a structured appendix with: full innovation log, dead ends, sigma-gate
+results per turn, git diff summary, and the state vector timeline.
 
-### Existing Projects
+### Generate Cursor rules
 
 ```bash
-cd my-existing-project
-chp init . --existing
+chp cursor
 ```
 
-CHP wraps around your existing codebase. Point `frozen_paths` at your stable code. New development runs through the protocol.
+Creates `.cursorrules` and `skills/` folder that auto-inject the Critic, gates,
+and mode logic into Cursor or Claude Code sessions.
 
 ---
 
-## API
+## Configuration
+
+```yaml
+# config.yaml
+project:
+  name: "my-research-project"
+  description: "What this project investigates"
+  frozen_paths: ["frozen/"]
+  chain_prompt: "CHAIN_PROMPT.md"
+
+models:
+  builder: "claude-sonnet-4-20250514"
+  critic: "claude-sonnet-4-20250514"
+  reviewer: "claude-sonnet-4-20250514"
+  council:
+    - provider: "openai"
+      model: "gpt-4o"
+      api_key_env: "OPENAI_API_KEY"
+    - provider: "xai"
+      model: "grok-3"
+      api_key_env: "GROK_API_KEY"
+
+gates:
+  seeds: 3
+  convergence_seeds: 30
+  sigma_threshold: 0.15
+  anomaly_checks:
+    - metric: "primary_metric"
+      operator: ">"
+      threshold: 0.25
+    - metric: "primary_metric_std"
+      operator: "<"
+      threshold: 0.15
+  max_consecutive_anomalies: 3
+
+loop:
+  max_turns: 50
+  stagnation_threshold: 5
+  max_consecutive_exploration: 3
+  context_reset_interval: 15
+  state_vector_interval: 5
+  auto_tag: true
+
+exit_conditions:
+  science_complete: true
+  performance_gate: true
+  unresolvable_anomaly: true
+  fundamental_misalignment: true
+  human_stop: true
+
+critic:
+  mindset: "Assume the build failed until proven otherwise"
+  instruction: "Argue AGAINST the science before scoring it"
+  gates:
+    - name: "frozen_compliance"
+      threshold: 1.0
+      blocking: true
+    - name: "architecture"
+      threshold: 0.85
+      blocking: false
+    - name: "scientific_validity"
+      threshold: 0.85
+      blocking: false
+    - name: "drift_check"
+      threshold: 0.85
+      blocking: false
+```
+
+---
+
+## Python API
 
 ```python
 from context_hacking import Orchestrator, Config
@@ -296,23 +361,48 @@ from context_hacking import Orchestrator, Config
 config = Config.from_yaml("config.yaml")
 loop = Orchestrator(config)
 
-# Run the full loop
+# Run the full loop until an exit condition
 loop.run()
 
 # Or step through manually
-loop.step()  # one turn
+result = loop.step()  # one turn
 print(loop.status())
+
+# Access state
+print(loop.current_mode)       # "VALIDATION" or "EXPLORATION"
+print(loop.turn)               # current turn number
+print(loop.dead_ends)          # list of logged dead ends
+print(loop.innovation_log)     # full log
 ```
 
 ---
 
-## Philosophy
+## How It Was Proven
 
-**Don't fight what LLMs are bad at. Build systems that use it.**
+CHP was developed and validated on [SIMSIV](https://github.com/kepiCHelaSHen/SIMSIV)
+— a calibrated agent-based simulation of human social evolution.
 
-LLMs hallucinate. That's not a bug to patch — it's a signal to exploit. When an LLM generates from priors instead of from your source code, the divergence between prior and source IS the drift detector.
+| Metric | Without CHP | With CHP |
+|--------|------------|---------|
+| Coefficient accuracy | 1/96 (1%) | 96/96 (100%) |
+| False positives caught | 0 | 1 (n=3, replicated and killed at n=10) |
+| Code bugs found | 0 | 6 (migration routing, death year, fitness blend, ...) |
+| Final result | — | p < 0.0001, d = -5.97, 6/6 seeds |
+| Lines of code built | — | 7,663 (autonomous, 11 turns) |
+| Experiments run | — | ~100 (~20,000 simulation-years) |
 
-CHP doesn't make LLMs smarter. It makes their failures visible, measurable, and automatically correctable.
+---
+
+## The Core Insight
+
+> **Don't fight what LLMs are bad at. Build systems that use it.**
+
+LLMs hallucinate. That's not a bug to patch — it's a signal to exploit. When an LLM
+generates from priors instead of from your source code, the divergence between prior
+and source IS the drift detector.
+
+CHP doesn't make LLMs smarter. It makes their failures visible, measurable, and
+automatically correctable.
 
 ---
 
@@ -320,14 +410,13 @@ CHP doesn't make LLMs smarter. It makes their failures visible, measurable, and 
 
 MIT. Use it. Break it. Ship science with it.
 
----
-
 ## Citation
 
 ```bibtex
 @software{rice2026chp,
   author = {Rice, James},
-  title = {Context Hacking Protocol: A 9-Layer Anti-Drift Framework for LLM-Assisted Scientific Code Generation},
+  title = {Context Hacking Protocol: A 9-Layer Anti-Drift Framework
+           for LLM-Assisted Scientific Code Generation},
   year = {2026},
   url = {https://github.com/kepiCHelaSHen/context-hacking}
 }
