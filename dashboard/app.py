@@ -10,44 +10,21 @@ from pathlib import Path
 from typing import Any
 import streamlit as st
 
-st.set_page_config(page_title="CHP - Context Hacking Protocol", page_icon="O",
+st.set_page_config(page_title="CHP - Context Hacking Protocol", page_icon="\u2B21",
                    layout="wide", initial_sidebar_state="collapsed")
 
-FIGURE_DESCRIPTIONS: dict[str, str] = {
-    "schelling_comparison": "Baseline vs CHP dynamic tolerance - segregation comparison",
-    "grid_final": "Final agent grid - segregation index measured from this state",
-    "segregation_over_time": "Segregation index over simulation steps",
-    "cluster_map": "Cluster labels - spatially contiguous groups",
-    "spatial_pd_lattice": "Nowak & May spatial PD - cooperator/defector pattern",
-    "cooperation_rate": "Cooperation rate per generation",
-    "population_timeseries": "Prey and predator population dynamics",
-    "phase_portrait": "Phase space - prey vs predator trajectory",
-    "sir_epidemic_curve": "Stochastic SIR - I(t) integer, not float",
-    "r0_distribution": "R0 estimate distribution across seeds",
-    "convergence": "Bayesian optimization convergence",
-    "search_space": "2D hyperparameter search space heatmap",
-    "lorenz_attractor": "Lorenz butterfly - RK45 adaptive, sigma=10 rho=28 beta=8/3",
-    "lorenz_chp_story": "CHP Prior-as-Detector: Wrong -> Detected -> Corrected",
-    "lyapunov_convergence": "Lyapunov exponent convergence across time",
-    "grover_amplitude": "Grover success probability vs iteration count",
-    "grover_states": "State amplitudes at k=25 - target state highlighted",
-    "izhikevich_patterns": "5 firing patterns: RS IB FS CH LTS (not Hodgkin-Huxley)",
-    "isi_histogram": "Inter-spike interval distribution by firing pattern",
-    "blockchain_safety": "Safety vs f Byzantine nodes - PBFT threshold f < N/3",
-    "consensus_rounds": "PBFT consensus per round with Byzantine faults",
-    "metal_vs_classical": "Classical harmony flags 6-9 errors per Pantera riff. Metal: zero.",
-}
+from context_hacking.figures import FIGURE_DESCRIPTIONS
 
 EXPERIMENT_CATALOG = {
-    "schelling-segregation":     {"domain": "Social Science",      "icon": "H", "catches": "tolerance drift, sequential update"},
-    "spatial-prisoners-dilemma": {"domain": "Game Theory",         "icon": "D", "catches": "async update, T/R/P/S payoff"},
-    "lotka-volterra":            {"domain": "Ecology",             "icon": "W", "catches": "ODE params, zero extinction"},
-    "sir-epidemic":              {"domain": "Epidemiology",        "icon": "V", "catches": "deterministic vs stochastic"},
-    "ml-hyperparam-search":      {"domain": "Machine Learning",    "icon": "R", "catches": "grid search, data leakage"},
-    "lorenz-attractor":          {"domain": "Chaos Theory",        "icon": "B", "catches": "Euler integration, wrong beta"},
-    "quantum-grover":            {"domain": "Quantum Computing",   "icon": "Q", "catches": "classical search, boolean oracle"},
-    "izhikevich-neurons":        {"domain": "Neuroscience",        "icon": "N", "catches": "Hodgkin-Huxley contamination"},
-    "blockchain-consensus":      {"domain": "Distributed Systems", "icon": "C", "catches": "Raft/Paxos, f+1 quorum"},
+    "schelling-segregation":     {"domain": "Social Science",      "icon": "\U0001F3D8", "catches": "tolerance drift, sequential update"},
+    "spatial-prisoners-dilemma": {"domain": "Game Theory",         "icon": "\U0001F3B2", "catches": "async update, T/R/P/S payoff"},
+    "lotka-volterra":            {"domain": "Ecology",             "icon": "\U0001F43A", "catches": "ODE params, zero extinction"},
+    "sir-epidemic":              {"domain": "Epidemiology",        "icon": "\U0001F9A0", "catches": "deterministic vs stochastic"},
+    "ml-hyperparam-search":      {"domain": "Machine Learning",    "icon": "\U0001F916", "catches": "grid search, data leakage"},
+    "lorenz-attractor":          {"domain": "Chaos Theory",        "icon": "\U0001F98B", "catches": "Euler integration, wrong beta"},
+    "quantum-grover":            {"domain": "Quantum Computing",   "icon": "\u269B",     "catches": "classical search, boolean oracle"},
+    "izhikevich-neurons":        {"domain": "Neuroscience",        "icon": "\U0001F9E0", "catches": "Hodgkin-Huxley contamination"},
+    "blockchain-consensus":      {"domain": "Distributed Systems", "icon": "\U0001F517", "catches": "Raft/Paxos, f+1 quorum"},
 }
 
 REFRESH_SECONDS = 5

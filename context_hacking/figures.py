@@ -49,6 +49,12 @@ FIGURE_DESCRIPTIONS: dict[str, str] = {
     "metal_vs_classical": "Classical flags 6-9 errors per Pantera riff. Metal: zero.",
     "convergence": "Bayesian optimization convergence — best validation accuracy",
     "search_space": "2D hyperparameter search space heatmap",
+    "lorenz_chp_story": "CHP Prior-as-Detector — Wrong -> Detected -> Corrected",
+    "cluster_map": "Cluster labels — spatially contiguous same-type groups",
+    "r0_distribution": "R0 estimate distribution across seeds",
+    "lyapunov_convergence": "Lyapunov exponent convergence across time",
+    "phase_portrait": "Phase space — prey vs predator population trajectory",
+    "cooperation_rate": "Cooperation rate per generation",
 }
 
 
@@ -95,19 +101,19 @@ def generate_figures(experiment_name: str, experiment_dir: Path) -> list[Path]:
     return saved
 
 
-def _dark_style():
-    """Apply dark background style for all figures."""
+def _white_style():
+    """Apply white background style for publication-quality figures."""
     import matplotlib.pyplot as plt
-    plt.style.use("dark_background")
+    plt.style.use("default")
     plt.rcParams.update({
-        "figure.facecolor": "#0a0a1a",
-        "axes.facecolor": "#0d0d20",
-        "axes.edgecolor": "#2a2a4a",
-        "text.color": "#e0e0e0",
-        "axes.labelcolor": "#e0e0e0",
-        "xtick.color": "#888",
-        "ytick.color": "#888",
-        "grid.color": "#1a1a3a",
+        "figure.facecolor": "#FFFFFF",
+        "axes.facecolor": "#FAFBFC",
+        "axes.edgecolor": "#C8CCDB",
+        "text.color": "#374151",
+        "axes.labelcolor": "#374151",
+        "xtick.color": "#6B7280",
+        "ytick.color": "#6B7280",
+        "grid.color": "#E2E5EF",
         "font.family": "monospace",
     })
 
@@ -116,7 +122,7 @@ def _dark_style():
 
 def _fig_schelling(exp_dir: Path, fig_dir: Path) -> list[Path]:
     import matplotlib.pyplot as plt
-    _dark_style()
+    _white_style()
 
     import sys
     sys.path.insert(0, str(exp_dir))
@@ -159,7 +165,7 @@ def _fig_schelling(exp_dir: Path, fig_dir: Path) -> list[Path]:
     ax2.axis("off")
 
     fig.suptitle("CHP Schelling Experiment — Prior-as-Detector Demo",
-                 fontsize=14, color="#00ff88", fontweight="bold")
+                 fontsize=14, color="#065F46", fontweight="bold")
     plt.tight_layout()
     p = fig_dir / "schelling_comparison.png"
     fig.savefig(p, dpi=150, bbox_inches="tight")
@@ -174,7 +180,7 @@ def _fig_schelling(exp_dir: Path, fig_dir: Path) -> list[Path]:
 def _fig_lorenz(exp_dir: Path, fig_dir: Path) -> list[Path]:
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
-    _dark_style()
+    _white_style()
 
     import sys
     sys.path.insert(0, str(exp_dir))
@@ -198,9 +204,9 @@ def _fig_lorenz(exp_dir: Path, fig_dir: Path) -> list[Path]:
     ax.set_zlabel("Z")
     ax.set_title("Lorenz Attractor — RK45 Adaptive Integration\n"
                  f"sigma=10, rho=28, beta=8/3, t=[0,50], Lyapunov={r['lyapunov_exponent']:.3f}",
-                 color="#00ff88", fontweight="bold")
-    ax.set_facecolor("#0a0a1a")
-    fig.set_facecolor("#0a0a1a")
+                 color="#065F46", fontweight="bold")
+    ax.set_facecolor("#FAFBFC")
+    fig.set_facecolor("#FFFFFF")
 
     p = fig_dir / "lorenz_attractor.png"
     fig.savefig(p, dpi=150, bbox_inches="tight")
@@ -212,7 +218,7 @@ def _fig_lorenz(exp_dir: Path, fig_dir: Path) -> list[Path]:
 
 def _fig_grover(exp_dir: Path, fig_dir: Path) -> list[Path]:
     import matplotlib.pyplot as plt
-    _dark_style()
+    _white_style()
 
     import sys
     sys.path.insert(0, str(exp_dir))
@@ -232,14 +238,14 @@ def _fig_grover(exp_dir: Path, fig_dir: Path) -> list[Path]:
         sim.grover_iteration()
 
     fig, ax = plt.subplots(figsize=(10, 5))
-    ax.plot(range(50), probs, color="#00ff88", linewidth=2)
-    ax.axvline(x=25, color="#ff4444", linestyle="--", alpha=0.7, label="k_opt=25")
-    ax.axhline(y=0.95, color="#ffaa00", linestyle=":", alpha=0.5, label="95% threshold")
+    ax.plot(range(50), probs, color="#065F46", linewidth=2)
+    ax.axvline(x=25, color="#991B1B", linestyle="--", alpha=0.7, label="k_opt=25")
+    ax.axhline(y=0.95, color="#D97706", linestyle=":", alpha=0.5, label="95% threshold")
     ax.set_xlabel("Iterations (k)")
     ax.set_ylabel("P(target)")
     ax.set_title("Grover's Algorithm — Sinusoidal Amplitude Profile\n"
                  "N=1024, k_opt=25, P(25)=0.9995",
-                 color="#00ff88", fontweight="bold")
+                 color="#065F46", fontweight="bold")
     ax.legend()
     ax.grid(True, alpha=0.2)
 
@@ -257,17 +263,17 @@ def _fig_grover(exp_dir: Path, fig_dir: Path) -> list[Path]:
     fig, ax = plt.subplots(figsize=(12, 4))
     amps = sim2.amplitudes ** 2
     ax.bar(range(len(amps)), amps, color="#1a1a3a", width=1.0)
-    ax.bar([sim2.target], [amps[sim2.target]], color="#00ff88", width=3)
+    ax.bar([sim2.target], [amps[sim2.target]], color="#065F46", width=3)
     ax.set_xlabel("Basis State")
     ax.set_ylabel("Probability")
     ax.set_title(f"Grover State Amplitudes at k=25 — Target={sim2.target} (P={amps[sim2.target]:.4f})",
-                 color="#00ff88", fontweight="bold")
+                 color="#065F46", fontweight="bold")
     ax.set_ylim(0, 0.005)
     ax.annotate(f"Target: {sim2.target}\nP={amps[sim2.target]:.4f}",
                 xy=(sim2.target, amps[sim2.target]),
                 xytext=(sim2.target + 100, 0.003),
-                arrowprops=dict(arrowstyle="->", color="#00ff88"),
-                color="#00ff88", fontsize=11)
+                arrowprops=dict(arrowstyle="->", color="#065F46"),
+                color="#065F46", fontsize=11)
 
     p2 = fig_dir / "grover_states.png"
     fig.savefig(p2, dpi=150, bbox_inches="tight")
@@ -281,7 +287,7 @@ def _fig_grover(exp_dir: Path, fig_dir: Path) -> list[Path]:
 
 def _fig_izhikevich(exp_dir: Path, fig_dir: Path) -> list[Path]:
     import matplotlib.pyplot as plt
-    _dark_style()
+    _white_style()
 
     import sys
     sys.path.insert(0, str(exp_dir))
@@ -299,7 +305,7 @@ def _fig_izhikevich(exp_dir: Path, fig_dir: Path) -> list[Path]:
     }
 
     fig, axes = plt.subplots(5, 1, figsize=(14, 12), sharex=True)
-    colors = ["#00ff88", "#4488ff", "#ff4444", "#ffaa00", "#cc44ff"]
+    colors = ["#065F46", "#1D4ED8", "#991B1B", "#D97706", "#6D28D9"]
 
     for idx, (name, params) in enumerate(patterns.items()):
         r = run_simulation(**params, I=10.0, duration=200)
@@ -315,7 +321,7 @@ def _fig_izhikevich(exp_dir: Path, fig_dir: Path) -> list[Path]:
     axes[-1].set_xlabel("Time (ms)")
     fig.suptitle("Izhikevich Neuron — 5 Firing Patterns (NOT Hodgkin-Huxley)\n"
                  "2 variables (v, u), 4 parameters (a, b, c, d), dt=0.5ms half-step",
-                 fontsize=13, color="#00ff88", fontweight="bold")
+                 fontsize=13, color="#065F46", fontweight="bold")
     plt.tight_layout()
 
     p = fig_dir / "izhikevich_patterns.png"
@@ -328,7 +334,7 @@ def _fig_izhikevich(exp_dir: Path, fig_dir: Path) -> list[Path]:
 
 def _fig_sir(exp_dir: Path, fig_dir: Path) -> list[Path]:
     import matplotlib.pyplot as plt
-    _dark_style()
+    _white_style()
 
     import sys
     sys.path.insert(0, str(exp_dir))
@@ -343,16 +349,16 @@ def _fig_sir(exp_dir: Path, fig_dir: Path) -> list[Path]:
     s_vals = [n - sum(curve[:i+1]) for i in range(len(curve))]  # rough S approximation
 
     fig, ax = plt.subplots(figsize=(10, 5))
-    ax.fill_between(range(len(curve)), curve, color="#ff4444", alpha=0.6, label="Infected")
-    ax.plot(range(len(curve)), curve, color="#ff4444", linewidth=1.5)
-    ax.axhline(y=r["peak_infected"], color="#ffaa00", linestyle="--", alpha=0.5,
+    ax.fill_between(range(len(curve)), curve, color="#991B1B", alpha=0.6, label="Infected")
+    ax.plot(range(len(curve)), curve, color="#991B1B", linewidth=1.5)
+    ax.axhline(y=r["peak_infected"], color="#D97706", linestyle="--", alpha=0.5,
                label=f"Peak={r['peak_infected']} at t={r['peak_tick']}")
     ax.set_xlabel("Tick")
     ax.set_ylabel("Infected Agents")
     ax.set_title(f"Stochastic SIR Epidemic — N=500, R0=3.0\n"
                  f"Peak={r['peak_infected']} at t={r['peak_tick']}, "
                  f"Final size={r['final_size_fraction']:.1%}, I(t) is INTEGER",
-                 color="#00ff88", fontweight="bold")
+                 color="#065F46", fontweight="bold")
     ax.legend()
     ax.grid(True, alpha=0.2)
 
@@ -366,7 +372,7 @@ def _fig_sir(exp_dir: Path, fig_dir: Path) -> list[Path]:
 
 def _fig_spatial_pd(exp_dir: Path, fig_dir: Path) -> list[Path]:
     import matplotlib.pyplot as plt
-    _dark_style()
+    _white_style()
 
     import sys
     sys.path.insert(0, str(exp_dir))
@@ -381,11 +387,11 @@ def _fig_spatial_pd(exp_dir: Path, fig_dir: Path) -> list[Path]:
         grid.step()
 
     fig, ax = plt.subplots(figsize=(8, 8))
-    cmap = plt.cm.colors.ListedColormap(["#ff4444", "#4488ff"])
+    cmap = plt.cm.colors.ListedColormap(["#991B1B", "#1D4ED8"])
     ax.imshow(grid.grid, cmap=cmap, interpolation="nearest")
     ax.set_title(f"Spatial PD — Nowak & May (1992)\n"
                  f"b=1.8, gen=50, cooperation={grid.cooperation_rate():.3f}",
-                 color="#00ff88", fontweight="bold")
+                 color="#065F46", fontweight="bold")
     ax.axis("off")
 
     p = fig_dir / "spatial_pd_lattice.png"
@@ -398,7 +404,7 @@ def _fig_spatial_pd(exp_dir: Path, fig_dir: Path) -> list[Path]:
 
 def _fig_blockchain(exp_dir: Path, fig_dir: Path) -> list[Path]:
     import matplotlib.pyplot as plt
-    _dark_style()
+    _white_style()
 
     import sys
     sys.path.insert(0, str(exp_dir))
@@ -418,12 +424,12 @@ def _fig_blockchain(exp_dir: Path, fig_dir: Path) -> list[Path]:
             results.append(1 if r["consensus_reached"] and not r["safety_violated"] else 0)
         ax.plot(f_values, results, marker="o", linewidth=2, label=strat, markersize=8)
 
-    ax.axvline(x=3.33, color="#ff4444", linestyle="--", alpha=0.5, label="N/3 threshold")
+    ax.axvline(x=3.33, color="#991B1B", linestyle="--", alpha=0.5, label="N/3 threshold")
     ax.set_xlabel("Byzantine Nodes (f)")
     ax.set_ylabel("Consensus + Safety")
     ax.set_title("PBFT Consensus — Safety Under Byzantine Faults\n"
                  "Quorum=2f+1=7 (NOT f+1=4 Raft)",
-                 color="#00ff88", fontweight="bold")
+                 color="#065F46", fontweight="bold")
     ax.set_yticks([0, 1])
     ax.set_yticklabels(["FAILED", "SAFE"])
     ax.legend()
@@ -439,7 +445,7 @@ def _fig_blockchain(exp_dir: Path, fig_dir: Path) -> list[Path]:
 
 def _fig_metal(exp_dir: Path, fig_dir: Path) -> list[Path]:
     import matplotlib.pyplot as plt
-    _dark_style()
+    _white_style()
 
     import sys
     sys.path.insert(0, str(exp_dir))
@@ -460,14 +466,14 @@ def _fig_metal(exp_dir: Path, fig_dir: Path) -> list[Path]:
     width = 0.35
 
     bars1 = ax.bar(x - width/2, classical_errors, width, label="Classical Analysis (WRONG)",
-                   color="#ff4444", alpha=0.8)
+                   color="#991B1B", alpha=0.8)
     bars2 = ax.bar(x + width/2, metal_errors, width, label="Metal Analysis (CORRECT)",
-                   color="#00ff88", alpha=0.8)
+                   color="#065F46", alpha=0.8)
 
     ax.set_ylabel("'Errors' Flagged")
     ax.set_title("Classical vs Metal Harmony Analysis — Pantera Riffs\n"
                  "Classical prior flags 6-9 'errors' per riff. Metal theory: ZERO.",
-                 color="#00ff88", fontweight="bold")
+                 color="#065F46", fontweight="bold")
     ax.set_xticks(x)
     ax.set_xticklabels([n.replace("_", "\n") for n in riff_names], fontsize=9)
     ax.legend()
@@ -477,7 +483,7 @@ def _fig_metal(exp_dir: Path, fig_dir: Path) -> list[Path]:
     for bar in bars1:
         height = bar.get_height()
         ax.text(bar.get_x() + bar.get_width()/2., height + 0.2,
-                f"{int(height)}", ha="center", va="bottom", color="#ff4444", fontsize=10)
+                f"{int(height)}", ha="center", va="bottom", color="#991B1B", fontsize=10)
 
     p = fig_dir / "metal_vs_classical.png"
     fig.savefig(p, dpi=150, bbox_inches="tight")
@@ -489,7 +495,7 @@ def _fig_metal(exp_dir: Path, fig_dir: Path) -> list[Path]:
 
 def _fig_lotka_volterra(exp_dir: Path, fig_dir: Path) -> list[Path]:
     import matplotlib.pyplot as plt
-    _dark_style()
+    _white_style()
 
     import sys
     sys.path.insert(0, str(exp_dir))
@@ -505,21 +511,21 @@ def _fig_lotka_volterra(exp_dir: Path, fig_dir: Path) -> list[Path]:
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
 
     # Time series
-    ax1.plot(prey, color="#00ff88", linewidth=1, label="Prey")
-    ax1.plot(pred, color="#ff4444", linewidth=1, label="Predators")
+    ax1.plot(prey, color="#065F46", linewidth=1, label="Prey")
+    ax1.plot(pred, color="#991B1B", linewidth=1, label="Predators")
     ax1.set_xlabel("Tick")
     ax1.set_ylabel("Population")
     ax1.set_title("Agent-Based Predator-Prey\n(NOT ODE — note the noise)",
-                  color="#00ff88", fontweight="bold")
+                  color="#065F46", fontweight="bold")
     ax1.legend()
     ax1.grid(True, alpha=0.2)
 
     # Phase portrait
-    ax2.plot(prey, pred, color="#4488ff", linewidth=0.5, alpha=0.7)
+    ax2.plot(prey, pred, color="#1D4ED8", linewidth=0.5, alpha=0.7)
     ax2.set_xlabel("Prey")
     ax2.set_ylabel("Predators")
     ax2.set_title("Phase Portrait\n(spiral, not closed orbit = stochastic)",
-                  color="#4488ff", fontweight="bold")
+                  color="#1D4ED8", fontweight="bold")
     ax2.grid(True, alpha=0.2)
 
     plt.tight_layout()
