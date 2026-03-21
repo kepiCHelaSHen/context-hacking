@@ -1,0 +1,35 @@
+# Context Hacking Protocol — Cursor Rules
+# Drop this file in your project root for automatic CHP integration.
+
+## Before writing ANY code
+
+1. Read CHAIN_PROMPT.md — this is the single source of truth for all design decisions.
+2. Read dead_ends.md — do NOT repeat logged failures. Ever.
+3. Check frozen/ paths — do NOT modify any file listed in config.yaml frozen_paths.
+4. Read state_vector.md — know what turn you're on and what mode you're in.
+
+## While writing code
+
+5. All randomness via seeded numpy.random.Generator. Same seed = identical output.
+6. No bare print() — use logging.getLogger(__name__).
+7. No circular imports — models know nothing about engines.
+8. Every coefficient must trace to a source file and line number in frozen/.
+
+## After writing code
+
+9. Argue AGAINST your own implementation before submitting it.
+10. Run tests across 3 seeds minimum. Check sigma-gates in config.yaml.
+11. If any gate fails: do not commit. Fix the issue first.
+12. If you modified a frozen file: STOP. Revert immediately.
+
+## Mode awareness
+
+- VALIDATION mode: every claim needs a literature citation. Be strict.
+- EXPLORATION mode: state a falsifiable hypothesis. Be creative but log everything.
+- Check state_vector.md to know which mode you're in.
+
+## The Critic test
+
+Before declaring anything "done," ask yourself:
+"If a hostile peer reviewer saw this, what would they attack first?"
+Fix that. Then submit.

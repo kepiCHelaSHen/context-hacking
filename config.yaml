@@ -1,0 +1,109 @@
+# Context Hacking Protocol — Default Configuration
+# Copy this to your project root and customize.
+# All 9 layers are configurable from this single file.
+
+project:
+  name: "my-project"
+  description: "Describe your research question here"
+  frozen_paths: ["frozen/"]
+  chain_prompt: "CHAIN_PROMPT.md"
+  innovation_log: "innovation_log.md"
+  dead_ends: "dead_ends.md"
+  state_vector: "state_vector.md"
+
+# ── Layer 2 + 4: Agent models ────────────────────────────────────────────────
+models:
+  builder: "claude-sonnet-4-20250514"
+  critic: "claude-sonnet-4-20250514"
+  reviewer: "claude-sonnet-4-20250514"
+  council:
+    - provider: "openai"
+      model: "gpt-4o"
+      api_key_env: "OPENAI_API_KEY"
+      temperature: 0.3
+      max_tokens: 600
+    - provider: "xai"
+      model: "grok-3"
+      api_key_env: "GROK_API_KEY"
+      temperature: 0.3
+      max_tokens: 600
+
+# ── Layer 6: σ-Gated statistical verification ────────────────────────────────
+gates:
+  seeds: 3                    # seeds per anomaly check
+  convergence_seeds: 30       # seeds for full convergence battery
+  sigma_threshold: 0.15       # max std across seeds for any primary metric
+  anomaly_checks:
+    - metric: "primary_metric"
+      operator: ">"
+      threshold: 0.25
+      description: "Primary outcome must exceed minimum"
+    - metric: "secondary_metric"
+      operator: "<"
+      threshold: 0.70
+      description: "Secondary metric must not exceed ceiling"
+    - metric: "population"
+      operator: ">"
+      threshold: 0
+      description: "System must not collapse"
+  max_consecutive_anomalies: 3  # triggers EXIT 3
+
+# ── Layer 7: Two-mode negative feedback loop ─────────────────────────────────
+loop:
+  max_turns: 50
+  stagnation_threshold: 5       # turns without improvement → switch to Exploration
+  max_consecutive_exploration: 3 # forced return to Validation after this many
+  context_reset_interval: 15    # compact + re-anchor at this interval
+  state_vector_interval: 5      # write state vector every N turns
+  auto_tag: true                # git tag on successful builds (v2-turn-N-pass)
+  synthesis_interval: 5         # full synthesis review every N turns
+  lightweight_synthesis_interval: 3  # mini-synthesis every N turns
+
+# ── Layer 3: Frozen code gates ────────────────────────────────────────────────
+frozen:
+  enforce: true
+  paths: ["frozen/"]
+  gate_threshold: 1.0           # frozen compliance must be perfect (hard blocker)
+
+# ── Layer 9: Exit conditions (5 kill-switches) ───────────────────────────────
+exit_conditions:
+  science_complete: true        # EXIT 1: all criteria in findings doc met
+  performance_gate: true        # EXIT 2: no improvement for N turns + exploration exhausted
+  unresolvable_anomaly: true    # EXIT 3: K consecutive anomalies + reversion failed
+  fundamental_misalignment: true # EXIT 4: critic says root is broken
+  human_stop: true              # EXIT 5: STOP file exists
+
+# ── Layer 2: Critic configuration ────────────────────────────────────────────
+critic:
+  mindset: "Assume the build failed until proven otherwise"
+  instruction: "Argue AGAINST the science before scoring it"
+  specific_mission: "Actively look for reasons the implementation VIOLATES the frozen specification"
+  gates:
+    - name: "frozen_compliance"
+      threshold: 1.0
+      blocking: true
+      description: "No frozen files touched"
+    - name: "architecture"
+      threshold: 0.85
+      blocking: false
+      description: "No circular imports, all randomness seeded, no print()"
+    - name: "scientific_validity"
+      threshold: 0.85
+      blocking: false
+      description: "Mechanisms match cited literature"
+    - name: "drift_check"
+      threshold: 0.85
+      blocking: false
+      description: "Still aligned with research question"
+
+# ── Layer 2: Reviewer configuration ──────────────────────────────────────────
+reviewer:
+  scope: "Code hygiene only — PEP8, circular imports, hardcoded values, determinism bugs"
+  does_not_evaluate: "science, architecture decisions, or feature suggestions"
+  severity_levels: ["CRITICAL", "WARNING", "MINOR"]
+
+# ── Layer 8: Token efficiency ────────────────────────────────────────────────
+tokens:
+  health_check_max_lines: 3     # keep health checks short
+  builder_context: "targeted"   # only relevant files, not full project
+  partial_save_interval: 10     # save partial results every N runs in experiments
