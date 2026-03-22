@@ -1,3 +1,4 @@
+<!-- STATUS: run | DATE: 2026-03-21 | OUTPUT: experiments/anatomy-viewer/ -->
 ---
 name: chp-anatomy-viewer
 description: "Build a verified anatomical viewer where organ positions are enforced by Gray's Anatomy data."

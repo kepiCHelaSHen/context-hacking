@@ -1,0 +1,14 @@
+{
+  "display_name": "Beer-Lambert Spectrophotometry",
+  "standard": "cat",
+  "domain": "Chemistry",
+  "sprint": "chemistry-sprint-2026",
+  "status": "complete",
+  "key_result": "A=-log10(T) not -ln(T); dsDNA factor=50 not 40",
+  "false_positives_caught": 2,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

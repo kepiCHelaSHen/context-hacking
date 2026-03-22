@@ -1,0 +1,19 @@
+{
+  "display_name": "Schroeder/Freeverb Reverb",
+  "standard": "loop",
+  "domain": "Audio DSP",
+  "sprint": null,
+  "status": "complete",
+  "key_result": "Freeverb 8 combs not textbook 4; Jezar delay values",
+  "false_positives_caught": 0,
+  "turns": null,
+  "gate_scores": {
+    "g1": 1.0,
+    "g2": 0.95,
+    "g3": 0.95,
+    "g4": 1.0
+  },
+  "statistical_result": "8 combs vs 4",
+  "meta_spec_errors": 0,
+  "notes": null
+}

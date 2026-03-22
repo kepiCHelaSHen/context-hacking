@@ -1,3 +1,4 @@
+<!-- STATUS: agent-role | USAGE: send to GPT-4o for council review -->
 # Council Reviewer — GPT-4o
 # This prompt is sent to GPT-4o via the OpenAI API after each build turn.
 # The response is compared against the Grok council member for disagreement detection.

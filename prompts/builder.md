@@ -1,3 +1,4 @@
+<!-- STATUS: agent-role | USAGE: role context for Builder in CHP loop -->
 ---
 name: chp-builder
 description: "The Implementer — builds exactly what is specified, no more, no less."

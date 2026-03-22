@@ -1,0 +1,19 @@
+{
+  "display_name": "Schelling Segregation",
+  "standard": "loop",
+  "domain": "Social Science",
+  "sprint": null,
+  "status": "complete",
+  "key_result": "Dynamic tolerance reduces segregation at comfort_margin=0.05",
+  "false_positives_caught": 1,
+  "turns": 4,
+  "gate_scores": {
+    "g1": 1.0,
+    "g2": 0.95,
+    "g3": 0.92,
+    "g4": 0.95
+  },
+  "statistical_result": "p < 0.000001",
+  "meta_spec_errors": 0,
+  "notes": null
+}

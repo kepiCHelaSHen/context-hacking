@@ -1,0 +1,14 @@
+{
+  "display_name": "Anatomy Viewer (HTML)",
+  "standard": "cat",
+  "domain": "Medicine",
+  "sprint": null,
+  "status": "complete",
+  "key_result": "2D anatomy viewer with 7 body systems; 18/18 tests pass",
+  "false_positives_caught": 0,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": "18/18 tests pass",
+  "meta_spec_errors": 0,
+  "notes": null
+}

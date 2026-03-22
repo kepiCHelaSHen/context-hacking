@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHP — Tooltip Interaction Design Spec</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+/* ===== RESET ===== */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Mono',monospace;background:#F8F9FC;color:#0F1117;min-height:100vh}
+
+/* ===== TOOLTIP ENGINE ===== */
+.chp-tt{
+  position:fixed;z-index:9999;
+  background:#0F1117;border:1px solid #374151;border-radius:5px;
+  padding:9px 13px;max-width:290px;min-width:170px;
+  pointer-events:none;display:none;
+  box-shadow:0 4px 20px rgba(0,0,0,.30);
+  transition:opacity .08s;
+}
+.tt-title{
+  font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.16em;color:#9CA3AF;
+  margin-bottom:5px;padding-bottom:4px;border-bottom:1px solid #1F2937;
+}
+.tt-body{font-family:'Inter',sans-serif;font-size:11px;color:#E5E7EB;line-height:1.55}
+.tt-warn{font-family:'Inter',sans-serif;font-size:10px;color:#FCD34D;margin-top:5px;line-height:1.45}
+.tt-action{font-family:'IBM Plex Mono',monospace;font-size:9px;color:#60A5FA;margin-top:5px;letter-spacing:.04em}
+.tt-val{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:#F9FAFB;margin-top:4px}
+/* Colored left border by type */
+.tip-pass{border-left:3px solid #34D399}
+.tip-fail{border-left:3px solid #FCA5A5}
+.tip-warn{border-left:3px solid #FCD34D}
+.tip-info{border-left:3px solid #93C5FD}
+
+/* ===== DESIGN TOOLBAR ===== */
+.design-bar{
+  background:#0A0F1E;color:#6B7280;
+  padding:7px 20px;display:flex;align-items:center;gap:14px;
+  font-size:9px;letter-spacing:.10em;text-transform:uppercase;
+  border-bottom:1px solid #1F2937;
+  position:sticky;top:0;z-index:200;
+}
+.design-bar strong{color:#E5E7EB;font-weight:700}
+.design-bar .sep{color:#374151}
+.dbar-btn{
+  font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  background:transparent;border:1px solid #374151;color:#9CA3AF;
+  padding:3px 10px;border-radius:3px;cursor:pointer;
+  font-family:'IBM Plex Mono',monospace;transition:all .15s;
+}
+.dbar-btn:hover{border-color:#4B5563;color:#E5E7EB}
+.dbar-btn.on{background:#1D4ED8;border-color:#1D4ED8;color:#fff}
+.dbar-count{color:#60A5FA;margin-left:auto;font-size:9px}
+
+/* Spec mode: dashed outline on all tooltip targets */
+body.spec-mode [data-tip]{
+  outline:1.5px dashed rgba(29,78,216,.5);
+  outline-offset:2px;
+}
+body.spec-mode [data-tip]:hover{
+  outline-color:#1D4ED8;
+  background-color:rgba(29,78,216,.04) !important;
+}
+
+/* ===== EXISTING MOCKUP STYLES (exact from approved mockups) ===== */
+.header{background:#fff;border-bottom:1.5px solid #E2E5EF;padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:13px;font-weight:700;letter-spacing:.12em;cursor:default}
+.proj{font-size:10px;background:#EFF6FF;color:#1D4ED8;border:1px solid #93C5FD;border-radius:4px;padding:3px 10px;margin-left:10px;cursor:pointer}
+.proj:hover{background:#DBEAFE}
+.hbadge{font-size:10px;font-weight:600;padding:3px 10px;border-radius:4px;letter-spacing:.06em}
+.hb-green{background:#ECFDF5;color:#065F46;border:1px solid #34D399}
+.hb-amber{background:#FFFBEB;color:#92400E;border:1px solid #FCD34D}
+.hb-red{background:#FEF2F2;color:#991B1B;border:1px solid #FCA5A5}
+.hstat{font-size:10px;color:#6B7280;margin-left:8px;cursor:default}
+.hstat span{color:#0F1117;font-weight:600}
+.htime{font-size:10px;color:#9CA3AF;cursor:default}
+.tabs{background:#fff;border-bottom:2px solid #E2E5EF;display:flex;padding:0 20px}
+.tab{font-size:10px;font-weight:600;letter-spacing:.10em;text-transform:uppercase;padding:11px 16px;color:#6B7280;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;transition:color .12s}
+.tab:hover{color:#374151}
+.tab.active{color:#1D4ED8;border-bottom-color:#1D4ED8}
+.actions{background:#F8F9FC;border-bottom:1px solid #E2E5EF;padding:8px 20px;display:flex;gap:8px;align-items:center}
+.btn{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border:1.5px solid #C8CCDB;background:#fff;color:#374151;padding:5px 12px;border-radius:4px;cursor:pointer;font-family:'IBM Plex Mono',monospace;transition:background .1s}
+.btn:hover{background:#F3F4F8}
+.btn.blue{border-color:#93C5FD;color:#1D4ED8;background:#EFF6FF}
+.btn.blue:hover{background:#DBEAFE}
+.btn.red{border-color:#FCA5A5;color:#991B1B;background:#FEF2F2}
+.btn.red:hover{background:#FEE2E2}
+.cards{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin:16px 20px 0}
+.card{background:#fff;border:1px solid #E2E5EF;border-top:3px solid #93C5FD;border-radius:6px;padding:12px 14px;cursor:default}
+.card.g{border-top-color:#34D399}.card.r{border-top-color:#FCA5A5}.card.a{border-top-color:#FCD34D}
+.clbl{font-size:9px;color:#6B7280;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px}
+.cval{font-size:22px;font-weight:700;color:#0F1117;line-height:1.1}
+.csub{font-size:10px;color:#9CA3AF;margin-top:3px;font-family:'Inter',sans-serif}
+.content{padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.sh{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.sh-lbl{font-size:9px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.12em;white-space:nowrap}
+.sh-line{flex:1;height:1px;background:#E2E5EF}
+.gate{background:#fff;border:1px solid #E2E5EF;border-left:3px solid #C8CCDB;border-radius:0 4px 4px 0;padding:8px 12px;margin:4px 0;cursor:default;transition:background .1s}
+.gate:hover{background:#FAFBFD}
+.gate.p{border-left-color:#34D399}.gate.f{border-left-color:#FCA5A5}.gate.w{border-left-color:#FCD34D}
+.gate-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.gate-name{font-size:9px;color:#6B7280;text-transform:uppercase;letter-spacing:.10em}
+.gate-score{font-size:13px;font-weight:700}
+.gate-score.p{color:#065F46}.gate-score.f{color:#991B1B}.gate-score.w{color:#92400E}
+.track{height:3px;background:#E9EBF2;border-radius:2px;position:relative;margin-bottom:2px}
+.fill{height:100%;border-radius:2px}
+.fill.p{background:#34D399}.fill.f{background:#FCA5A5}.fill.w{background:#FCD34D}
+.tick{position:absolute;top:-4px;width:2px;height:11px;background:#D97706;cursor:help;z-index:1}
+.tick:hover{background:#F59E0B}
+.gate-foot{font-size:9px;color:#9CA3AF;margin-top:4px;font-family:'Inter',sans-serif}
+.sigma-row{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid #E2E5EF;font-size:10px;cursor:default;transition:background .1s}
+.sigma-row:hover{background:#F8F9FC}
+.sigma-row:last-child{border-bottom:none}
+.sigma-metric{flex:1;color:#374151}
+.sigma-op{color:#9CA3AF;min-width:16px;text-align:center}
+.sigma-thresh{color:#D97706;font-weight:600;min-width:36px}
+.sigma-live{font-weight:700;min-width:48px;text-align:right}
+.sigma-live.pass{color:#065F46}.sigma-live.fail{color:#991B1B}
+.council{background:#ECFDF5;border:1px solid #34D399;border-radius:4px;padding:8px 12px;font-size:10px;color:#065F46;display:flex;align-items:center;gap:8px;cursor:default}
+.dot-green{width:6px;height:6px;border-radius:50%;background:#34D399;flex-shrink:0}
+.log-entry{border:1px solid #E2E5EF;border-radius:4px;margin-bottom:6px;overflow:hidden}
+.log-hdr{background:#F3F4F8;padding:7px 12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;transition:background .1s}
+.log-hdr:hover{background:#E9EBF2}
+.log-hdr-left{font-size:10px;font-weight:600;color:#374151}
+.log-hdr-right{font-size:9px;color:#6B7280}
+.log-body{padding:10px 12px;font-size:10px;color:#374151;line-height:1.7;border-top:1px solid #E2E5EF;background:#fff;font-family:'Inter',sans-serif;display:none}
+.log-body.open{display:block}
+.fp-box{background:#FFFBEB;border:1px solid #FCD34D;border-left:4px solid #D97706;border-radius:4px;padding:10px 14px;margin:8px 0;cursor:default}
+.fp-hdr{font-size:9px;color:#D97706;text-transform:uppercase;letter-spacing:.14em;font-weight:700;margin-bottom:5px}
+.fp-body{font-size:10px;color:#374151;line-height:1.6;font-family:'Inter',sans-serif}
+.de-box{border:1px solid #FCA5A5;border-radius:4px;overflow:hidden}
+.de-hdr{background:#FEF2F2;padding:6px 12px;font-size:9px;color:#991B1B;text-transform:uppercase;letter-spacing:.12em;font-weight:700;cursor:default}
+.de-row{display:flex;align-items:flex-start;gap:10px;padding:7px 12px;border-top:1px solid #E2E5EF;background:#fff;cursor:default;transition:background .1s}
+.de-row:hover{background:#FFF5F5}
+.de-idx{font-size:10px;color:#FCA5A5;font-weight:700;min-width:28px}
+.de-title{font-size:10px;color:#374151;font-weight:600}
+.de-rule{font-size:9px;color:#9CA3AF;font-style:italic;margin-top:1px;font-family:'Inter',sans-serif}
+.colpanel{display:flex;flex-direction:column;gap:0}
+
+/* Tab 2 */
+.ph-content{padding:16px 20px;max-width:980px;margin:0 auto}
+.sh-sub{font-size:10px;color:#6B7280;margin:-6px 0 14px;font-family:'Inter',sans-serif}
+.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.stat{background:#F3F4F8;border-radius:6px;padding:12px 14px;cursor:default;transition:background .1s}
+.stat:hover{background:#EAEBF0}
+.stat-lbl{font-size:9px;color:#6B7280;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px}
+.stat-val{font-size:22px;font-weight:700;color:#0F1117;line-height:1.1}
+.stat-sub{font-size:10px;color:#9CA3AF;margin-top:3px;font-family:'Inter',sans-serif}
+.stat2{background:#fff;border:1px solid #E2E5EF;border-radius:6px;padding:9px 14px;cursor:default;transition:background .1s}
+.stat2:hover{background:#F8F9FC}
+.stat2-lbl{font-size:9px;color:#9CA3AF;text-transform:uppercase;letter-spacing:.12em;margin-bottom:3px}
+.stat2-val{font-size:16px;font-weight:600;color:#374151}
+.chartgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.chart-card{background:#fff;border:1px solid #E2E5EF;border-radius:6px;padding:14px}
+.chart-title{font-size:9px;color:#374151;text-transform:uppercase;letter-spacing:.10em;font-weight:700;margin-bottom:12px;cursor:default}
+
+/* Tab 3 */
+.report-content{padding:16px 20px;display:grid;grid-template-columns:1fr 340px;gap:20px}
+.report-body{font-family:'Inter',sans-serif;font-size:12px;line-height:1.8;color:#374151}
+.report-body h2{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.10em;color:#0F1117;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid #E2E5EF}
+.report-body table{width:100%;border-collapse:collapse;font-size:11px;margin:8px 0}
+.report-body th{text-align:left;padding:6px 10px;border-bottom:2px solid #C8CCDB;font-family:'IBM Plex Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.10em;color:#6B7280;background:#F3F4F8}
+.report-body td{padding:6px 10px;border-bottom:1px solid #E2E5EF;color:#374151;cursor:default;transition:background .1s}
+.report-body tr:hover td{background:#F8F9FC}
+.gate-pass{color:#065F46;font-weight:700}
+.fig-panel{display:flex;flex-direction:column;gap:10px}
+.fig-card{background:#fff;border:1px solid #E2E5EF;border-radius:6px;overflow:hidden;cursor:pointer;transition:border-color .15s}
+.fig-card:hover{border-color:#93C5FD;box-shadow:0 2px 8px rgba(29,78,216,.08)}
+.fig-placeholder{background:#F3F4F8;height:140px;display:flex;align-items:center;justify-content:center;color:#9CA3AF;font-size:10px}
+.fig-cap{padding:7px 10px;border-top:1px solid #E2E5EF;font-size:9px;color:#6B7280}
+.fig-cap strong{color:#374151;display:block;margin-bottom:1px}
+.export-btn{background:#EFF6FF;border:1.5px solid #93C5FD;color:#1D4ED8;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:8px 16px;border-radius:4px;width:100%;cursor:pointer;margin-top:8px;transition:background .1s}
+.export-btn:hover{background:#DBEAFE}
+
+/* Tab 4 */
+.gallery-content{padding:16px 20px}
+.badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 8px;border-radius:3px;letter-spacing:.06em;text-transform:uppercase}
+.b-green{background:#ECFDF5;color:#065F46;border:1px solid #34D399}
+.b-gray{background:#F3F4F8;color:#6B7280;border:1px solid #C8CCDB}
+.b-amber{background:#FFFBEB;color:#92400E;border:1px solid #FCD34D}
+.b-blue{background:#EFF6FF;color:#1D4ED8;border:1px solid #93C5FD}
+.reg-table{width:100%;border-collapse:collapse}
+.reg-table thead th{text-align:left;padding:8px 12px;border-bottom:2px solid #C8CCDB;font-size:9px;text-transform:uppercase;letter-spacing:.10em;color:#6B7280;background:#F3F4F8;cursor:default}
+.reg-table tbody tr{cursor:pointer;transition:background .1s}
+.reg-table tbody tr:hover td{background:#EFF6FF}
+.reg-table tbody tr.active td{background:#EFF6FF}
+.reg-table tbody tr.active td:first-child{border-left:3px solid #1D4ED8}
+.reg-table tbody td{padding:8px 12px;border-bottom:1px solid #E2E5EF;font-size:11px;color:#374151;vertical-align:middle}
+.detail-panel{background:#fff;border:1px solid #E2E5EF;border-radius:6px;margin-top:16px;overflow:hidden}
+.detail-hdr{background:#F3F4F8;padding:10px 16px;border-bottom:1px solid #E2E5EF;display:flex;align-items:center;gap:10px;cursor:default}
+.detail-title{font-size:12px;font-weight:700;color:#0F1117}
+.detail-tabs{display:flex;border-bottom:1px solid #E2E5EF}
+.dtab{font-size:9px;text-transform:uppercase;letter-spacing:.10em;padding:8px 14px;color:#6B7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .1s}
+.dtab:hover{color:#374151}
+.dtab.active{color:#1D4ED8;border-bottom-color:#1D4ED8;background:#fff}
+.detail-body{padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.spec-block{font-family:'Inter',sans-serif;font-size:11px;line-height:1.7;color:#374151}
+.spec-block h4{font-family:'IBM Plex Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.10em;color:#6B7280;margin:10px 0 4px;cursor:default}
+.spec-block h4:first-child{margin-top:0}
+.fig-mini{background:#F3F4F8;border-radius:4px;height:90px;display:flex;align-items:center;justify-content:center;color:#9CA3AF;font-size:9px;border:1px solid #E2E5EF;cursor:pointer;transition:all .15s}
+.fig-mini:hover{border-color:#93C5FD;background:#EFF6FF;color:#1D4ED8}
+.fig-mini.add{border-style:dashed;color:#C8CCDB;cursor:default}
+.fig-mini.add:hover{background:#F3F4F8;border-color:#C8CCDB;color:#C8CCDB}
+
+/* Panel visibility */
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* Event items in Key Events panel */
+.event-item{border-radius:0 4px 4px 0;padding:7px 12px;margin:4px 0;font-size:10px;cursor:default;line-height:1.5}
+</style>
+</head>
+<body>
+
+<!-- ===== DESIGN TOOLBAR ===== -->
+<div class="design-bar">
+  <strong>CHP UI</strong>
+  <span class="sep">·</span>
+  <span>Tooltip Interaction Design Spec</span>
+  <span class="sep">·</span>
+  <span>Hover any element to preview tooltip</span>
+  <button class="dbar-btn" id="specBtn" onclick="toggleSpec()">Spec Mode Off</button>
+  <span class="sep" id="specNote" style="display:none;color:#60A5FA;font-size:9px">blue outlines = tooltipped elements</span>
+  <span class="dbar-count" id="tipCount">— tooltip targets</span>
+</div>
+
+<!-- ===== PERSISTENT HEADER ===== -->
+<div class="header">
+  <div style="display:flex;align-items:center;gap:8px">
+
+    <span class="logo"
+      data-tip-title="Context Hacking Protocol"
+      data-tip="Scientific experiment framework. Builder writes code, Critic scores it against a frozen spec, loop runs until all gates pass. Replaces manual iteration."
+      data-tip-type="info">CHP</span>
+
+    <span class="proj"
+      data-tip-title="Active Project"
+      data-tip="Currently monitoring: schelling-segregation. Source of truth: EXPERIMENT_INDEX.json + config.yaml in the project root."
+      data-tip-action="Click to open project switcher"
+      data-tip-type="info">schelling-segregation</span>
+
+    <span class="hstat"
+      data-tip-title="Current Turn"
+      data-tip="4 turns completed. Each turn = one full Builder → Critic → Validator cycle. Source: TURN field in state_vector.md."
+      data-tip-type="info">T:<span>4</span></span>
+
+    <span class="hbadge hb-green" style="margin-left:4px"
+      data-tip-title="Loop Mode — Validation"
+      data-tip="All milestones met. Loop is running final verification passes. Expect DONE status on this turn or next. Source: MODE field in state_vector.md."
+      data-tip-type="pass">Validation</span>
+
+    <span class="hstat"
+      data-tip-title="Dead Ends Logged"
+      data-tip="1 contraindicated approach permanently logged in dead_ends.md. The loop will not attempt this approach again. Red color = at least one dead end exists."
+      data-tip-action="See Contraindications panel in Live Monitor"
+      data-tip-type="fail"><span style="color:#991B1B">1</span> dead end</span>
+
+    <span class="hstat"
+      data-tip-title="Publication Figures"
+      data-tip="3 figures generated in experiments/schelling-segregation/figures/. Updated each time the Builder runs a turn."
+      data-tip-action="See Live Figures section or switch to Experiment Report"
+      data-tip-type="info"><span style="color:#1D4ED8">3</span> figs</span>
+  </div>
+
+  <span class="htime"
+    data-tip-title="Auto-Refresh Status"
+    data-tip="Dashboard polls file modification times every 5 seconds. Only re-renders components whose source files changed since last poll — no full-page reload."
+    data-tip-type="info">auto-refresh 5s &nbsp;·&nbsp; 09:41:22</span>
+</div>
+
+<!-- ===== TABS ===== -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab(0)"
+    data-tip-title="Tab — Live Monitor"
+    data-tip="Watch the loop as it runs. Critic gate scores, sigma-gate readings, innovation log, dead ends, live figures. Polls every 5 seconds."
+    data-tip-type="info">Live Monitor</div>
+
+  <div class="tab" onclick="switchTab(1)"
+    data-tip-title="Tab — Protocol Health"
+    data-tip="Is the loop learning? Token efficiency trends, false positive history, gate score trends, time per turn. Source: .chp/telemetry.json."
+    data-tip-type="info">Protocol Health</div>
+
+  <div class="tab" onclick="switchTab(2)"
+    data-tip-title="Tab — Experiment Report"
+    data-tip="Full REPORT.md rendered with false positive story, result tables, gate scores, and publication figures. Source: REPORT.md in project dir."
+    data-tip-type="info">Experiment Report</div>
+
+  <div class="tab" onclick="switchTab(3)"
+    data-tip-title="Tab — Experiment Gallery"
+    data-tip="Browse all experiments in EXPERIMENT_INDEX.json. Click any row to drill in: spec, frozen files, dead ends, report, figures."
+    data-tip-type="info">Gallery</div>
+
+  <div class="tab" onclick="switchTab(4)"
+    data-tip-title="Tab — New Experiment"
+    data-tip="Step-by-step wizard to generate a new experiment: slug, research question, domain, prior errors, sigma gates. Writes spec, frozen, chain prompt, dead ends template."
+    data-tip-type="info">New Experiment</div>
+</div>
+
+<!-- ===== ACTION BUTTONS ===== -->
+<div class="actions">
+
+  <button class="btn blue"
+    data-tip-title="Run Loop"
+    data-tip="Generates the exact &ldquo;claude chp run&rdquo; command for the active project. Does NOT execute it — opens a command modal for you to copy and paste into your terminal."
+    data-tip-action="Click to open Run Command modal"
+    data-tip-type="info">Run Loop</button>
+
+  <button class="btn red"
+    data-tip-title="Stop Loop"
+    data-tip="Writes a STOP sentinel file to the project root. The loop checks for this file before each new turn and halts cleanly after finishing the current turn."
+    data-tip-warn="Loop will complete its current turn before stopping — not immediate"
+    data-tip-type="warn">Stop Loop</button>
+
+  <button class="btn"
+    data-tip-title="Export Paper Appendix"
+    data-tip="Writes paper_appendix.md to the project root. Contains: project name + timestamp, full state vector as bullet list, full innovation log, full dead ends file, and REPORT.md."
+    data-tip-type="info">Export Paper</button>
+
+  <button class="btn"
+    data-tip-title="Download All Figures"
+    data-tip="Zips all PNG, SVG, and JPG files in experiments/[active-experiment]/figures/ and triggers a browser download. Filename: chp_figures_[timestamp].zip"
+    data-tip-type="info">Download Figures</button>
+
+  <button class="btn"
+    data-tip-title="Manual Refresh"
+    data-tip="Forces immediate re-read of all source files. Normally not needed — auto-refresh polls every 5 seconds automatically. Use if you suspect a stale render."
+    data-tip-type="info">Refresh</button>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 1: LIVE MONITOR                                          -->
+<!-- ============================================================ -->
+<div class="tab-panel active" id="panel-0">
+  <div class="cards">
+
+    <div class="card g"
+      data-tip-title="Status Card — Mode"
+      data-tip="VALIDATION: all milestones met, loop running final verification. States: VALIDATION (green) · EXPLORATION (amber) · DONE (green) · EXIT (red). Source: MODE field in state_vector.md."
+      data-tip-type="pass">
+      <div class="clbl">Mode</div>
+      <div class="cval" style="font-size:14px;padding-top:4px"><span class="hbadge hb-green">Validation</span></div>
+      <div class="csub">complete — all milestones done</div>
+    </div>
+
+    <div class="card"
+      data-tip-title="Status Card — Turn"
+      data-tip="4 turns completed. Each turn is one full Builder → Critic → Validator cycle. Config max: 50 turns. Source: TURN field in state_vector.md."
+      data-tip-type="info">
+      <div class="clbl">Turn</div>
+      <div class="cval">4</div>
+      <div class="csub">of 50 max</div>
+    </div>
+
+    <div class="card r"
+      data-tip-title="Status Card — Dead Ends"
+      data-tip="1 contraindicated approach permanently logged in dead_ends.md. Red top border appears when count > 0. The loop reads this file at the start of each turn."
+      data-tip-action="See Contraindications panel in left column below"
+      data-tip-type="fail">
+      <div class="clbl">Dead Ends</div>
+      <div class="cval" style="color:#991B1B">1</div>
+      <div class="csub">Contraindications logged</div>
+    </div>
+
+    <div class="card"
+      data-tip-title="Status Card — Open Flags"
+      data-tip="0 unresolved items in the OPEN_FLAGS field of state_vector.md. Flags are open research questions or anomalies the Builder must address before the loop can advance to VALIDATION mode."
+      data-tip-type="info">
+      <div class="clbl">Open Flags</div>
+      <div class="cval">0</div>
+      <div class="csub">none</div>
+    </div>
+
+  </div>
+
+  <div class="content">
+    <!-- LEFT COLUMN -->
+    <div class="colpanel">
+
+      <div class="sh"><span class="sh-lbl">Critic Scorecard</span><div class="sh-line"></div></div>
+
+      <!-- G1 PASS -->
+      <div class="gate p"
+        data-tip-title="G1 — Frozen Compliance · 1.00 / 1.00 ✓ PASS"
+        data-tip="All values in the frozen spec are implemented exactly — no rounding, no substitution, no defaults. This gate has a hard ceiling: partial compliance always fails. tolerance=0.375 EXACT confirmed."
+        data-tip-type="pass">
+        <div class="gate-hdr">
+          <span class="gate-name">G1 — Frozen Compliance</span>
+          <span class="gate-score p">1.00</span>
+        </div>
+        <div class="track">
+          <div class="fill p" style="width:100%"></div>
+          <div class="tick"
+            data-tip-title="Pass Threshold Mark"
+            data-tip="Amber vertical line marks the minimum passing score for this gate. G1 threshold = 1.00 (bar must be full). G2–G4 threshold = 0.85. Any fill ending left of this mark blocks the build."
+            data-tip-type="warn"
+            style="left:85%"></div>
+        </div>
+        <div class="gate-foot">threshold 1.00 · PASS</div>
+      </div>
+
+      <!-- G2 PASS -->
+      <div class="gate p"
+        data-tip-title="G2 — Architecture · 0.95 / 0.85 ✓ PASS"
+        data-tip="Code structure matches required architecture: Agent class with move() method, no NumPy vectorization, no vectorized batch updates that would obscure the sequential rule. 0.10 above threshold."
+        data-tip-type="pass">
+        <div class="gate-hdr">
+          <span class="gate-name">G2 — Architecture</span>
+          <span class="gate-score p">0.95</span>
+        </div>
+        <div class="track">
+          <div class="fill p" style="width:95%"></div>
+          <div class="tick"
+            data-tip-title="Pass Threshold — 0.85"
+            data-tip="G2 threshold is 0.85. This turn scored 0.95 — 0.10 above threshold. A score of 0.87 would still pass; anything below 0.85 blocks the build entirely."
+            data-tip-type="warn"
+            style="left:85%"></div>
+        </div>
+        <div class="gate-foot">threshold 0.85 · PASS</div>
+      </div>
+
+      <!-- G3 BLOCKED (false positive turn) -->
+      <div class="gate f"
+        data-tip-title="G3 — Scientific Validity · 0.70 / 0.85 ✗ BLOCKED"
+        data-tip="Build blocked before merge. False positive caught: dynamic tolerance produced segregation=0.804 — HIGHER than the original model (0.778). Root cause: tolerance update applied BEFORE move step instead of after. Code was never merged."
+        data-tip-action="See Turn 2 in Innovation Log for full diagnosis"
+        data-tip-type="fail">
+        <div class="gate-hdr">
+          <span class="gate-name">G3 — Scientific Validity</span>
+          <span class="gate-score f">0.70</span>
+        </div>
+        <div class="track">
+          <div class="fill f" style="width:70%"></div>
+          <div class="tick"
+            data-tip-title="Pass Threshold — 0.85"
+            data-tip="Score of 0.70 is 0.15 below the 0.85 threshold. Bar fill stops well left of this mark. This turn was blocked — the false positive was diagnosed and fixed in Turn 3, verified in Turn 4."
+            data-tip-type="fail"
+            style="left:85%"></div>
+        </div>
+        <div class="gate-foot">threshold 0.85 · BLOCKED — false positive caught</div>
+      </div>
+
+      <!-- G4 PASS -->
+      <div class="gate p"
+        data-tip-title="G4 — Drift Check · 0.90 / 0.85 ✓ PASS"
+        data-tip="Builder output matches CHAIN_PROMPT.md intent. No prior-experiment contamination (no ODE imports, no NumPy mass-action, no Hodgkin-Huxley variables). Score is passing but watchful — 0.05 above threshold."
+        data-tip-type="pass">
+        <div class="gate-hdr">
+          <span class="gate-name">G4 — Drift Check</span>
+          <span class="gate-score p">0.90</span>
+        </div>
+        <div class="track">
+          <div class="fill p" style="width:90%"></div>
+          <div class="tick"
+            data-tip-title="Pass Threshold — 0.85"
+            data-tip="Score of 0.90 clears threshold by 0.05. This is a passing but watchful margin. If prior-experiment contamination appears next turn, this score will drop below threshold."
+            data-tip-type="warn"
+            style="left:85%"></div>
+        </div>
+        <div class="gate-foot">threshold 0.85 · PASS</div>
+      </div>
+
+      <!-- SIGMA GATES -->
+      <div class="sh" style="margin-top:16px"><span class="sh-lbl">Sigma-Gate Readings</span><div class="sh-line"></div></div>
+      <div style="border:1px solid #E2E5EF;border-radius:4px;overflow:hidden;background:#fff">
+
+        <div class="sigma-row"
+          data-tip-title="Sigma Gate — segregation_index · PASS"
+          data-tip="Live value: 0.666. Required: within [0.3, 0.8]. Verifies the model produces non-trivial segregation — not fully mixed (near 0) and not fully segregated (near 1). Source: anomaly_checks in config.yaml."
+          data-tip-type="pass">
+          <span class="sigma-metric">segregation_index</span>
+          <span class="sigma-op">∈</span>
+          <span class="sigma-thresh">[0.3,0.8]</span>
+          <span class="sigma-live pass">0.666</span>
+        </div>
+
+        <div class="sigma-row"
+          data-tip-title="Sigma Gate — cluster_count · PASS"
+          data-tip="Live value: 9 clusters. Required: > 1. Verifies spatial structure exists. A value of 1 means all agents merged into one block — the signature of ODE contamination or a vectorized update bug."
+          data-tip-type="pass">
+          <span class="sigma-metric">cluster_count</span>
+          <span class="sigma-op">&gt;</span>
+          <span class="sigma-thresh">1</span>
+          <span class="sigma-live pass">9</span>
+        </div>
+
+        <div class="sigma-row"
+          data-tip-title="Sigma Gate — std_across_seeds · PASS"
+          data-tip="Live value: 0.056 std across 30 seeds. Required: < 0.15. Confirms the result is reproducible across random seeds and is not a lucky single-seed artifact. Low std = stable result."
+          data-tip-type="pass">
+          <span class="sigma-metric">std_across_seeds</span>
+          <span class="sigma-op">&lt;</span>
+          <span class="sigma-thresh">0.15</span>
+          <span class="sigma-live pass">0.056</span>
+        </div>
+
+        <div class="sigma-row"
+          data-tip-title="Sigma Gate — population · PASS"
+          data-tip="Live value: 2,250 agents. Required: > 0. Basic sanity check — confirms agents were not accidentally cleared, overwritten, or lost during a step in the simulation loop."
+          data-tip-type="pass">
+          <span class="sigma-metric">population</span>
+          <span class="sigma-op">&gt;</span>
+          <span class="sigma-thresh">0</span>
+          <span class="sigma-live pass">2250</span>
+        </div>
+
+      </div>
+
+      <!-- COUNCIL STATUS -->
+      <div class="sh" style="margin-top:16px"><span class="sh-lbl">Council Status</span><div class="sh-line"></div></div>
+      <div class="council"
+        data-tip-title="Council Status — No Drift Detected"
+        data-tip="GPT-4o and Grok independently scored this turn's output. Both agree on scientific validity. Drift = when two council members produce conflicting scientific validity judgments. Checked by scanning last 3,000 characters of innovation_log.md for the DRIFT keyword."
+        data-tip-type="pass">
+        <div class="dot-green"></div>No drift detected — GPT-4o and Grok aligned
+      </div>
+
+      <!-- CONTRAINDICATIONS -->
+      <div class="sh" style="margin-top:16px"><span class="sh-lbl">Contraindications</span><div class="sh-line"></div></div>
+      <div class="de-box">
+        <div class="de-hdr"
+          data-tip-title="Contraindications Header"
+          data-tip="Permanently logged errors from past turns. Written to dead_ends.md in the experiment directory. The loop reads this file at the start of each turn to avoid known bad approaches. Cannot be overridden by the Builder."
+          data-tip-type="fail">Contraindications — do not repeat</div>
+        <div class="de-row"
+          data-tip-title="Contraindication C01 — Tolerance Before Move"
+          data-tip="Applying tolerance update BEFORE move() produced segregation=0.804 (frozen spec predicts ~0.65). The correct order: (1) move(), (2) update_tolerance(). Logged on Turn 2 after false positive was diagnosed."
+          data-tip-warn="Never call update_tolerance() before move() in schelling.py"
+          data-tip-type="fail">
+          <span class="de-idx">C01</span>
+          <div>
+            <div class="de-title">Tolerance update before move step</div>
+            <div class="de-rule">-- apply tolerance update AFTER move step per frozen spec</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /left column -->
+
+    <!-- RIGHT COLUMN -->
+    <div class="colpanel">
+      <div class="sh"><span class="sh-lbl">Innovation Log</span><div class="sh-line"></div></div>
+
+      <!-- Turn 4 — expanded by default (most recent) -->
+      <div class="log-entry">
+        <div class="log-hdr" onclick="toggleLog(this)"
+          data-tip-title="Log Entry — Turn 4 (Most Recent)"
+          data-tip="Mode: VALIDATION. 30-seed battery complete. This is the most recent turn — auto-expanded on load. Click to collapse. Newest turns are always at the top."
+          data-tip-type="pass">
+          <span class="log-hdr-left">Turn 4 — Convergence Battery</span>
+          <span class="log-hdr-right">VALIDATION · 11:50</span>
+        </div>
+        <div class="log-body open">
+          30-seed battery complete. Dynamic tolerance (comfort=0.05) vs original.<br>
+          mean=0.666, std=0.056 · original mean=0.766, std=0.009<br>
+          Paired t-test: <strong>t=-9.858, p &lt; 0.000001</strong> · Cohen's d = -1.83<br>
+          Dynamic &lt; Original in 27/30 seeds. Sigma-gate: PASS.
+        </div>
+      </div>
+
+      <!-- Turn 3 — collapsed -->
+      <div class="log-entry">
+        <div class="log-hdr" onclick="toggleLog(this)"
+          data-tip-title="Log Entry — Turn 3"
+          data-tip="Mode: EXPLORATION. Parameter sweep across comfort_margin values. This turn transitioned the loop from EXPLORATION to VALIDATION after finding the correct parameter. Click to expand."
+          data-tip-type="info">
+          <span class="log-hdr-left">Turn 3 — Exploration</span>
+          <span class="log-hdr-right">EXPLORATION · 11:40</span>
+        </div>
+        <div class="log-body">
+          comfort_margin sweep: 0.10→0.763 (NO), 0.05→0.665 (YES), 0.02→0.651 (YES)<br>
+          Partial mixing confirmed at comfort_margin=0.05.
+        </div>
+      </div>
+
+      <!-- Turn 2 — FP turn, always expanded -->
+      <div class="log-entry" style="border-color:#FCD34D">
+        <div class="log-hdr" onclick="toggleLog(this)"
+          style="background:#FFFBEB"
+          data-tip-title="Log Entry — Turn 2 (False Positive Caught)"
+          data-tip="Build BLOCKED before merge. Gate 3 scored 0.70 — below the 0.85 threshold. FP entries are auto-expanded on load and show the &ldquo;FP:&rdquo; prefix label. Amber border distinguishes this entry type. Click to collapse."
+          data-tip-action="Expand to see the full false positive story"
+          data-tip-type="warn">
+          <span class="log-hdr-left" style="color:#92400E">FP: Turn 2 — False Positive Caught</span>
+          <span class="log-hdr-right">VALIDATION · 11:35</span>
+        </div>
+        <div class="log-body open">
+          <div class="fp-box" style="margin:0"
+            data-tip-title="False Positive — Blocked Build"
+            data-tip="This specific build was killed here and never merged into the codebase. The Critic detected that tolerance-before-move produces the wrong segregation value. The code was diagnosed in Turn 3 and the fix verified across 30 seeds in Turn 4."
+            data-tip-type="warn">
+            <div class="fp-hdr">False Positive Caught</div>
+            <div class="fp-body">Dynamic tolerance produced segregation=0.804 — HIGHER than original (0.778). Tolerance update applied BEFORE move step. Gate 3 = 0.70. Build BLOCKED.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Turn 1 — collapsed -->
+      <div class="log-entry">
+        <div class="log-hdr" onclick="toggleLog(this)"
+          data-tip-title="Log Entry — Turn 1 (Foundation)"
+          data-tip="Mode: VALIDATION. Initial build — schelling.py written from scratch, tolerance=0.375 implemented exactly, 3-seed anomaly check passed. Collapsed by default (not most recent, no FP). Click to expand."
+          data-tip-type="info">
+          <span class="log-hdr-left">Turn 1 — Foundation</span>
+          <span class="log-hdr-right">VALIDATION · 11:30</span>
+        </div>
+        <div class="log-body">
+          schelling.py — 230 lines. tolerance=0.375 EXACT. 3-seed anomaly check: std=0.019. PASS.
+        </div>
+      </div>
+
+    </div><!-- /right column -->
+  </div>
+</div><!-- /panel-0 -->
+
+
+<!-- ============================================================ -->
+<!-- TAB 2: PROTOCOL HEALTH                                       -->
+<!-- ============================================================ -->
+<div class="tab-panel" id="panel-1">
+  <div class="ph-content">
+
+    <div class="sh"><span class="sh-lbl">Protocol Health — Is the loop learning?</span><div class="sh-line"></div></div>
+    <div class="sh-sub">Healthy loop: declining drift · improving gate scores · faster turns · fewer fix cycles</div>
+
+    <!-- PRIMARY STAT CARDS -->
+    <div class="statgrid">
+
+      <div class="stat"
+        data-tip-title="Token Efficiency — Tokens / Line"
+        data-tip="142.3 tokens consumed per line of code written. Lower = more efficient. Computed as total_tokens ÷ total_lines_written across all turns. High values (> 300) indicate fix cycles consuming tokens without net output."
+        data-tip-type="info">
+        <div class="stat-lbl">Tokens / Line</div>
+        <div class="stat-val">142.3</div>
+        <div class="stat-sub">lower = more efficient</div>
+      </div>
+
+      <div class="stat"
+        data-tip-title="False Positives Caught"
+        data-tip="1 build was blocked by the Critic before being merged. Each catch means a scientific error was detected and prevented from entering the codebase. Amber color draws attention — not alarming, but significant."
+        data-tip-warn="Note: 0 FPs on a hard experiment may mean the Critic isn't strict enough — not always a good sign"
+        data-tip-type="warn">
+        <div class="stat-lbl">False Pos. Caught</div>
+        <div class="stat-val" style="color:#D97706">1</div>
+        <div class="stat-sub">killed before merge</div>
+      </div>
+
+      <div class="stat"
+        data-tip-title="Dead Ends Avoided"
+        data-tip="2 times the loop encountered a contraindicated approach from dead_ends.md and actively avoided it. Each avoidance is compound learning — a mistake not repeated saves a full fix cycle."
+        data-tip-type="pass">
+        <div class="stat-lbl">Dead Ends Avoided</div>
+        <div class="stat-val" style="color:#065F46">2</div>
+        <div class="stat-sub">mistakes not repeated</div>
+      </div>
+
+      <div class="stat"
+        data-tip-title="First-Try Gate Pass Rate"
+        data-tip="75% of turns passed all Critic gates without a fix cycle (Turns 1, 3, 4 passed first-try; Turn 2 required diagnosis + fix). 60–80% is typical for a well-specified experiment. Below 50% = tighten the frozen spec."
+        data-tip-type="info">
+        <div class="stat-lbl">First-Try Pass</div>
+        <div class="stat-val">75%</div>
+        <div class="stat-sub">no fix cycle needed</div>
+      </div>
+
+    </div>
+
+    <!-- SECONDARY STAT CARDS -->
+    <div class="statgrid" style="margin-bottom:20px">
+
+      <div class="stat2"
+        data-tip-title="Total Token Consumption"
+        data-tip="34,600 tokens across all 4 turns. Includes both Builder and Critic API calls. Used as the numerator in the Tokens/Line efficiency metric."
+        data-tip-type="info">
+        <div class="stat2-lbl">Total Tokens</div>
+        <div class="stat2-val">34,600</div>
+      </div>
+
+      <div class="stat2"
+        data-tip-title="Lines of Code Written (Net)"
+        data-tip="290 net lines across all turns. Excludes rewrites — if Turn 2 was replaced by Turn 3, only the final version counts. Used as the denominator in the Tokens/Line calculation."
+        data-tip-type="info">
+        <div class="stat2-lbl">Lines Built</div>
+        <div class="stat2-val">290</div>
+      </div>
+
+      <div class="stat2"
+        data-tip-title="Total Wall-Clock Time"
+        data-tip="4.0 minutes from Turn 1 start to Turn 4 completion. Includes API latency and fix cycles. Source: sum of duration_seconds across all turn records in .chp/telemetry.json."
+        data-tip-type="info">
+        <div class="stat2-lbl">Total Time</div>
+        <div class="stat2-val">4.0 min</div>
+      </div>
+
+      <div class="stat2"
+        data-tip-title="Turns Completed"
+        data-tip="4 complete Builder→Critic→Validator cycles. Config max: 50 turns. Source: count of turn records in .chp/telemetry.json."
+        data-tip-type="info">
+        <div class="stat2-lbl">Turns</div>
+        <div class="stat2-val">4</div>
+      </div>
+
+    </div>
+
+    <div class="sh"><span class="sh-lbl">Trends Over Time</span><div class="sh-line"></div></div>
+
+    <div class="chartgrid">
+
+      <div class="chart-card">
+        <div class="chart-title"
+          data-tip-title="Chart — Tokens per Turn"
+          data-tip="Blue line: actual tokens per turn. Amber dashed: 3-turn rolling average (gives trend direction). Red dot on a data point = false positive was caught that turn. Hover data points for exact values."
+          data-tip-type="info">Tokens per turn</div>
+        <div style="position:relative;height:160px"><canvas id="tokensChart"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title"
+          data-tip-title="Chart — Critic Gate Scores"
+          data-tip="Green line = G1 Frozen (should be 1.00 every turn — any drop is critical). Amber line = G3 Science (the diagnostic gate). Red data point = turn where that gate blocked the build. Dashed amber line = 0.85 pass threshold. Hover for exact scores."
+          data-tip-type="info">Critic gate scores</div>
+        <div style="position:relative;height:160px"><canvas id="gatesChart"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title"
+          data-tip-title="Chart — Time per Turn"
+          data-tip="Bar height = wall-clock minutes for each turn. Color coding: green (&lt; 5 min, fast), amber (&lt; 10 min, normal), red (≥ 10 min, slow — investigate for stuck API calls or complex fix cycles). Hover bars for exact duration."
+          data-tip-type="info">Time per turn (minutes)</div>
+        <div style="position:relative;height:160px"><canvas id="timeChart"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title"
+          data-tip-title="Panel — Key Events"
+          data-tip="Notable events across all turns: false positives (amber), sigma-gate anomalies (red), milestones (green), mode transitions (blue). Source: turns where false_positive_caught=true or anomaly=true in telemetry.json."
+          data-tip-type="info">Key Events</div>
+
+        <div class="fp-box"
+          data-tip-title="Event — False Positive Caught (Turn 2)"
+          data-tip="Turn 2: Build blocked before merge. Dynamic tolerance before move step produced segregation=0.804. Gate 3 scored 0.70. Error diagnosed in Turn 3, verified across 30 seeds in Turn 4."
+          data-tip-action="See Turn 2 in Live Monitor → Innovation Log"
+          data-tip-type="warn">
+          <div class="fp-hdr">Turn 2 — False Positive Caught</div>
+          <div class="fp-body">Dynamic tolerance produced segregation=0.804. Tolerance update before move step. Gate 3 = 0.70. Build BLOCKED.</div>
+        </div>
+
+        <div class="event-item"
+          style="background:#ECFDF5;border-left:3px solid #34D399;color:#065F46"
+          data-tip-title="Event — Milestone Passed (Turn 4)"
+          data-tip="Turn 4: 30-seed convergence battery completed. p &lt; 0.000001, Cohen's d = -1.83. All sigma gates passed. Result confirmed as statistically significant with a massive effect size."
+          data-tip-type="pass">
+          Turn 4: Convergence battery PASSED — 30 seeds, p &lt; 0.000001
+        </div>
+
+        <div class="event-item"
+          style="background:#EFF6FF;border-left:3px solid #93C5FD;color:#1D4ED8"
+          data-tip-title="Event — Mode Transition (Turn 3)"
+          data-tip="Turn 3: Loop transitioned from EXPLORATION to VALIDATION. comfort_margin=0.05 produced correct partial mixing (0.665). Parameter fix confirmed, full 30-seed battery triggered next turn."
+          data-tip-type="info">
+          Turn 3: Mode EXPLORATION → VALIDATION (parameter fix found)
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div><!-- /panel-1 -->
+
+
+<!-- ============================================================ -->
+<!-- TAB 3: EXPERIMENT REPORT                                     -->
+<!-- ============================================================ -->
+<div class="tab-panel" id="panel-2">
+  <div class="report-content">
+
+    <div>
+      <div class="fp-box"
+        data-tip-title="False Positive Story"
+        data-tip="The narrative of every build that was blocked before merge. Required section in CHP experiments with FP catches. Automatically extracted from innovation_log.md FP entries. Renders as an amber callout before the main report body."
+        data-tip-type="warn">
+        <div class="fp-hdr">False Positive Story</div>
+        <div class="fp-body">Turn 2: Dynamic tolerance produced segregation=0.804 — HIGHER than the original model (0.778). The frozen spec predicts partial mixing (~0.65). Root cause: tolerance update applied BEFORE the move step. Gate 3 scored 0.70. Build blocked. Turn 3 diagnosed the parameter sensitivity. Turn 4 confirmed the fix across 30 seeds.</div>
+      </div>
+
+      <div class="sh"><span class="sh-lbl">Executive Summary</span><div class="sh-line"></div></div>
+      <div class="report-body">
+        <p>The Schelling (1971) segregation model with dynamic tolerance extension, built in 4 turns. Dynamic tolerance reduces segregation from 0.766 to 0.666 at comfort_margin=0.05, confirmed across 30 seeds with <strong>p &lt; 0.000001</strong> (Cohen's d = −1.83).</p>
+
+        <h2>Key Results</h2>
+        <table>
+          <thead><tr><th>Metric</th><th>Value</th><th>Gate</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr data-tip-title="Result Row — segregation_index (dynamic)"
+              data-tip="0.666: within sigma bounds [0.30, 0.80]. Confirms partial mixing — significantly below the original model's 0.766. p &lt; 0.000001 from paired t-test across 30 seeds."
+              data-tip-type="pass">
+              <td>segregation (dynamic)</td><td><strong>0.666</strong></td><td>[0.30, 0.80]</td><td class="gate-pass">PASS</td>
+            </tr>
+            <tr data-tip-title="Result Row — Baseline Comparison"
+              data-tip="Original Schelling model at tolerance=0.375: 0.766 segregation. Used as the comparison target. No gate applied to the baseline — it is the reference value from the frozen spec."
+              data-tip-type="info">
+              <td>segregation (original)</td><td>0.766</td><td>—</td><td style="color:#6B7280">baseline</td>
+            </tr>
+            <tr data-tip-title="Result Row — Reproducibility (std)"
+              data-tip="std=0.056 across 30 independent random seeds. Required: &lt; 0.15. Confirms the result is not a lucky single-seed artifact. A result with std &gt; 0.15 would be flagged by the sigma gate."
+              data-tip-type="pass">
+              <td>std across 30 seeds</td><td><strong>0.056</strong></td><td>&lt; 0.15</td><td class="gate-pass">PASS</td>
+            </tr>
+            <tr data-tip-title="Result Row — Statistical Significance"
+              data-tip="p &lt; 0.000001 from paired t-test. Required: p &lt; 0.05. This result would survive Bonferroni correction across hundreds of simultaneous tests. Cohen's d = -1.83 indicates a massive effect size."
+              data-tip-type="pass">
+              <td>p-value (paired t-test)</td><td><strong>&lt; 0.000001</strong></td><td>&lt; 0.05</td><td class="gate-pass">PASS</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>Gate Scores</h2>
+        <table>
+          <thead><tr><th>Gate</th><th>Score</th><th>Threshold</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr data-tip-title="Gate Score — G1 Frozen Compliance"
+              data-tip="1.00/1.00. Hard gate. tolerance=0.375 exact (no rounding), grid 50×50 exact, agent count 2,500 exact. All frozen spec values match."
+              data-tip-type="pass">
+              <td>G1 Frozen Compliance</td><td class="gate-pass">1.00</td><td>1.00</td><td class="gate-pass">PASS</td>
+            </tr>
+            <tr data-tip-title="Gate Score — G2 Architecture"
+              data-tip="0.95/0.85. Agent class with move() method, no vectorized NumPy batch updates, no mass-action shortcuts. Code architecture matches spec."
+              data-tip-type="pass">
+              <td>G2 Architecture</td><td class="gate-pass">0.95</td><td>0.85</td><td class="gate-pass">PASS</td>
+            </tr>
+            <tr data-tip-title="Gate Score — G3 Scientific Validity"
+              data-tip="Final score: 0.92/0.85 (PASS). Note: this gate scored 0.70 on Turn 2 — the false positive that blocked the build. After diagnosis and fix, recovered to 0.92 in Turn 4."
+              data-tip-warn="This gate failed on Turn 2 — see False Positive Story above"
+              data-tip-type="pass">
+              <td>G3 Scientific Validity</td><td class="gate-pass">0.92</td><td>0.85</td><td class="gate-pass">PASS</td>
+            </tr>
+            <tr data-tip-title="Gate Score — G4 Drift Check"
+              data-tip="0.95/0.85. No prior-experiment contamination. Builder did not import scipy ODE solvers or use NumPy vectorization patterns from other experiments."
+              data-tip-type="pass">
+              <td>G4 Drift Check</td><td class="gate-pass">0.95</td><td>0.85</td><td class="gate-pass">PASS</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="fig-panel">
+      <div class="sh"><span class="sh-lbl">Publication Figures</span><div class="sh-line"></div></div>
+
+      <div class="fig-card"
+        data-tip-title="Figure — segregation_dynamics.png"
+        data-tip="14.2 KB · Generated 09:41. Segregation index over 500 time steps for both original and dynamic tolerance models. Shows 30-seed distribution as shaded band."
+        data-tip-action="Click to open full size · Right-click to download"
+        data-tip-type="info">
+        <div class="fig-placeholder">[ segregation_dynamics.png ]</div>
+        <div class="fig-cap"><strong>Segregation dynamics over time</strong>Original vs dynamic tolerance · 30-seed distribution · 14.2 KB · 09:41</div>
+      </div>
+
+      <div class="fig-card"
+        data-tip-title="Figure — grid_comparison.png"
+        data-tip="22.1 KB · Generated 09:41. Side-by-side grid state: Step 0 (random initialization) vs Step 500 (equilibrium). Visual evidence of partial mixing vs full segregation."
+        data-tip-action="Click to open full size · Right-click to download"
+        data-tip-type="info">
+        <div class="fig-placeholder">[ grid_comparison.png ]</div>
+        <div class="fig-cap"><strong>Grid state comparison</strong>Step 0 vs Step 500 · agent distribution · 22.1 KB · 09:41</div>
+      </div>
+
+      <div class="fig-card"
+        data-tip-title="Figure — comfort_margin_sweep.png"
+        data-tip="18.7 KB · Generated 09:38. Parameter sensitivity: segregation_index vs comfort_margin across [0.00–0.10]. Shows why 0.05 was selected — the key finding panel."
+        data-tip-action="Click to open full size · Right-click to download"
+        data-tip-type="info">
+        <div class="fig-placeholder">[ comfort_margin_sweep.png ]</div>
+        <div class="fig-cap"><strong>Parameter sensitivity sweep</strong>comfort_margin 0.00–0.10 · key finding panel · 18.7 KB · 09:38</div>
+      </div>
+
+      <button class="export-btn"
+        data-tip-title="Export Paper Appendix"
+        data-tip="Writes paper_appendix.md to the project root. Contains: project name + export timestamp, full state vector as bullet list, full innovation log, full dead ends file, and this complete REPORT.md. Designed for direct inclusion in a publication appendix."
+        data-tip-type="info">Export Paper Appendix</button>
+    </div>
+
+  </div>
+</div><!-- /panel-2 -->
+
+
+<!-- ============================================================ -->
+<!-- TAB 4: EXPERIMENT GALLERY                                    -->
+<!-- ============================================================ -->
+<div class="tab-panel" id="panel-3">
+  <div class="gallery-content">
+    <div class="sh"><span class="sh-lbl">Experiment Registry</span><div class="sh-line"></div></div>
+
+    <div style="border:1px solid #E2E5EF;border-radius:6px;overflow:hidden">
+      <table class="reg-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Experiment</th>
+            <th data-tip-title="Column — Domain"
+              data-tip="Scientific discipline. Used for filtering. Values: Social Science, Game Theory, Epidemiology, Chaos Theory, Neuroscience, Quantum Computing, Mathematics, Music Theory, Ecology, etc."
+              data-tip-type="info">Domain</th>
+            <th data-tip-title="Column — Prior Drift Catches"
+              data-tip="The specific LLM tendencies this experiment's frozen spec was designed to catch — written before the experiment ran. These are exact errors the protocol guards against. High-value information for understanding what the protocol does."
+              data-tip-type="warn">Prior drift catches</th>
+            <th data-tip-title="Column — False Positives Caught"
+              data-tip="Total builds blocked by the Critic before merge for this experiment. Each is a scientific error caught before it could corrupt results. Amber = 1, higher values possible."
+              data-tip-type="warn">FPs</th>
+            <th data-tip-title="Column — Key Result"
+              data-tip="Primary scientific finding. Statistical result or key metric confirming the hypothesis. Extracted from EXPERIMENT_INDEX.json key_result field."
+              data-tip-type="info">Key result</th>
+            <th data-tip-title="Column — Status"
+              data-tip="Active = currently running in Live Monitor · Done = REPORT.md exists, all gates passed · Staged = spec ready, not yet run · Superseded = replaced by newer experiment"
+              data-tip-type="info">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <tr class="active" onclick="selectRow(this)"
+            data-tip-title="Row — schelling-segregation (active selection)"
+            data-tip="Social Science · 4 turns · 1 FP caught. Dynamic tolerance reduces segregation 0.766→0.666 at comfort_margin=0.05. p &lt; 0.000001, Cohen's d = -1.83."
+            data-tip-action="Click to load experiment detail panel below"
+            data-tip-type="info">
+            <td style="font-size:14px;width:32px">🏘</td>
+            <td><strong>schelling-segregation</strong></td>
+            <td style="font-size:9px;color:#6B7280">Social Science</td>
+            <td style="font-size:9px;color:#9CA3AF;font-family:'Inter',sans-serif">tolerance drift, sequential update</td>
+            <td style="color:#D97706;font-weight:700;text-align:center"
+              data-tip-title="1 False Positive Caught"
+              data-tip="Turn 2: tolerance-before-move step produced segregation=0.804 (wrong). Diagnosed in Turn 3, fixed and verified in Turn 4 across 30 seeds."
+              data-tip-type="warn">1</td>
+            <td style="font-size:10px;color:#065F46">p&lt;0.000001 · d=−1.83</td>
+            <td><span class="badge b-green"
+              data-tip-title="Status — Complete"
+              data-tip="REPORT.md exists. All 4 gates passed on final turn. Results verified across 30 seeds with p &lt; 0.000001."
+              data-tip-type="pass">Done</span></td>
+          </tr>
+
+          <tr onclick="selectRow(this)"
+            data-tip-title="Row — spatial-prisoners-dilemma"
+            data-tip="Game Theory · 3 turns · 1 FP caught. Cooperation survives at 0.41 with spatial structure (would go extinct in well-mixed). Nowak &amp; May (1992) on 100×100 toroidal grid."
+            data-tip-action="Click to load experiment detail panel below"
+            data-tip-type="info">
+            <td style="font-size:14px">🎲</td>
+            <td><strong>spatial-prisoners-dilemma</strong></td>
+            <td style="font-size:9px;color:#6B7280">Game Theory</td>
+            <td style="font-size:9px;color:#9CA3AF;font-family:'Inter',sans-serif">async update, T/R/P/S payoff</td>
+            <td style="color:#D97706;font-weight:700;text-align:center"
+              data-tip-title="1 False Positive Caught"
+              data-tip="Single-defector initial condition → deterministic result across all seeds (no variation). Fix: random_half initial conditions required for meaningful stochastic variation."
+              data-tip-type="warn">1</td>
+            <td style="font-size:10px;color:#065F46">coop=0.41 · std=0.017</td>
+            <td><span class="badge b-green"
+              data-tip-title="Status — Complete"
+              data-tip="REPORT.md exists. 3 turns. Cooperation at 0.41 ± 0.017 confirmed across 30 seeds."
+              data-tip-type="pass">Done</span></td>
+          </tr>
+
+          <tr onclick="selectRow(this)"
+            data-tip-title="Row — quantum-grover"
+            data-tip="Quantum Computing · 2 turns · 1 FP caught. State-vector simulation of Grover's algorithm with phase-flip oracle. P=0.9995 at k_opt=25 for N=1024."
+            data-tip-action="Click to load experiment detail panel below"
+            data-tip-type="info">
+            <td style="font-size:14px">⚛</td>
+            <td><strong>quantum-grover</strong></td>
+            <td style="font-size:9px;color:#6B7280">Quantum Computing</td>
+            <td style="font-size:9px;color:#9CA3AF;font-family:'Inter',sans-serif">classical search, boolean oracle</td>
+            <td style="color:#D97706;font-weight:700;text-align:center"
+              data-tip-title="1 False Positive Caught"
+              data-tip="Oracle implemented as boolean return instead of phase flip (amplitude *= -1). Caught at Gate 3 — sinusoidal probability profile impossible with boolean oracle."
+              data-tip-type="warn">1</td>
+            <td style="font-size:10px;color:#065F46">P=0.9995 at k=25</td>
+            <td><span class="badge b-green"
+              data-tip-title="Status — Complete"
+              data-tip="REPORT.md exists. P=0.9995 at k_opt=25 for N=1024. Quadratic speedup verified. 30/30 random targets found."
+              data-tip-type="pass">Done</span></td>
+          </tr>
+
+          <tr onclick="selectRow(this)"
+            data-tip-title="Row — omega-sentinel-1M"
+            data-tip="Mathematics · 4 FPs caught (highest in registry). Kill switch fired 4 times forcing algorithm recovery from Decimal bottleneck to pure integer arithmetic. 1M digits: e, π, √2. 62,500× LLM ceiling."
+            data-tip-action="Click to load experiment detail panel below"
+            data-tip-type="info">
+            <td style="font-size:14px">π</td>
+            <td><strong>omega-sentinel-1M</strong></td>
+            <td style="font-size:9px;color:#6B7280">Mathematics</td>
+            <td style="font-size:9px;color:#9CA3AF;font-family:'Inter',sans-serif">float ceiling, Decimal bottleneck</td>
+            <td style="color:#D97706;font-weight:700;text-align:center"
+              data-tip-title="4 False Positives Caught (Highest in Registry)"
+              data-tip="Kill switch fired 4× at 1M digits: naive Machin killed, Chudnovsky+Decimal killed (too slow), binary-split-e+Decimal killed. All fixed with pure integer arithmetic throughout."
+              data-tip-type="warn">4</td>
+            <td style="font-size:10px;color:#065F46">1M digits · 62,500× ceiling</td>
+            <td><span class="badge b-green"
+              data-tip-title="Status — Complete"
+              data-tip="1M digits computed for e, π, sqrt(2). e=67s, pi=59s, sqrt2=290s with pure integer arithmetic."
+              data-tip-type="pass">Done</span></td>
+          </tr>
+
+          <tr onclick="selectRow(this)"
+            data-tip-title="Row — simsiv-v1-replication (Staged)"
+            data-tip="Social Simulation. Spec and frozen constants written. Test scaffolding in place. Not yet run — no results, no figures, no report."
+            data-tip-action="Click to view spec and frozen files"
+            data-tip-type="info">
+            <td style="font-size:14px">🧬</td>
+            <td><strong>simsiv-v1-replication</strong></td>
+            <td style="font-size:9px;color:#6B7280">Social Simulation</td>
+            <td style="font-size:9px;color:#9CA3AF;font-family:'Inter',sans-serif">h² averaging, 8-phase resources</td>
+            <td style="color:#9CA3AF;text-align:center">—</td>
+            <td style="font-size:10px;color:#9CA3AF">not yet run</td>
+            <td><span class="badge b-gray"
+              data-tip-title="Status — Staged"
+              data-tip="Experiment spec and frozen constants written. Test scaffolding in place. Ready to execute — no results yet."
+              data-tip-action="Run with: chp run --experiment simsiv-v1-replication"
+              data-tip-type="info">Staged</span></td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <!-- DETAIL PANEL -->
+    <div class="detail-panel">
+      <div class="detail-hdr">
+        <span style="font-size:16px">🏘</span>
+        <div>
+          <div class="detail-title">schelling-segregation</div>
+          <div style="font-size:10px;color:#6B7280;margin-top:1px">Social Science · 4 turns · 1 false positive · p&lt;0.000001</div>
+        </div>
+        <span class="badge b-green" style="margin-left:auto"
+          data-tip-title="Experiment Status — Complete"
+          data-tip="All 4 gates passed on the final turn. REPORT.md exists and is rendered in the Report sub-tab. 3 publication figures generated."
+          data-tip-type="pass">Done</span>
+      </div>
+
+      <div class="detail-tabs">
+        <div class="dtab active"
+          data-tip-title="Sub-tab — Spec"
+          data-tip="Renders spec.md: research question, expected false positives, sigma gate definitions, source citation. This is the pre-run design document — written before the experiment executes."
+          data-tip-type="info">Spec</div>
+        <div class="dtab"
+          data-tip-title="Sub-tab — Frozen"
+          data-tip="Renders all files in frozen/*.md as expandable sections. These are the ground-truth values the Builder must implement exactly. Deviation from these values will block Gate 1."
+          data-tip-type="info">Frozen</div>
+        <div class="dtab"
+          data-tip-title="Sub-tab — Dead Ends"
+          data-tip="Renders dead_ends.md as a contraindications list. Same format as the Live Monitor contraindications panel. Shows all permanently blocked approaches for this experiment."
+          data-tip-type="fail">Dead Ends</div>
+        <div class="dtab"
+          data-tip-title="Sub-tab — Report"
+          data-tip="Renders REPORT.md with full results, gate scores, and statistical analysis. Same content as the Experiment Report tab — accessible here without switching tabs."
+          data-tip-type="info">Report</div>
+        <div class="dtab"
+          data-tip-title="Sub-tab — Figures"
+          data-tip="2-column figure grid. Each figure: full-width image, caption bar with filename, file size, and modified time. Click any figure to open at full size."
+          data-tip-type="info">Figures</div>
+      </div>
+
+      <div class="detail-body">
+        <div class="spec-block">
+          <h4
+            data-tip-title="Spec Section — Research Question"
+            data-tip="The core scientific hypothesis this experiment tests. Written before the experiment runs — defines what a successful result looks like. The entire frozen spec flows from this question."
+            data-tip-type="info">Research Question</h4>
+          <p>Can dynamic tolerance reduce spatial segregation below the Schelling (1971) baseline, and under what parameter conditions?</p>
+
+          <h4
+            data-tip-title="Spec Section — Expected False Positives"
+            data-tip="Specific LLM behaviors the frozen spec was designed to catch. Written BEFORE the experiment runs — these are predictions of what errors the Builder will make. Finding them validates the protocol is working."
+            data-tip-warn="These are NOT bugs. They are predicted errors written into the spec to be caught."
+            data-tip-type="warn">Expected False Positives</h4>
+          <p>Builder applies tolerance update before move step → produces textbook segregation (0.80) instead of partial mixing (0.65). Caught by Gate 3.</p>
+
+          <h4
+            data-tip-title="Spec Section — Sigma Gates"
+            data-tip="The anomaly checks that define acceptable output bounds. Any live value outside these bounds triggers a sigma-gate alert in the Live Monitor. Defined in config.yaml before the experiment runs."
+            data-tip-type="info">Sigma Gates</h4>
+          <p>segregation_index ∈ [0.30, 0.80] · cluster_count &gt; 1 · std &lt; 0.15 across 30 seeds · population stable</p>
+
+          <h4
+            data-tip-title="Spec Section — Source Citation"
+            data-tip="The academic source the frozen spec was built from. Values in frozen/*.md files trace back to specific equations or data in this paper. The spec cannot diverge from the source."
+            data-tip-type="info">Source</h4>
+          <p>Schelling (1971). Dynamic Models of Segregation. Journal of Mathematical Sociology.</p>
+        </div>
+
+        <div>
+          <div class="de-box" style="margin-bottom:12px">
+            <div class="de-hdr"
+              data-tip-title="Contraindications (This Experiment)"
+              data-tip="Dead ends specific to schelling-segregation. Written to dead_ends.md after Turn 2. On Turn 3, the loop read this file and avoided repeating the tolerance-before-move error — saving a full fix cycle."
+              data-tip-type="fail">Contraindications</div>
+            <div class="de-row"
+              data-tip-title="C01 — Tolerance Before Move"
+              data-tip="Applying update_tolerance() before move() → segregation=0.804 (wrong direction). The frozen spec explicitly requires AFTER move. This was the Turn 2 false positive. Logged permanently."
+              data-tip-warn="Never call update_tolerance() before move() in schelling.py"
+              data-tip-type="fail">
+              <span class="de-idx">C01</span>
+              <div><div>Tolerance update before move step</div><div class="de-rule">-- apply AFTER move step per frozen spec</div></div>
+            </div>
+            <div class="de-row"
+              data-tip-title="C02 — comfort_margin=0.10 Too Large"
+              data-tip="comfort_margin=0.10 produces segregation=0.763 — above the upper sigma bound and shows the wrong qualitative result (no partial mixing). Use 0.05 as confirmed in Turn 3 sweep."
+              data-tip-type="fail">
+              <span class="de-idx">C02</span>
+              <div><div>comfort_margin=0.10 too large</div><div class="de-rule">-- use 0.05 for partial mixing per sweep</div></div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="fig-mini"
+              data-tip-title="Figure — segregation_dynamics.png"
+              data-tip="Segregation index over 500 steps, original vs dynamic tolerance. 30-seed distribution shown as a shaded band. Key finding: 0.666 vs 0.766."
+              data-tip-action="Click to open full size"
+              data-tip-type="info">segregation_dynamics.png</div>
+            <div class="fig-mini"
+              data-tip-title="Figure — grid_comparison.png"
+              data-tip="Grid state at Step 0 (random) vs Step 500 (equilibrium). Visual evidence of partial mixing. 50×50 agent grid."
+              data-tip-action="Click to open full size"
+              data-tip-type="info">grid_comparison.png</div>
+            <div class="fig-mini"
+              data-tip-title="Figure — comfort_sweep.png"
+              data-tip="Parameter sensitivity: segregation_index vs comfort_margin from 0.00 to 0.10. Shows the transition point at 0.05 — the key finding panel."
+              data-tip-action="Click to open full size"
+              data-tip-type="info">comfort_sweep.png</div>
+            <div class="fig-mini add"
+              data-tip-title="Figure Grid Placeholder"
+              data-tip="3 figures generated in this experiment. This placeholder fills the remaining grid cell. In production: appears when figure count is odd, or when there is room for an &ldquo;add figure&rdquo; affordance."
+              data-tip-type="info">+ end of figures</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /panel-3 -->
+
+<!-- TAB 5: NEW EXPERIMENT (stub) -->
+<div class="tab-panel" id="panel-4">
+  <div style="padding:48px 20px;text-align:center;color:#9CA3AF">
+    <div style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;color:#C8CCDB">New Experiment Wizard</div>
+    <div style="font-family:'Inter',sans-serif;font-size:12px;color:#9CA3AF">Interaction design for this tab is the next session.</div>
+  </div>
+</div>
+
+<!-- ===== TOOLTIP ELEMENT ===== -->
+<div class="chp-tt" id="chpTT"></div>
+
+<script>
+// ===== TOOLTIP ENGINE =====
+const tt = document.getElementById('chpTT');
+let ttTimer = null, mouseX = 0, mouseY = 0;
+
+const typeMap = {
+  pass:  'tip-pass',
+  fail:  'tip-fail',
+  warn:  'tip-warn',
+  info:  'tip-info'
+};
+
+function buildTooltip(target) {
+  const title  = target.dataset.tipTitle;
+  const body   = target.dataset.tip;
+  const action = target.dataset.tipAction;
+  const warn   = target.dataset.tipWarn;
+  const type   = typeMap[target.dataset.tipType] || 'tip-info';
+  if (!body && !title) return false;
+
+  let html = '';
+  if (title) html += `<div class="tt-title">${title}</div>`;
+  if (body)  html += `<div class="tt-body">${body}</div>`;
+  if (warn)  html += `<div class="tt-warn">⚠&thinsp;${warn}</div>`;
+  if (action) html += `<div class="tt-action">→&ensp;${action}</div>`;
+
+  tt.innerHTML = html;
+  tt.className = `chp-tt ${type}`;
+  return true;
+}
+
+function positionTT(x, y) {
+  const w = tt.offsetWidth || 260;
+  const h = tt.offsetHeight || 80;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  let left = x + 16, top = y - 10;
+  if (left + w > vw - 12) left = x - w - 16;
+  if (left < 8) left = 8;
+  if (top < 8) top = y + 22;
+  if (top + h > vh - 8) top = vh - h - 8;
+  tt.style.left = left + 'px';
+  tt.style.top  = top  + 'px';
+}
+
+document.addEventListener('mouseover', e => {
+  const target = e.target.closest('[data-tip]');
+  if (!target) { clearTimeout(ttTimer); tt.style.display = 'none'; return; }
+  clearTimeout(ttTimer);
+  ttTimer = setTimeout(() => {
+    if (buildTooltip(target)) {
+      tt.style.display = 'block';
+      positionTT(mouseX, mouseY);
+    }
+  }, 160);
+});
+
+document.addEventListener('mouseout', e => {
+  const target = e.target.closest('[data-tip]');
+  if (target && !target.contains(e.relatedTarget)) {
+    clearTimeout(ttTimer);
+    tt.style.display = 'none';
+  }
+});
+
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX; mouseY = e.clientY;
+  if (tt.style.display === 'block') positionTT(mouseX, mouseY);
+});
+
+// ===== TAB SWITCHING =====
+const tabs   = document.querySelectorAll('.tab');
+const panels = document.querySelectorAll('.tab-panel');
+function switchTab(i) {
+  tabs.forEach((t, idx) => t.classList.toggle('active', idx === i));
+  panels.forEach((p, idx) => p.classList.toggle('active', idx === i));
+}
+
+// ===== LOG EXPAND/COLLAPSE =====
+function toggleLog(hdr) {
+  hdr.nextElementSibling.classList.toggle('open');
+}
+
+// ===== GALLERY ROW SELECT =====
+function selectRow(row) {
+  document.querySelectorAll('.reg-table tbody tr').forEach(r => r.classList.remove('active'));
+  row.classList.add('active');
+}
+
+// ===== SPEC MODE =====
+function toggleSpec() {
+  const on = document.body.classList.toggle('spec-mode');
+  const btn = document.getElementById('specBtn');
+  const note = document.getElementById('specNote');
+  btn.textContent = on ? 'Spec Mode On' : 'Spec Mode Off';
+  btn.classList.toggle('on', on);
+  note.style.display = on ? 'inline' : 'none';
+}
+
+// Count tooltip targets and display
+window.addEventListener('load', () => {
+  const n = document.querySelectorAll('[data-tip]').length;
+  document.getElementById('tipCount').textContent = `${n} tooltip targets across all tabs`;
+});
+
+// ===== CHART.JS =====
+const MONO = "'IBM Plex Mono', monospace";
+const ax = {
+  grid: { color: '#E9EBF2' },
+  ticks: { font: { family: MONO, size: 9 }, color: '#9CA3AF' }
+};
+const ttStyle = {
+  backgroundColor: '#0F1117',
+  titleFont: { family: MONO, size: 9 },
+  bodyFont: { family: "'Inter', sans-serif", size: 10 },
+  borderColor: '#374151', borderWidth: 1,
+  padding: 8, cornerRadius: 4,
+  titleColor: '#9CA3AF', bodyColor: '#E5E7EB'
+};
+const turns = [1, 2, 3, 4];
+
+// Tokens chart
+new Chart(document.getElementById('tokensChart'), {
+  type: 'line',
+  data: {
+    labels: turns,
+    datasets: [
+      {
+        label: 'tokens',
+        data: [7300, 10000, 7300, 10000],
+        borderColor: '#3B82F6', borderWidth: 2,
+        pointRadius: 5,
+        pointBackgroundColor: ['#3B82F6','#EF4444','#3B82F6','#3B82F6'],
+        pointBorderColor: ['#3B82F6','#EF4444','#3B82F6','#3B82F6'],
+        tension: 0
+      },
+      {
+        label: '3T avg',
+        data: [null, 8650, 8200, 9200],
+        borderColor: '#D97706', borderWidth: 1.5, borderDash: [4, 3],
+        pointRadius: 0, tension: 0
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true, labels: { font: { family: MONO, size: 9 }, color: '#9CA3AF', boxWidth: 10 } },
+      tooltip: {
+        ...ttStyle,
+        callbacks: {
+          title: ctx => `Turn ${ctx[0].label}`,
+          label: ctx => {
+            const fp = ctx.datasetIndex === 0 && ctx.dataIndex === 1 ? ' — FP caught this turn (red dot)' : '';
+            return `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}${fp}`;
+          }
+        }
+      }
+    },
+    scales: { x: ax, y: ax }
+  }
+});
+
+// Gate scores chart — threshold drawn as a 4th flat dataset
+new Chart(document.getElementById('gatesChart'), {
+  type: 'line',
+  data: {
+    labels: turns,
+    datasets: [
+      {
+        label: 'G1 Frozen',
+        data: [1.0, 1.0, 1.0, 1.0],
+        borderColor: '#10B981', borderWidth: 2,
+        pointRadius: 5, pointBackgroundColor: '#10B981', tension: 0
+      },
+      {
+        label: 'G3 Science',
+        data: [0.90, 0.70, 0.88, 0.92],
+        borderColor: '#F59E0B', borderWidth: 2,
+        pointRadius: 5,
+        pointBackgroundColor: (ctx) => ctx.parsed.y < 0.85 ? '#EF4444' : '#F59E0B',
+        tension: 0
+      },
+      {
+        label: 'threshold',
+        data: [0.85, 0.85, 0.85, 0.85],
+        borderColor: '#D97706', borderWidth: 1, borderDash: [4, 3],
+        pointRadius: 0, tension: 0
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true, labels: { font: { family: MONO, size: 9 }, color: '#9CA3AF', boxWidth: 10 } },
+      tooltip: {
+        ...ttStyle,
+        callbacks: {
+          title: ctx => `Turn ${ctx[0].label}`,
+          label: ctx => {
+            if (ctx.dataset.label === 'threshold') return 'threshold: 0.85';
+            const v = ctx.parsed.y;
+            const blocked = ctx.datasetIndex === 1 && v < 0.85;
+            return `${ctx.dataset.label}: ${v.toFixed(2)} — ${blocked ? 'BLOCKED (red dot)' : 'PASS'}`;
+          }
+        }
+      }
+    },
+    scales: { x: ax, y: { ...ax, min: 0.5, max: 1.05 } }
+  }
+});
+
+// Time per turn chart
+new Chart(document.getElementById('timeChart'), {
+  type: 'bar',
+  data: {
+    labels: turns,
+    datasets: [{
+      label: 'minutes',
+      data: [0.75, 1.03, 0.63, 1.58],
+      backgroundColor: ['#10B981','#F59E0B','#10B981','#10B981'],
+      borderWidth: 0, borderRadius: 3
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        ...ttStyle,
+        callbacks: {
+          title: ctx => `Turn ${ctx[0].label}`,
+          label: ctx => {
+            const v = ctx.parsed.y;
+            const s = v < 5 ? 'fast (green)' : v < 10 ? 'normal (amber)' : 'slow — investigate (red)';
+            return `${v.toFixed(2)} min — ${s}`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: ax,
+      y: { ...ax, title: { display: true, text: 'min', font: { family: MONO, size: 8 }, color: '#9CA3AF' } }
+    }
+  }
+});
+</script>
+</body>
+</html>

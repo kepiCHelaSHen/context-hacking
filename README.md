@@ -680,3 +680,50 @@ MIT. Use it. Break it. Ship science with it.
   url = {https://github.com/kepiCHelaSHen/context-hacking}
 }
 ```
+
+---
+
+## Experiment Registry
+
+Full machine-readable index: [`EXPERIMENT_INDEX.json`](EXPERIMENT_INDEX.json)
+
+### Loop-run experiments (`chp-test-run/experiments/`)
+Built through the full CHP orchestrator loop with innovation logs and telemetry.
+
+| Experiment | Domain | Turns | FPs | Key Result |
+|-----------|--------|-------|-----|-----------|
+| schelling-segregation | Social Science | 4 | 1 | p<0.000001, d=-1.83 |
+| spatial-prisoners-dilemma | Game Theory | 3 | 1 | coop=0.41, std=0.017 |
+| sir-epidemic | Epidemiology | 2 | 1 | fadeout=3% (impossible in ODE) |
+| lorenz-attractor | Chaos Theory | 2 | 1 | RK45, Lyapunov=0.35 |
+| izhikevich-neurons | Neuroscience | 2 | 1 | 5 patterns, no HH contamination |
+| quantum-grover | Quantum Computing | 2 | 1 | P=0.9995 at k_opt=25 |
+| blockchain-consensus | Distributed Systems | 2 | 1 | PBFT safety f<N/3 confirmed |
+| lotka-volterra | Ecology | 2 | 1 | extinction confirmed (impossible in ODE) |
+| ml-hyperparam-search | Machine Learning | 2 | 1 | val=0.87-0.92, no leakage |
+| metal-harmony | Music Theory | 1 | 1 | classical: 6-9 errors. metal: 0 |
+
+### Direct-prompt experiments (`experiments/`)
+Built via single CLI prompt, verified against frozen reference.
+
+| Experiment | Domain | Algorithm | Digits | Multiplier |
+|-----------|--------|-----------|--------|-----------|
+| euler-e | Mathematics | Taylor series | 10,000 | 667x LLM ceiling |
+| pi-machin | Mathematics | Machin formula | 10,000 | 667x LLM ceiling |
+| sqrt2-newton | Mathematics | Newton (14 iter) | 10,000 | 625x LLM ceiling |
+| anatomy-viewer | Medical Visualization | HTML Canvas | N/A | 5 prior errors checked |
+| anatomy-viewer-vtk | Medical Visualization | VTK 3D | N/A | 5 prior errors checked |
+| schroeder-reverb | Audio DSP | Freeverb | N/A | 8 combs vs 4 (prior) |
+| time_sprint | Mathematics | Binary splitting | 100,000 | 6,250x LLM ceiling |
+| omega_sentinel_1M | Mathematics | Chudnovsky/Newton | 1,000,000 | 62,500x LLM ceiling |
+
+### Staged experiments — spec written, not yet run
+| Experiment | What it will build |
+|-----------|-------------------|
+| simsiv-v1-replication | 35-trait social evolution sim, ~10k lines |
+| simsiv-v2-replication | SIMSIV with institutional differentiation |
+
+### Framework assets
+- `ablation/` — 3-condition ablation study: no spec (36% accuracy) -> spec only (100% values) -> full CHP (behavioral verification)
+- `docs/methods_section.md` — publication-ready methods section
+- `prompts/PROMPTS_INDEX.md` — index of all CLI prompts

@@ -1,0 +1,19 @@
+{
+  "display_name": "ML Hyperparameter Search",
+  "standard": "loop",
+  "domain": "Computer Science",
+  "sprint": null,
+  "status": "complete",
+  "key_result": "Bayesian opt val accuracy 0.87-0.92 with no data leakage",
+  "false_positives_caught": 1,
+  "turns": 2,
+  "gate_scores": {
+    "g1": 1.0,
+    "g2": 0.92,
+    "g3": 0.9,
+    "g4": 0.95
+  },
+  "statistical_result": "no leakage (val<0.98)",
+  "meta_spec_errors": 0,
+  "notes": null
+}

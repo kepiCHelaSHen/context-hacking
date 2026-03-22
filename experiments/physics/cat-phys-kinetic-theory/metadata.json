@@ -1,0 +1,14 @@
+{
+  "display_name": "Kinetic Theory",
+  "standard": "cat",
+  "domain": "Physics",
+  "sprint": "physics-sprint-2026",
+  "status": "complete",
+  "key_result": "KE=3/2 kT not 1/2; v_mp < v_mean < v_rms",
+  "false_positives_caught": 2,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

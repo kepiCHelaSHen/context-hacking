@@ -2,3 +2,4 @@ chp-test-run/
 __pycache__/
 *.pyc
 .chp/
+.archive/

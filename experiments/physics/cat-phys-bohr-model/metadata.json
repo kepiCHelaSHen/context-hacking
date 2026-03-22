@@ -1,0 +1,14 @@
+{
+  "display_name": "Bohr Model Hydrogen",
+  "standard": "cat",
+  "domain": "Physics",
+  "sprint": "physics-sprint-2026",
+  "status": "complete",
+  "key_result": "Energy NEGATIVE; 1/n2 not 1/n; Rydberg full precision; Ha=656nm",
+  "false_positives_caught": 2,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

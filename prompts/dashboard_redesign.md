@@ -1,3 +1,4 @@
+<!-- STATUS: run | DATE: 2026-03-21 | OUTPUT: dashboard/app.py white theme -->
 ---
 name: chp-dashboard-redesign
 description: "Fix dashboard/app.py: white clinical theme + control panel at top."

@@ -1,0 +1,14 @@
+{
+  "display_name": "Blackbody Radiation",
+  "standard": "cat",
+  "domain": "Physics",
+  "sprint": "physics-sprint-2026",
+  "status": "complete",
+  "key_result": "Sun peak green 502nm not yellow; Wien lambda != c/nu",
+  "false_positives_caught": 2,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

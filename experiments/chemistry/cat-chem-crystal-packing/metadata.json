@@ -1,0 +1,14 @@
+{
+  "display_name": "Crystal Packing",
+  "standard": "cat",
+  "domain": "Chemistry",
+  "sprint": "chemistry-sprint-2026",
+  "status": "complete",
+  "key_result": "FCC=4 atoms not 8; 74.05pct packing; Cu density 8.96",
+  "false_positives_caught": 2,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

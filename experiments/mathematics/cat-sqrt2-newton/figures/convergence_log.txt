@@ -1,0 +1,15 @@
+iterations=14
+Iteration   1: ~2 matching digits
+Iteration   2: ~4 matching digits
+Iteration   3: ~7 matching digits
+Iteration   4: ~13 matching digits
+Iteration   5: ~25 matching digits
+Iteration   6: ~49 matching digits
+Iteration   7: ~98 matching digits
+Iteration   8: ~197 matching digits
+Iteration   9: ~393 matching digits
+Iteration  10: ~784 matching digits
+Iteration  11: ~1569 matching digits
+Iteration  12: ~3136 matching digits
+Iteration  13: ~6272 matching digits
+Iteration  14: ~10051 matching digits

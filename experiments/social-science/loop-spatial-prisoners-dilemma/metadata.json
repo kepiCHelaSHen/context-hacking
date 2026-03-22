@@ -1,0 +1,19 @@
+{
+  "display_name": "Spatial Prisoners Dilemma",
+  "standard": "loop",
+  "domain": "Social Science",
+  "sprint": null,
+  "status": "complete",
+  "key_result": "Cooperation survives at 0.41 with spatial structure",
+  "false_positives_caught": 1,
+  "turns": 3,
+  "gate_scores": {
+    "g1": 1.0,
+    "g2": 0.95,
+    "g3": 0.92,
+    "g4": 0.95
+  },
+  "statistical_result": "coop=0.41 std=0.017",
+  "meta_spec_errors": 0,
+  "notes": null
+}

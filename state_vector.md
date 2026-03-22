@@ -14,13 +14,13 @@
 #   NEXT_TURN_FOCUS: [one sentence]
 #   SCIENCE_GROUNDING: [one sentence — are we still on target?]
 
-TURN: 0
-MILESTONE: Not started
-MODE: VALIDATION — initial
-LAST_3_FAILURES: none
-WINNING_PARAMETERS: none
-METRIC_STATUS: no data yet
+TURN: framework-stable
+MILESTONE: CHP v1 complete — all templates, prompts, and experiments indexed
+MODE: STABLE — framework ready for new experiments
+LAST_3_FAILURES: none at framework level
+WINNING_PARAMETERS: 3-agent loop (builder/critic/reviewer) + 2-model council (GPT-4o/Grok)
+METRIC_STATUS: 16 prompts cataloged, 9 experiments completed, all tests passing
 OPEN_FLAGS: none
-LAST_PASSING_TAG: none
-NEXT_TURN_FOCUS: Begin first build turn
-SCIENCE_GROUNDING: Aligned with CHAIN_PROMPT.md
+LAST_PASSING_TAG: none (template file — experiments track their own tags)
+NEXT_TURN_FOCUS: This is a template. Copy to experiment directory to begin.
+SCIENCE_GROUNDING: Framework-level — individual experiments define their own grounding

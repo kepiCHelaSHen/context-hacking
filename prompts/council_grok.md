@@ -1,3 +1,4 @@
+<!-- STATUS: agent-role | USAGE: send to Grok for council review -->
 # Council Reviewer — Grok-3
 # This prompt is sent to Grok-3 via the xAI API after each build turn.
 # The response is compared against the GPT council member for disagreement detection.

@@ -1,3 +1,4 @@
+<!-- STATUS: template | USAGE: starting point for new experiment prompts -->
 # CHP Universal Loop Prompt
 # This drives the full Context Hacking Protocol for ANY experiment.
 # Usage: chp run --experiment <name>

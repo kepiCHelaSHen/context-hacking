@@ -1,3 +1,4 @@
+<!-- STATUS: run | DATE: 2026-03-21 | OUTPUT: experiments/anatomy-viewer-vtk/ -->
 ---
 name: chp-anatomy-viewer-vtk
 description: "Build a verified 3D anatomical viewer using VTK — organ positions enforced by Gray's Anatomy data."

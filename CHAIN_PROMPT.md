@@ -1,3 +1,9 @@
+# THIS IS A TEMPLATE — NOT AN ACTIVE PROJECT
+# Copy to your experiment directory and fill in sections.
+# Active experiments: chp-test-run/ and experiments/
+# All experiments: see EXPERIMENT_INDEX.json
+# ────────────────────────────────────────────────────────
+
 # [PROJECT NAME] — Chain Prompt Master File
 # This is the LIVING MASTER DOCUMENT for your project.
 # Pass this file in full at the start of every agent session.

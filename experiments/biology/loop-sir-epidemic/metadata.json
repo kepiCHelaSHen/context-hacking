@@ -1,0 +1,19 @@
+{
+  "display_name": "SIR Epidemic",
+  "standard": "loop",
+  "domain": "Epidemiology",
+  "sprint": null,
+  "status": "complete",
+  "key_result": "Fadeout rate 3pct (1/30 seeds) impossible in deterministic SIR",
+  "false_positives_caught": 1,
+  "turns": 4,
+  "gate_scores": {
+    "g1": 1.0,
+    "g2": 0.95,
+    "g3": 0.95,
+    "g4": 0.95
+  },
+  "statistical_result": "fadeout=3pct",
+  "meta_spec_errors": 0,
+  "notes": "Stochastic individual-based SIR"
+}

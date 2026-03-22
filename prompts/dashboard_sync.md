@@ -1,3 +1,4 @@
+<!-- STATUS: run | DATE: 2026-03-21 | OUTPUT: figures.py synced, icons fixed -->
 ---
 name: chp-dashboard-sync
 description: "Fix all drift between dashboard/app.py, context_hacking/figures.py, and tests/"

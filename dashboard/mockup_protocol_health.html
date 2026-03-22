@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHP — Protocol Health Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Mono',monospace;background:#F8F9FC;color:#0F1117}
+.header{background:#fff;border-bottom:1.5px solid #E2E5EF;padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:13px;font-weight:700;letter-spacing:.12em}
+.proj{font-size:10px;background:#EFF6FF;color:#1D4ED8;border:1px solid #93C5FD;border-radius:4px;padding:3px 10px;margin-left:10px}
+.tabs{background:#fff;border-bottom:2px solid #E2E5EF;display:flex;padding:0 20px}
+.tab{font-size:10px;font-weight:600;letter-spacing:.10em;text-transform:uppercase;padding:11px 16px;color:#6B7280;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer}
+.tab.active{color:#1D4ED8;border-bottom-color:#1D4ED8}
+.actions{background:#F8F9FC;border-bottom:1px solid #E2E5EF;padding:8px 20px;display:flex;gap:8px}
+.btn{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border:1.5px solid #C8CCDB;background:#fff;color:#374151;padding:5px 12px;border-radius:4px}
+.content{padding:16px 20px;max-width:980px;margin:0 auto}
+.sh{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.sh-lbl{font-size:9px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.12em;white-space:nowrap}
+.sh-line{flex:1;height:1px;background:#E2E5EF}
+.sh-sub{font-size:10px;color:#6B7280;margin:-6px 0 14px;font-family:'Inter',sans-serif}
+.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.stat{background:#F3F4F8;border-radius:6px;padding:12px 14px}
+.stat-lbl{font-size:9px;color:#6B7280;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px}
+.stat-val{font-size:22px;font-weight:700;color:#0F1117;line-height:1.1}
+.stat-sub{font-size:10px;color:#9CA3AF;margin-top:3px;font-family:'Inter',sans-serif}
+.stat2{background:#fff;border:1px solid #E2E5EF;border-radius:6px;padding:9px 14px}
+.stat2-lbl{font-size:9px;color:#9CA3AF;text-transform:uppercase;letter-spacing:.12em;margin-bottom:3px}
+.stat2-val{font-size:16px;font-weight:600;color:#374151}
+.chartgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.chart-card{background:#fff;border:1px solid #E2E5EF;border-radius:6px;padding:14px}
+.chart-title{font-size:9px;color:#374151;text-transform:uppercase;letter-spacing:.10em;font-weight:700;margin-bottom:12px}
+.fp-box{background:#FFFBEB;border:1px solid #FCD34D;border-left:4px solid #D97706;border-radius:4px;padding:8px 12px;margin:6px 0}
+.fp-hdr{font-size:9px;color:#D97706;text-transform:uppercase;letter-spacing:.14em;font-weight:700;margin-bottom:3px}
+.fp-body{font-size:10px;color:#374151;line-height:1.5;font-family:'Inter',sans-serif}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex;align-items:center;gap:8px">
+    <span class="logo">CHP</span>
+    <span class="proj">schelling-segregation</span>
+    <span style="font-size:10px;color:#6B7280;margin-left:6px">T:<strong style="color:#0F1117">4</strong></span>
+    <span style="font-size:10px;background:#ECFDF5;color:#065F46;border:1px solid #34D399;border-radius:4px;padding:3px 10px;margin-left:4px">Validation</span>
+  </div>
+  <span style="font-size:10px;color:#9CA3AF">auto-refresh 5s · 09:41:22</span>
+</div>
+
+<div class="tabs">
+  <div class="tab">Live Monitor</div>
+  <div class="tab active">Protocol Health</div>
+  <div class="tab">Experiment Report</div>
+  <div class="tab">Gallery</div>
+  <div class="tab">New Experiment</div>
+</div>
+
+<div class="actions">
+  <button class="btn" style="border-color:#93C5FD;color:#1D4ED8;background:#EFF6FF">Run Loop</button>
+  <button class="btn" style="border-color:#FCA5A5;color:#991B1B;background:#FEF2F2">Stop Loop</button>
+  <button class="btn">Export Paper</button>
+  <button class="btn">Download Figures</button>
+</div>
+
+<div class="content">
+  <div class="sh"><span class="sh-lbl">Protocol Health — Is the loop learning?</span><div class="sh-line"></div></div>
+  <div class="sh-sub">Healthy loop: declining drift · improving gate scores · faster turns · fewer fix cycles</div>
+
+  <div class="statgrid">
+    <div class="stat"><div class="stat-lbl">Tokens / Line</div><div class="stat-val">142.3</div><div class="stat-sub">lower = more efficient</div></div>
+    <div class="stat"><div class="stat-lbl">False Pos. Caught</div><div class="stat-val" style="color:#D97706">1</div><div class="stat-sub">killed before merge</div></div>
+    <div class="stat"><div class="stat-lbl">Dead Ends Avoided</div><div class="stat-val" style="color:#065F46">2</div><div class="stat-sub">mistakes not repeated</div></div>
+    <div class="stat"><div class="stat-lbl">First-Try Pass</div><div class="stat-val">75%</div><div class="stat-sub">no fix cycle needed</div></div>
+  </div>
+
+  <div class="statgrid" style="margin-bottom:20px">
+    <div class="stat2"><div class="stat2-lbl">Total Tokens</div><div class="stat2-val">34,600</div></div>
+    <div class="stat2"><div class="stat2-lbl">Lines Built</div><div class="stat2-val">290</div></div>
+    <div class="stat2"><div class="stat2-lbl">Total Time</div><div class="stat2-val">4.0 min</div></div>
+    <div class="stat2"><div class="stat2-lbl">Turns</div><div class="stat2-val">4</div></div>
+  </div>
+
+  <div class="sh"><span class="sh-lbl">Trends Over Time</span><div class="sh-line"></div></div>
+
+  <div class="chartgrid">
+    <div class="chart-card">
+      <div class="chart-title">Tokens per turn</div>
+      <div style="position:relative;height:160px"><canvas id="tokensChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Critic gate scores</div>
+      <div style="position:relative;height:160px"><canvas id="gatesChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Time per turn (minutes)</div>
+      <div style="position:relative;height:160px"><canvas id="timeChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Key Events</div>
+      <div class="fp-box">
+        <div class="fp-hdr">Turn 2 — False Positive Caught</div>
+        <div class="fp-body">Dynamic tolerance produced segregation=0.804. Tolerance update before move step. Gate 3 = 0.70. Build BLOCKED.</div>
+      </div>
+      <div style="background:#ECFDF5;border-left:3px solid #34D399;border-radius:0 4px 4px 0;padding:7px 12px;margin:4px 0;font-size:10px;color:#065F46">
+        Turn 4: Convergence battery PASSED — 30 seeds, p &lt; 0.000001
+      </div>
+      <div style="background:#EFF6FF;border-left:3px solid #93C5FD;border-radius:0 4px 4px 0;padding:7px 12px;margin:4px 0;font-size:10px;color:#1D4ED8">
+        Turn 3: Mode EXPLORATION → VALIDATION (parameter fix found)
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const turns = [1,2,3,4];
+const mono = "'IBM Plex Mono', monospace";
+const axOpts = {grid:{color:'#E9EBF2'},ticks:{font:{family:mono,size:9},color:'#9CA3AF'}};
+
+new Chart(document.getElementById('tokensChart'),{
+  type:'line',
+  data:{
+    labels:turns,
+    datasets:[
+      {label:'tokens',data:[7300,10000,7300,10000],borderColor:'#3B82F6',borderWidth:2,pointRadius:4,pointBackgroundColor:'#3B82F6',tension:0},
+      {label:'3T avg',data:[7300,8650,8200,9200],borderColor:'#D97706',borderWidth:1.5,borderDash:[4,3],pointRadius:0,tension:0}
+    ]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{family:mono,size:9},color:'#9CA3AF'}}},scales:{x:{...axOpts},y:{...axOpts}}}
+});
+
+new Chart(document.getElementById('gatesChart'),{
+  type:'line',
+  data:{
+    labels:turns,
+    datasets:[
+      {label:'G1 Frozen',data:[1.0,1.0,1.0,1.0],borderColor:'#10B981',borderWidth:2,pointRadius:4,pointBackgroundColor:'#10B981',tension:0},
+      {label:'G3 Science',data:[0.90,0.70,0.88,0.92],borderColor:'#F59E0B',borderWidth:2,pointRadius:4,pointBackgroundColor:(ctx)=>ctx.parsed.y < 0.85 ? '#EF4444' : '#F59E0B',tension:0}
+    ]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{family:mono,size:9},color:'#9CA3AF'}},annotation:{annotations:{line1:{type:'line',yMin:0.85,yMax:0.85,borderColor:'#D97706',borderWidth:1,borderDash:[4,3]}}}},scales:{x:{...axOpts},y:{...axOpts,min:0.5,max:1.05}}}
+});
+
+new Chart(document.getElementById('timeChart'),{
+  type:'bar',
+  data:{
+    labels:turns,
+    datasets:[{
+      label:'minutes',
+      data:[0.75,1.03,0.63,1.58],
+      backgroundColor:['#10B981','#F59E0B','#10B981','#10B981'],
+      borderWidth:0,
+      borderRadius:2
+    }]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{...axOpts},y:{...axOpts}}}
+});
+</script>
+</body>
+</html>

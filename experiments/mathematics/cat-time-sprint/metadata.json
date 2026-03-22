@@ -1,0 +1,14 @@
+{
+  "display_name": "Time Sprint (100K Digits)",
+  "standard": "cat",
+  "domain": "Mathematics",
+  "sprint": "math-sprint-2026",
+  "status": "complete",
+  "key_result": "e/pi/sqrt2 to 100K digits; naive 42.7s vs optimized 22.2s",
+  "false_positives_caught": 0,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": "100000 digits verified",
+  "meta_spec_errors": 0,
+  "notes": null
+}

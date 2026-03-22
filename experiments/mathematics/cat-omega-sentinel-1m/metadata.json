@@ -1,0 +1,14 @@
+{
+  "display_name": "OMEGA Sentinel (1M Digits)",
+  "standard": "cat",
+  "domain": "Mathematics",
+  "sprint": "math-sprint-2026",
+  "status": "complete",
+  "key_result": "e/pi/sqrt2 to 1M digits; kill switch fired 4 times",
+  "false_positives_caught": 0,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": "1000000 digits verified",
+  "meta_spec_errors": 0,
+  "notes": null
+}

@@ -1,3 +1,4 @@
+<!-- STATUS: template | USAGE: check CHP loop health -->
 # Subagent Health Checks
 # Run at the start of every turn to verify agents haven't drifted from their roles.
 # Each check is 3 lines max. If the response is wrong, re-invoke with full role prompt.

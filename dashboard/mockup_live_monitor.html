@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHP — Live Monitor Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Mono',monospace;background:#F8F9FC;color:#0F1117}
+.header{background:#fff;border-bottom:1.5px solid #E2E5EF;padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:13px;font-weight:700;letter-spacing:.12em}
+.proj{font-size:10px;background:#EFF6FF;color:#1D4ED8;border:1px solid #93C5FD;border-radius:4px;padding:3px 10px;margin-left:10px}
+.hbadge{font-size:10px;font-weight:600;padding:3px 10px;border-radius:4px;letter-spacing:.06em}
+.hb-green{background:#ECFDF5;color:#065F46;border:1px solid #34D399}
+.hstat{font-size:10px;color:#6B7280;margin-left:8px}
+.hstat span{color:#0F1117;font-weight:600}
+.htime{font-size:10px;color:#9CA3AF}
+.tabs{background:#fff;border-bottom:2px solid #E2E5EF;display:flex;padding:0 20px}
+.tab{font-size:10px;font-weight:600;letter-spacing:.10em;text-transform:uppercase;padding:11px 16px;color:#6B7280;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer}
+.tab.active{color:#1D4ED8;border-bottom-color:#1D4ED8}
+.actions{background:#F8F9FC;border-bottom:1px solid #E2E5EF;padding:8px 20px;display:flex;gap:8px;align-items:center}
+.btn{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border:1.5px solid #C8CCDB;background:#fff;color:#374151;padding:5px 12px;border-radius:4px;cursor:pointer}
+.btn.blue{border-color:#93C5FD;color:#1D4ED8;background:#EFF6FF}
+.btn.red{border-color:#FCA5A5;color:#991B1B;background:#FEF2F2}
+.cards{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin:16px 20px 0}
+.card{background:#fff;border:1px solid #E2E5EF;border-top:3px solid #93C5FD;border-radius:6px;padding:12px 14px}
+.card.g{border-top-color:#34D399}.card.r{border-top-color:#FCA5A5}.card.a{border-top-color:#FCD34D}
+.clbl{font-size:9px;color:#6B7280;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px}
+.cval{font-size:22px;font-weight:700;color:#0F1117;line-height:1.1}
+.csub{font-size:10px;color:#9CA3AF;margin-top:3px}
+.content{padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.sh{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.sh-lbl{font-size:9px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.12em;white-space:nowrap}
+.sh-line{flex:1;height:1px;background:#E2E5EF}
+.gate{background:#fff;border:1px solid #E2E5EF;border-left:3px solid #C8CCDB;border-radius:0 4px 4px 0;padding:8px 12px;margin:4px 0}
+.gate.p{border-left-color:#34D399}.gate.f{border-left-color:#FCA5A5}.gate.w{border-left-color:#FCD34D}
+.gate-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.gate-name{font-size:9px;color:#6B7280;text-transform:uppercase;letter-spacing:.10em}
+.gate-score{font-size:13px;font-weight:700}
+.gate-score.p{color:#065F46}.gate-score.f{color:#991B1B}.gate-score.w{color:#92400E}
+.track{height:3px;background:#E9EBF2;border-radius:2px;position:relative}
+.fill{height:100%;border-radius:2px}
+.fill.p{background:#34D399}.fill.f{background:#FCA5A5}.fill.w{background:#FCD34D}
+.tick{position:absolute;top:-3px;width:1.5px;height:9px;background:#D97706}
+.gate-foot{font-size:9px;color:#9CA3AF;margin-top:3px}
+.sigma-row{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid #E2E5EF;font-size:10px}
+.sigma-row:last-child{border-bottom:none}
+.sigma-metric{flex:1;color:#374151}
+.sigma-op{color:#9CA3AF;min-width:16px;text-align:center}
+.sigma-thresh{color:#D97706;font-weight:600;min-width:36px}
+.sigma-live{font-weight:700;min-width:48px;text-align:right}
+.sigma-live.pass{color:#065F46}.sigma-live.fail{color:#991B1B}
+.council{background:#ECFDF5;border:1px solid #34D399;border-radius:4px;padding:8px 12px;font-size:10px;color:#065F46;display:flex;align-items:center;gap:8px}
+.dot-green{width:6px;height:6px;border-radius:50%;background:#34D399;flex-shrink:0}
+.log-entry{border:1px solid #E2E5EF;border-radius:4px;margin-bottom:6px;overflow:hidden}
+.log-hdr{background:#F3F4F8;padding:7px 12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.log-hdr-left{font-size:10px;font-weight:600;color:#374151}
+.log-hdr-right{font-size:9px;color:#6B7280}
+.log-body{padding:10px 12px;font-size:10px;color:#374151;line-height:1.7;border-top:1px solid #E2E5EF;background:#fff;font-family:'Inter',sans-serif}
+.fp-box{background:#FFFBEB;border:1px solid #FCD34D;border-left:4px solid #D97706;border-radius:4px;padding:10px 14px;margin:8px 0}
+.fp-hdr{font-size:9px;color:#D97706;text-transform:uppercase;letter-spacing:.14em;font-weight:700;margin-bottom:5px}
+.fp-body{font-size:10px;color:#374151;line-height:1.6;font-family:'Inter',sans-serif}
+.de-box{border:1px solid #FCA5A5;border-radius:4px;overflow:hidden}
+.de-hdr{background:#FEF2F2;padding:6px 12px;font-size:9px;color:#991B1B;text-transform:uppercase;letter-spacing:.12em;font-weight:700}
+.de-row{display:flex;align-items:flex-start;gap:10px;padding:7px 12px;border-top:1px solid #E2E5EF;background:#fff}
+.de-idx{font-size:10px;color:#FCA5A5;font-weight:700;min-width:28px}
+.de-title{font-size:10px;color:#374151;font-weight:600}
+.de-rule{font-size:9px;color:#9CA3AF;font-style:italic;margin-top:1px;font-family:'Inter',sans-serif}
+.colpanel{display:flex;flex-direction:column;gap:0}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex;align-items:center;gap:8px">
+    <span class="logo">CHP</span>
+    <span class="proj">schelling-segregation</span>
+    <span class="hstat">T:<span>4</span></span>
+    <span class="hbadge hb-green" style="margin-left:4px">Validation</span>
+    <span class="hstat"><span style="color:#991B1B">1</span> dead end</span>
+    <span class="hstat"><span style="color:#1D4ED8">3</span> figs</span>
+  </div>
+  <span class="htime">auto-refresh 5s &nbsp;·&nbsp; 09:41:22</span>
+</div>
+
+<div class="tabs">
+  <div class="tab active">Live Monitor</div>
+  <div class="tab">Protocol Health</div>
+  <div class="tab">Experiment Report</div>
+  <div class="tab">Gallery</div>
+  <div class="tab">New Experiment</div>
+</div>
+
+<div class="actions">
+  <button class="btn blue">Run Loop</button>
+  <button class="btn red">Stop Loop</button>
+  <button class="btn">Export Paper</button>
+  <button class="btn">Download Figures</button>
+  <button class="btn">Refresh</button>
+</div>
+
+<div class="cards">
+  <div class="card g">
+    <div class="clbl">Mode</div>
+    <div class="cval" style="font-size:14px;padding-top:4px"><span class="hbadge hb-green">Validation</span></div>
+    <div class="csub">complete — all milestones done</div>
+  </div>
+  <div class="card">
+    <div class="clbl">Turn</div>
+    <div class="cval">4</div>
+    <div class="csub">of 50 max</div>
+  </div>
+  <div class="card r">
+    <div class="clbl">Dead Ends</div>
+    <div class="cval" style="color:#991B1B">1</div>
+    <div class="csub">Contraindications logged</div>
+  </div>
+  <div class="card">
+    <div class="clbl">Open Flags</div>
+    <div class="cval">0</div>
+    <div class="csub">none</div>
+  </div>
+</div>
+
+<div class="content">
+  <div class="colpanel">
+    <div class="sh"><span class="sh-lbl">Critic Scorecard</span><div class="sh-line"></div></div>
+    <div class="gate p">
+      <div class="gate-hdr"><span class="gate-name">G1 — Frozen Compliance</span><span class="gate-score p">1.00</span></div>
+      <div class="track"><div class="fill p" style="width:100%"></div><div class="tick" style="left:85%"></div></div>
+      <div class="gate-foot">threshold 1.00 · PASS</div>
+    </div>
+    <div class="gate p">
+      <div class="gate-hdr"><span class="gate-name">G2 — Architecture</span><span class="gate-score p">0.95</span></div>
+      <div class="track"><div class="fill p" style="width:95%"></div><div class="tick" style="left:85%"></div></div>
+      <div class="gate-foot">threshold 0.85 · PASS</div>
+    </div>
+    <div class="gate w">
+      <div class="gate-hdr"><span class="gate-name">G3 — Scientific Validity</span><span class="gate-score w">0.70</span></div>
+      <div class="track"><div class="fill f" style="width:70%"></div><div class="tick" style="left:85%"></div></div>
+      <div class="gate-foot">threshold 0.85 · BLOCKED — false positive caught</div>
+    </div>
+    <div class="gate p">
+      <div class="gate-hdr"><span class="gate-name">G4 — Drift Check</span><span class="gate-score p">0.90</span></div>
+      <div class="track"><div class="fill p" style="width:90%"></div><div class="tick" style="left:85%"></div></div>
+      <div class="gate-foot">threshold 0.85 · PASS</div>
+    </div>
+
+    <div class="sh" style="margin-top:16px"><span class="sh-lbl">Sigma-Gate Readings</span><div class="sh-line"></div></div>
+    <div style="border:1px solid #E2E5EF;border-radius:4px;overflow:hidden;background:#fff">
+      <div class="sigma-row"><span class="sigma-metric">segregation_index</span><span class="sigma-op">∈</span><span class="sigma-thresh">[0.3,0.8]</span><span class="sigma-live pass">0.666</span></div>
+      <div class="sigma-row"><span class="sigma-metric">cluster_count</span><span class="sigma-op">&gt;</span><span class="sigma-thresh">1</span><span class="sigma-live pass">9</span></div>
+      <div class="sigma-row"><span class="sigma-metric">std_across_seeds</span><span class="sigma-op">&lt;</span><span class="sigma-thresh">0.15</span><span class="sigma-live pass">0.056</span></div>
+      <div class="sigma-row"><span class="sigma-metric">population</span><span class="sigma-op">&gt;</span><span class="sigma-thresh">0</span><span class="sigma-live pass">2250</span></div>
+    </div>
+
+    <div class="sh" style="margin-top:16px"><span class="sh-lbl">Council Status</span><div class="sh-line"></div></div>
+    <div class="council"><div class="dot-green"></div>No drift detected — GPT-4o and Grok aligned</div>
+
+    <div class="sh" style="margin-top:16px"><span class="sh-lbl">Contraindications</span><div class="sh-line"></div></div>
+    <div class="de-box">
+      <div class="de-hdr">Contraindications — do not repeat</div>
+      <div class="de-row"><span class="de-idx">C01</span><div><div class="de-title">Tolerance update before move step</div><div class="de-rule">-- apply tolerance update AFTER move step per frozen spec</div></div></div>
+    </div>
+  </div>
+
+  <div class="colpanel">
+    <div class="sh"><span class="sh-lbl">Innovation Log</span><div class="sh-line"></div></div>
+
+    <div class="log-entry">
+      <div class="log-hdr">
+        <span class="log-hdr-left">Turn 4 — Convergence Battery</span>
+        <span class="log-hdr-right">VALIDATION · 11:50</span>
+      </div>
+      <div class="log-body">
+        30-seed battery complete. Dynamic tolerance (comfort=0.05) vs original.<br>
+        mean=0.666, std=0.056 · original mean=0.766, std=0.009<br>
+        Paired t-test: <strong>t=-9.858, p &lt; 0.000001</strong> · Cohen's d = -1.83<br>
+        Dynamic &lt; Original in 27/30 seeds. Sigma-gate: PASS.
+      </div>
+    </div>
+
+    <div class="log-entry">
+      <div class="log-hdr">
+        <span class="log-hdr-left">Turn 3 — Exploration</span>
+        <span class="log-hdr-right">EXPLORATION · 11:40</span>
+      </div>
+      <div class="log-body">
+        comfort_margin sweep: 0.10→0.763 (NO), 0.05→0.665 (YES), 0.02→0.651 (YES)<br>
+        Partial mixing confirmed at comfort_margin=0.05.
+      </div>
+    </div>
+
+    <div class="log-entry" style="border-color:#FCD34D">
+      <div class="log-hdr" style="background:#FFFBEB">
+        <span class="log-hdr-left" style="color:#92400E">FP: Turn 2 — False Positive Caught</span>
+        <span class="log-hdr-right">VALIDATION · 11:35</span>
+      </div>
+      <div class="log-body">
+        <div class="fp-box" style="margin:0">
+          <div class="fp-hdr">False Positive Caught</div>
+          <div class="fp-body">Dynamic tolerance produced segregation=0.804 — HIGHER than original (0.778). Tolerance update applied BEFORE move step. Gate 3 = 0.70. Build BLOCKED.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-entry">
+      <div class="log-hdr">
+        <span class="log-hdr-left">Turn 1 — Foundation</span>
+        <span class="log-hdr-right">VALIDATION · 11:30</span>
+      </div>
+      <div class="log-body">
+        schelling.py — 230 lines. tolerance=0.375 EXACT. 3-seed anomaly check: std=0.019. PASS.
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "display_name": "Simple Harmonic Motion",
+  "standard": "cat",
+  "domain": "Physics",
+  "sprint": "physics-sprint-2026",
+  "status": "complete",
+  "key_result": "KE at x=A/2 is 3/4 E not 1/2; omega vs f by 2pi",
+  "false_positives_caught": 2,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

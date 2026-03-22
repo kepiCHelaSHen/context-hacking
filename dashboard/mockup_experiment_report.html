@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHP — Experiment Report Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Mono',monospace;background:#F8F9FC;color:#0F1117}
+.header{background:#fff;border-bottom:1.5px solid #E2E5EF;padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:13px;font-weight:700;letter-spacing:.12em}
+.proj{font-size:10px;background:#EFF6FF;color:#1D4ED8;border:1px solid #93C5FD;border-radius:4px;padding:3px 10px;margin-left:10px}
+.tabs{background:#fff;border-bottom:2px solid #E2E5EF;display:flex;padding:0 20px}
+.tab{font-size:10px;font-weight:600;letter-spacing:.10em;text-transform:uppercase;padding:11px 16px;color:#6B7280;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer}
+.tab.active{color:#1D4ED8;border-bottom-color:#1D4ED8}
+.actions{background:#F8F9FC;border-bottom:1px solid #E2E5EF;padding:8px 20px;display:flex;gap:8px}
+.btn{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border:1.5px solid #C8CCDB;background:#fff;color:#374151;padding:5px 12px;border-radius:4px}
+.content{padding:16px 20px;display:grid;grid-template-columns:1fr 340px;gap:20px}
+.sh{display:flex;align-items:center;gap:10px;margin:0 0 12px}
+.sh-lbl{font-size:9px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.12em;white-space:nowrap}
+.sh-line{flex:1;height:1px;background:#E2E5EF}
+.fp-box{background:#FFFBEB;border:1px solid #FCD34D;border-left:4px solid #D97706;border-radius:4px;padding:12px 16px;margin-bottom:16px}
+.fp-hdr{font-size:9px;color:#D97706;text-transform:uppercase;letter-spacing:.14em;font-weight:700;margin-bottom:6px}
+.fp-body{font-size:11px;color:#374151;line-height:1.7;font-family:'Inter',sans-serif}
+.report-body{font-family:'Inter',sans-serif;font-size:12px;line-height:1.8;color:#374151}
+.report-body h2{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.10em;color:#0F1117;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid #E2E5EF}
+.report-body table{width:100%;border-collapse:collapse;font-size:11px;margin:8px 0}
+.report-body th{text-align:left;padding:6px 10px;border-bottom:2px solid #C8CCDB;font-family:'IBM Plex Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.10em;color:#6B7280;background:#F3F4F8}
+.report-body td{padding:6px 10px;border-bottom:1px solid #E2E5EF;color:#374151}
+.gate-pass{color:#065F46;font-weight:700}
+.fig-panel{display:flex;flex-direction:column;gap:10px}
+.fig-card{background:#fff;border:1px solid #E2E5EF;border-radius:6px;overflow:hidden}
+.fig-placeholder{background:#F3F4F8;height:140px;display:flex;align-items:center;justify-content:center;color:#9CA3AF;font-size:10px}
+.fig-cap{padding:7px 10px;border-top:1px solid #E2E5EF;font-size:9px;color:#6B7280}
+.fig-cap strong{color:#374151;display:block;margin-bottom:1px}
+.export-btn{background:#EFF6FF;border:1.5px solid #93C5FD;color:#1D4ED8;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:8px 16px;border-radius:4px;width:100%;cursor:pointer;margin-top:8px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex;align-items:center;gap:8px">
+    <span class="logo">CHP</span>
+    <span class="proj">schelling-segregation</span>
+    <span style="font-size:10px;color:#6B7280;margin-left:6px">T:<strong style="color:#0F1117">4</strong></span>
+    <span style="font-size:10px;background:#ECFDF5;color:#065F46;border:1px solid #34D399;border-radius:4px;padding:3px 10px;margin-left:4px">Complete</span>
+  </div>
+  <span style="font-size:10px;color:#9CA3AF">auto-refresh 5s · 09:41:22</span>
+</div>
+
+<div class="tabs">
+  <div class="tab">Live Monitor</div>
+  <div class="tab">Protocol Health</div>
+  <div class="tab active">Experiment Report</div>
+  <div class="tab">Gallery</div>
+  <div class="tab">New Experiment</div>
+</div>
+
+<div class="actions">
+  <button class="btn" style="border-color:#93C5FD;color:#1D4ED8;background:#EFF6FF">Run Loop</button>
+  <button class="btn" style="border-color:#FCA5A5;color:#991B1B;background:#FEF2F2">Stop Loop</button>
+  <button class="btn">Export Paper</button>
+  <button class="btn">Download Figures</button>
+</div>
+
+<div class="content">
+  <div>
+    <div class="fp-box">
+      <div class="fp-hdr">False Positive Story</div>
+      <div class="fp-body">Turn 2: Dynamic tolerance produced segregation=0.804 — HIGHER than the original model (0.778). The frozen spec predicts partial mixing (~0.65). Root cause: tolerance update applied BEFORE the move step. Gate 3 scored 0.70. Build blocked. Turn 3 diagnosed the parameter sensitivity. Turn 4 confirmed the fix across 30 seeds.</div>
+    </div>
+
+    <div class="sh"><span class="sh-lbl">Executive Summary</span><div class="sh-line"></div></div>
+    <div class="report-body">
+      <p>The Schelling (1971) segregation model with dynamic tolerance extension, built in 4 turns. Dynamic tolerance reduces segregation from 0.766 to 0.666 at comfort_margin=0.05, confirmed across 30 seeds with <strong>p &lt; 0.000001</strong> (Cohen's d = −1.83).</p>
+
+      <h2>Key Results</h2>
+      <table>
+        <thead><tr><th>Metric</th><th>Value</th><th>Gate</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>segregation (dynamic)</td><td><strong>0.666</strong></td><td>[0.30, 0.80]</td><td class="gate-pass">PASS</td></tr>
+          <tr><td>segregation (original)</td><td>0.766</td><td>—</td><td style="color:#6B7280">baseline</td></tr>
+          <tr><td>std across 30 seeds</td><td><strong>0.056</strong></td><td>&lt; 0.15</td><td class="gate-pass">PASS</td></tr>
+          <tr><td>partial mixing (27/30 seeds)</td><td><strong>90%</strong></td><td>≥ 80%</td><td class="gate-pass">PASS</td></tr>
+          <tr><td>p-value (paired t-test)</td><td><strong>&lt; 0.000001</strong></td><td>&lt; 0.05</td><td class="gate-pass">PASS</td></tr>
+          <tr><td>Cohen's d</td><td><strong>−1.83</strong></td><td>—</td><td style="color:#065F46">massive effect</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Gate Scores</h2>
+      <table>
+        <thead><tr><th>Gate</th><th>Score</th><th>Threshold</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>G1 Frozen Compliance</td><td class="gate-pass">1.00</td><td>1.00</td><td class="gate-pass">PASS</td></tr>
+          <tr><td>G2 Architecture</td><td class="gate-pass">0.95</td><td>0.85</td><td class="gate-pass">PASS</td></tr>
+          <tr><td>G3 Scientific Validity</td><td class="gate-pass">0.92</td><td>0.85</td><td class="gate-pass">PASS</td></tr>
+          <tr><td>G4 Drift Check</td><td class="gate-pass">0.95</td><td>0.85</td><td class="gate-pass">PASS</td></tr>
+        </tbody>
+      </table>
+
+      <h2>What CHP Demonstrated</h2>
+      <p>The Builder produced the textbook Schelling result even with dynamic tolerance enabled. The Critic caught it at Gate 3 = 0.70. Exploration mode found the fix: comfort_margin=0.05. The 30-seed battery proved the result. Error → Detection → Correction → Verification. The full CHP cycle in 4 turns.</p>
+    </div>
+  </div>
+
+  <div class="fig-panel">
+    <div class="sh"><span class="sh-lbl">Publication Figures</span><div class="sh-line"></div></div>
+    <div class="fig-card">
+      <div class="fig-placeholder">[ segregation_dynamics.png ]</div>
+      <div class="fig-cap"><strong>Segregation dynamics over time</strong>Original vs dynamic tolerance · 30-seed distribution · 14.2 KB · 09:41</div>
+    </div>
+    <div class="fig-card">
+      <div class="fig-placeholder">[ grid_comparison.png ]</div>
+      <div class="fig-cap"><strong>Grid state comparison</strong>Step 0 vs Step 500 · agent distribution · 22.1 KB · 09:41</div>
+    </div>
+    <div class="fig-card">
+      <div class="fig-placeholder">[ comfort_margin_sweep.png ]</div>
+      <div class="fig-cap"><strong>Parameter sensitivity sweep</strong>comfort_margin 0.00–0.10 · key finding panel · 18.7 KB · 09:38</div>
+    </div>
+    <button class="export-btn">Export Paper Appendix</button>
+  </div>
+</div>
+
+</body>
+</html>

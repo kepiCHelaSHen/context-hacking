@@ -1,0 +1,14 @@
+{
+  "display_name": "Special Relativity",
+  "standard": "cat",
+  "domain": "Physics",
+  "sprint": "physics-sprint-2026",
+  "status": "complete",
+  "key_result": "gamma=1/sqrt(1-v2/c2) NOT sqrt; moving clock SLOWER",
+  "false_positives_caught": 2,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

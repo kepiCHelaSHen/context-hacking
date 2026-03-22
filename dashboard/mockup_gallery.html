@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHP — Gallery Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Mono',monospace;background:#F8F9FC;color:#0F1117}
+.header{background:#fff;border-bottom:1.5px solid #E2E5EF;padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:13px;font-weight:700;letter-spacing:.12em}
+.proj{font-size:10px;background:#EFF6FF;color:#1D4ED8;border:1px solid #93C5FD;border-radius:4px;padding:3px 10px;margin-left:10px}
+.tabs{background:#fff;border-bottom:2px solid #E2E5EF;display:flex;padding:0 20px}
+.tab{font-size:10px;font-weight:600;letter-spacing:.10em;text-transform:uppercase;padding:11px 16px;color:#6B7280;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer}
+.tab.active{color:#1D4ED8;border-bottom-color:#1D4ED8}
+.actions{background:#F8F9FC;border-bottom:1px solid #E2E5EF;padding:8px 20px;display:flex;gap:8px}
+.btn{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border:1.5px solid #C8CCDB;background:#fff;color:#374151;padding:5px 12px;border-radius:4px;cursor:pointer}
+.content{padding:16px 20px}
+.sh{display:flex;align-items:center;gap:10px;margin:0 0 12px}
+.sh-lbl{font-size:9px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.12em;white-space:nowrap}
+.sh-line{flex:1;height:1px;background:#E2E5EF}
+.badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 8px;border-radius:3px;letter-spacing:.06em;text-transform:uppercase}
+.b-blue{background:#EFF6FF;color:#1D4ED8;border:1px solid #93C5FD}
+.b-green{background:#ECFDF5;color:#065F46;border:1px solid #34D399}
+.b-gray{background:#F3F4F8;color:#6B7280;border:1px solid #C8CCDB}
+.b-amber{background:#FFFBEB;color:#92400E;border:1px solid #FCD34D}
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;padding:8px 12px;border-bottom:2px solid #C8CCDB;font-size:9px;text-transform:uppercase;letter-spacing:.10em;color:#6B7280;background:#F3F4F8}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:#EFF6FF}
+tbody tr.active td{background:#EFF6FF}
+tbody tr.active td:first-child{border-left:3px solid #1D4ED8}
+tbody td{padding:8px 12px;border-bottom:1px solid #E2E5EF;font-size:11px;color:#374151;vertical-align:middle}
+.catches{font-size:9px;color:#9CA3AF;font-family:'Inter',sans-serif}
+.detail-panel{background:#fff;border:1px solid #E2E5EF;border-radius:6px;margin-top:16px;overflow:hidden}
+.detail-hdr{background:#F3F4F8;padding:10px 16px;border-bottom:1px solid #E2E5EF;display:flex;align-items:center;gap:10px}
+.detail-title{font-size:12px;font-weight:700;color:#0F1117}
+.detail-tabs{display:flex;border-bottom:1px solid #E2E5EF}
+.dtab{font-size:9px;text-transform:uppercase;letter-spacing:.10em;padding:8px 14px;color:#6B7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.dtab.active{color:#1D4ED8;border-bottom-color:#1D4ED8;background:#fff}
+.detail-body{padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.spec-block{font-family:'Inter',sans-serif;font-size:11px;line-height:1.7;color:#374151}
+.spec-block h4{font-family:'IBM Plex Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.10em;color:#6B7280;margin:10px 0 4px}
+.de-box{border:1px solid #FCA5A5;border-radius:4px;overflow:hidden}
+.de-hdr{background:#FEF2F2;padding:5px 10px;font-size:9px;color:#991B1B;text-transform:uppercase;letter-spacing:.12em;font-weight:700}
+.de-row{display:flex;gap:8px;padding:7px 10px;border-top:1px solid #E2E5EF;font-size:10px}
+.de-idx{color:#FCA5A5;font-weight:700;min-width:24px}
+.de-rule{font-size:9px;color:#9CA3AF;font-style:italic;font-family:'Inter',sans-serif;margin-top:1px}
+.fig-mini{background:#F3F4F8;border-radius:4px;height:90px;display:flex;align-items:center;justify-content:center;color:#9CA3AF;font-size:9px;border:1px solid #E2E5EF}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex;align-items:center;gap:8px">
+    <span class="logo">CHP</span>
+    <span class="proj">context-hacking</span>
+    <span style="font-size:10px;color:#6B7280;margin-left:6px"><strong style="color:#065F46">10</strong> complete &nbsp;·&nbsp; <strong style="color:#9CA3AF">2</strong> staged</span>
+  </div>
+  <span style="font-size:10px;color:#9CA3AF">09:41:22</span>
+</div>
+
+<div class="tabs">
+  <div class="tab">Live Monitor</div>
+  <div class="tab">Protocol Health</div>
+  <div class="tab">Experiment Report</div>
+  <div class="tab active">Gallery</div>
+  <div class="tab">New Experiment</div>
+</div>
+
+<div class="actions">
+  <button class="btn" style="border-color:#93C5FD;color:#1D4ED8;background:#EFF6FF">Run Loop</button>
+  <button class="btn">Export Paper</button>
+  <button class="btn">Download Figures</button>
+</div>
+
+<div class="content">
+  <div class="sh"><span class="sh-lbl">Experiment Registry</span><div class="sh-line"></div></div>
+
+  <div style="border:1px solid #E2E5EF;border-radius:6px;overflow:hidden">
+    <table>
+      <thead>
+        <tr><th></th><th>Experiment</th><th>Domain</th><th>Prior drift catches</th><th>FPs</th><th>Key result</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr class="active">
+          <td style="font-size:14px;width:32px">🏘</td>
+          <td><strong>schelling-segregation</strong></td>
+          <td style="font-size:9px;color:#6B7280">Social Science</td>
+          <td class="catches">tolerance drift, sequential update</td>
+          <td style="color:#D97706;font-weight:700;text-align:center">1</td>
+          <td style="font-size:10px;color:#065F46">p&lt;0.000001 · d=−1.83</td>
+          <td><span class="badge b-green">Done</span></td>
+        </tr>
+        <tr>
+          <td style="font-size:14px">🎲</td>
+          <td><strong>spatial-prisoners-dilemma</strong></td>
+          <td style="font-size:9px;color:#6B7280">Game Theory</td>
+          <td class="catches">async update, T/R/P/S payoff</td>
+          <td style="color:#D97706;font-weight:700;text-align:center">1</td>
+          <td style="font-size:10px;color:#065F46">coop=0.41 · std=0.017</td>
+          <td><span class="badge b-green">Done</span></td>
+        </tr>
+        <tr>
+          <td style="font-size:14px">🦠</td>
+          <td><strong>sir-epidemic</strong></td>
+          <td style="font-size:9px;color:#6B7280">Epidemiology</td>
+          <td class="catches">deterministic vs stochastic</td>
+          <td style="color:#D97706;font-weight:700;text-align:center">1</td>
+          <td style="font-size:10px;color:#065F46">fadeout=3% (ODE: 0%)</td>
+          <td><span class="badge b-green">Done</span></td>
+        </tr>
+        <tr>
+          <td style="font-size:14px">🦋</td>
+          <td><strong>lorenz-attractor</strong></td>
+          <td style="font-size:9px;color:#6B7280">Chaos Theory</td>
+          <td class="catches">Euler integration, wrong beta</td>
+          <td style="color:#D97706;font-weight:700;text-align:center">1</td>
+          <td style="font-size:10px;color:#065F46">RK45 · Lyapunov=0.35</td>
+          <td><span class="badge b-green">Done</span></td>
+        </tr>
+        <tr>
+          <td style="font-size:14px">🧠</td>
+          <td><strong>izhikevich-neurons</strong></td>
+          <td style="font-size:9px;color:#6B7280">Neuroscience</td>
+          <td class="catches">Hodgkin-Huxley contamination</td>
+          <td style="color:#D97706;font-weight:700;text-align:center">1</td>
+          <td style="font-size:10px;color:#065F46">5 patterns verified</td>
+          <td><span class="badge b-green">Done</span></td>
+        </tr>
+        <tr>
+          <td style="font-size:14px">⚛</td>
+          <td><strong>quantum-grover</strong></td>
+          <td style="font-size:9px;color:#6B7280">Quantum Computing</td>
+          <td class="catches">classical search, boolean oracle</td>
+          <td style="color:#D97706;font-weight:700;text-align:center">1</td>
+          <td style="font-size:10px;color:#065F46">P=0.9995 at k=25</td>
+          <td><span class="badge b-green">Done</span></td>
+        </tr>
+        <tr>
+          <td style="font-size:14px">π</td>
+          <td><strong>omega-sentinel-1M</strong></td>
+          <td style="font-size:9px;color:#6B7280">Mathematics</td>
+          <td class="catches">float ceiling, Decimal bottleneck</td>
+          <td style="color:#D97706;font-weight:700;text-align:center">4</td>
+          <td style="font-size:10px;color:#065F46">1M digits · 62,500x ceiling</td>
+          <td><span class="badge b-green">Done</span></td>
+        </tr>
+        <tr>
+          <td style="font-size:14px">🎸</td>
+          <td><strong>metal-harmony</strong></td>
+          <td style="font-size:9px;color:#6B7280">Music Theory</td>
+          <td class="catches">classical theory contamination</td>
+          <td style="color:#D97706;font-weight:700;text-align:center">1</td>
+          <td style="font-size:10px;color:#065F46">classical: 6–9 errors. metal: 0</td>
+          <td><span class="badge b-green">Done</span></td>
+        </tr>
+        <tr>
+          <td style="font-size:14px">🧪</td>
+          <td><strong>chem-equilibrium</strong></td>
+          <td style="font-size:9px;color:#6B7280">Chemistry</td>
+          <td class="catches">Kp/Kc confusion, sign error</td>
+          <td style="color:#9CA3AF;text-align:center">—</td>
+          <td style="font-size:10px;color:#9CA3AF">not yet run</td>
+          <td><span class="badge b-amber">Staged</span></td>
+        </tr>
+        <tr>
+          <td style="font-size:14px">🧬</td>
+          <td><strong>simsiv-v1-replication</strong></td>
+          <td style="font-size:9px;color:#6B7280">Social Evolution</td>
+          <td class="catches">h² averaging, 8-phase resources</td>
+          <td style="color:#9CA3AF;text-align:center">—</td>
+          <td style="font-size:10px;color:#9CA3AF">not yet run</td>
+          <td><span class="badge b-gray">Staged</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="detail-panel">
+    <div class="detail-hdr">
+      <span style="font-size:16px">🏘</span>
+      <div>
+        <div class="detail-title">schelling-segregation</div>
+        <div style="font-size:10px;color:#6B7280;margin-top:1px">Social Science · 4 turns · 1 false positive · p&lt;0.000001</div>
+      </div>
+      <span class="badge b-green" style="margin-left:auto">Done</span>
+    </div>
+    <div class="detail-tabs">
+      <div class="dtab active">Spec</div>
+      <div class="dtab">Frozen</div>
+      <div class="dtab">Dead Ends</div>
+      <div class="dtab">Report</div>
+      <div class="dtab">Figures</div>
+    </div>
+    <div class="detail-body">
+      <div class="spec-block">
+        <h4>Research Question</h4>
+        <p>Can dynamic tolerance reduce spatial segregation below the Schelling (1971) baseline, and under what parameter conditions?</p>
+        <h4>Expected False Positives</h4>
+        <p>Builder applies tolerance update before move step → produces textbook segregation (0.80) instead of partial mixing (0.65). Caught by Gate 3.</p>
+        <h4>Sigma Gates</h4>
+        <p>segregation_index ∈ [0.30, 0.80] · cluster_count &gt; 1 · std &lt; 0.15 across 30 seeds · population stable</p>
+        <h4>Source</h4>
+        <p>Schelling (1971). Dynamic Models of Segregation. Journal of Mathematical Sociology.</p>
+      </div>
+      <div>
+        <div class="de-box" style="margin-bottom:12px">
+          <div class="de-hdr">Contraindications</div>
+          <div class="de-row"><span class="de-idx">C01</span><div><div>Tolerance update before move step</div><div class="de-rule">-- apply AFTER move step per frozen spec</div></div></div>
+          <div class="de-row"><span class="de-idx">C02</span><div><div>comfort_margin=0.10 too large</div><div class="de-rule">-- use 0.05 for partial mixing</div></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div class="fig-mini">segregation_dynamics.png</div>
+          <div class="fig-mini">grid_comparison.png</div>
+          <div class="fig-mini">comfort_sweep.png</div>
+          <div class="fig-mini" style="color:#C8CCDB;border-style:dashed">+ add figure</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

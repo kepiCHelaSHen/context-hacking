@@ -1,3 +1,4 @@
+<!-- STATUS: agent-role | USAGE: role context for Reviewer in CHP loop -->
 ---
 name: chp-reviewer
 description: "The Linter — code hygiene only, no opinions about science or architecture."

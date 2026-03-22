@@ -1,0 +1,14 @@
+{
+  "display_name": "Anatomy Viewer (VTK 3D)",
+  "standard": "cat",
+  "domain": "Medicine",
+  "sprint": null,
+  "status": "complete",
+  "key_result": "3D anatomy viewer with VTK; same spec different renderer",
+  "false_positives_caught": 0,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": "18/18 tests pass",
+  "meta_spec_errors": 0,
+  "notes": null
+}

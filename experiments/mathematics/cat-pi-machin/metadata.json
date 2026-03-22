@@ -1,0 +1,14 @@
+{
+  "display_name": "Pi via Machin (10K Digits)",
+  "standard": "cat",
+  "domain": "Mathematics",
+  "sprint": "math-sprint-2026",
+  "status": "complete",
+  "key_result": "pi to 10000 digits via Machin formula",
+  "false_positives_caught": 0,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": "10000 digits verified",
+  "meta_spec_errors": 0,
+  "notes": null
+}

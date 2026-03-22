@@ -1,0 +1,14 @@
+{
+  "display_name": "Carnot Cycle",
+  "standard": "cat",
+  "domain": "Physics",
+  "sprint": "physics-sprint-2026",
+  "status": "complete",
+  "key_result": "Must use Kelvin not Celsius; COP can exceed 1; COP_hp = COP_ref + 1",
+  "false_positives_caught": 2,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

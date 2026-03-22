@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHP Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ── */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#F8F9FC;color:#0F1117;min-height:100vh}
+
+/* ── DESIGN TOKENS ── */
+:root{
+  --bg:#F8F9FC;--sur:#FFFFFF;--sur2:#F3F4F8;--sur3:#E9EBF2;
+  --ln:#E2E5EF;--ln2:#C8CCDB;
+  --t1:#0F1117;--t2:#374151;--t3:#6B7280;--t4:#9CA3AF;
+  --blue:#1D4ED8;--bluebg:#EFF6FF;--blueln:#93C5FD;
+  --pass:#065F46;--passbg:#ECFDF5;--passln:#34D399;
+  --fail:#991B1B;--failbg:#FEF2F2;--failln:#FCA5A5;
+  --warn:#92400E;--warnbg:#FFFBEB;--warnln:#FCD34D;
+  --amber:#D97706;
+  --mono:'IBM Plex Mono',monospace;
+}
+
+/* ── TYPOGRAPHY ── */
+.mono{font-family:var(--mono)}
+.label{font-family:var(--mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--t3)}
+.label-sm{font-family:var(--mono);font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:.10em;color:var(--t4)}
+
+/* ── HEADER ── */
+.header{
+  background:var(--sur);border-bottom:1.5px solid var(--ln);
+  padding:10px 20px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.header-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.logo{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.14em;color:var(--t1)}
+.proj-badge{
+  font-family:var(--mono);font-size:10px;background:var(--bluebg);color:var(--blue);
+  border:1px solid var(--blueln);border-radius:4px;padding:3px 10px;
+}
+.hstat{font-family:var(--mono);font-size:10px;color:var(--t3);margin-left:4px}
+.hstat strong{color:var(--t1)}
+.mode-badge{font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 10px;border-radius:4px;letter-spacing:.06em}
+.mode-validation{background:var(--passbg);color:var(--pass);border:1px solid var(--passln)}
+.mode-exploration{background:var(--warnbg);color:var(--warn);border:1px solid var(--warnln)}
+.mode-exit{background:var(--failbg);color:var(--fail);border:1px solid var(--failln)}
+.mode-none{background:var(--sur2);color:var(--t3);border:1px solid var(--ln2)}
+.htime{font-family:var(--mono);font-size:10px;color:var(--t4);display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+
+/* ── ACTION BAR ── */
+.actions{
+  background:var(--bg);border-bottom:1px solid var(--ln);
+  padding:8px 20px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+}
+.btn{
+  font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;border:1.5px solid var(--ln2);background:var(--sur);
+  color:var(--t2);padding:5px 12px;border-radius:4px;cursor:pointer;
+  transition:background .1s;white-space:nowrap;
+}
+.btn:hover{background:var(--sur2)}
+.btn-blue{border-color:var(--blueln);color:var(--blue);background:var(--bluebg)}
+.btn-blue:hover{background:#DBEAFE}
+.btn-red{border-color:var(--failln);color:var(--fail);background:var(--failbg)}
+.btn-red:hover{background:#FEE2E2}
+
+/* ── TABS ── */
+.tabs{
+  background:var(--sur);border-bottom:2px solid var(--ln);
+  display:flex;padding:0 20px;overflow-x:auto;
+}
+.tab{
+  font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.10em;
+  text-transform:uppercase;padding:11px 16px;color:var(--t3);
+  border-bottom:2px solid transparent;margin-bottom:-2px;
+  cursor:pointer;white-space:nowrap;transition:color .12s;
+}
+.tab:hover{color:var(--t2)}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+
+/* ── TAB PANELS ── */
+.panel{display:none;padding:20px}
+.panel.active{display:block}
+
+/* ── SECTION HEADER ── */
+.sh{display:flex;align-items:center;gap:10px;margin:0 0 12px}
+.sh-lbl{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.12em;white-space:nowrap}
+.sh-line{flex:1;height:1px;background:var(--ln)}
+.sh-sub{font-size:10px;color:var(--t3);margin:-8px 0 14px;font-family:'Inter',sans-serif}
+
+/* ── GALLERY FILTERS ── */
+.filter-bar{
+  display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+  margin-bottom:16px;padding:12px 14px;
+  background:var(--sur);border:1px solid var(--ln);border-radius:6px;
+}
+.filter-group{display:flex;align-items:center;gap:6px}
+.filter-label{font-family:var(--mono);font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.10em;white-space:nowrap}
+.filter-chip{
+  font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;padding:3px 10px;border-radius:20px;cursor:pointer;
+  border:1.5px solid var(--ln2);background:var(--sur);color:var(--t3);
+  transition:all .12s;
+}
+.filter-chip:hover{border-color:var(--blue);color:var(--blue)}
+.filter-chip.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.filter-chip.cat.active{background:#6366F1;border-color:#6366F1;color:#fff}
+.filter-chip.disc.active{background:#0891B2;border-color:#0891B2;color:#fff}
+.filter-chip.loop.active{background:#059669;border-color:#059669;color:#fff}
+.filter-sep{width:1px;height:20px;background:var(--ln2);margin:0 4px}
+.search-box{
+  font-family:var(--mono);font-size:10px;padding:4px 10px;
+  border:1.5px solid var(--ln2);border-radius:4px;background:var(--bg);
+  color:var(--t1);outline:none;min-width:180px;
+}
+.search-box:focus{border-color:var(--blue)}
+.filter-count{font-family:var(--mono);font-size:9px;color:var(--t4);margin-left:auto}
+
+/* ── GALLERY TABLE ── */
+.gallery-table-wrap{border:1px solid var(--ln);border-radius:6px;overflow:hidden}
+.gallery-table{width:100%;border-collapse:collapse}
+.gallery-table thead th{
+  text-align:left;padding:8px 12px;
+  border-bottom:2px solid var(--ln2);
+  font-family:var(--mono);font-size:9px;text-transform:uppercase;
+  letter-spacing:.10em;color:var(--t3);background:var(--sur2);
+  white-space:nowrap;
+}
+.gallery-table tbody tr{cursor:pointer;transition:background .08s}
+.gallery-table tbody tr:hover td{background:var(--bluebg)}
+.gallery-table tbody tr.selected td{background:var(--bluebg)}
+.gallery-table tbody tr.selected td:first-child{border-left:3px solid var(--blue)}
+.gallery-table tbody td{
+  padding:8px 12px;border-bottom:1px solid var(--ln);
+  font-size:11px;color:var(--t2);vertical-align:middle;
+}
+.gallery-table tbody tr:last-child td{border-bottom:none}
+.exp-name{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--t1)}
+.exp-slug{font-family:var(--mono);font-size:9px;color:var(--t4);margin-top:1px}
+.domain-tag{font-size:9px;color:var(--t3);font-family:'Inter',sans-serif}
+.fp-count{font-family:var(--mono);font-size:11px;font-weight:700;text-align:center}
+.fp-count.has-fp{color:var(--amber)}
+.fp-count.no-fp{color:var(--t4)}
+.key-result-cell{font-size:10px;color:var(--t2);max-width:280px;font-family:'Inter',sans-serif;line-height:1.4}
+
+/* ── STANDARD BADGES ── */
+.std-badge{
+  display:inline-block;font-family:var(--mono);font-size:8px;font-weight:700;
+  padding:2px 7px;border-radius:3px;letter-spacing:.06em;text-transform:uppercase;
+}
+.std-cat{background:#EDE9FE;color:#5B21B6;border:1px solid #C4B5FD}
+.std-disc{background:#CFFAFE;color:#0E7490;border:1px solid #67E8F9}
+.std-loop{background:var(--passbg);color:var(--pass);border:1px solid var(--passln)}
+
+/* ── STATUS BADGES ── */
+.status-badge{
+  display:inline-block;font-family:var(--mono);font-size:8px;font-weight:700;
+  padding:2px 7px;border-radius:3px;letter-spacing:.06em;text-transform:uppercase;
+}
+.status-complete{background:var(--passbg);color:var(--pass);border:1px solid var(--passln)}
+.status-staged{background:var(--sur2);color:var(--t3);border:1px solid var(--ln2)}
+.status-superseded{background:var(--failbg);color:var(--t3);border:1px solid var(--failln)}
+.status-active{background:var(--bluebg);color:var(--blue);border:1px solid var(--blueln)}
+
+/* ── DETAIL PANEL ── */
+.detail-panel{
+  background:var(--sur);border:1px solid var(--ln);border-radius:6px;
+  margin-top:16px;overflow:hidden;
+}
+.detail-hdr{
+  background:var(--sur2);padding:12px 16px;border-bottom:1px solid var(--ln);
+  display:flex;align-items:flex-start;gap:12px;
+}
+.detail-hdr-info{flex:1}
+.detail-title{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--t1)}
+.detail-meta{font-size:10px;color:var(--t3);margin-top:3px;font-family:'Inter',sans-serif}
+.detail-subtabs{display:flex;border-bottom:1px solid var(--ln);background:var(--sur)}
+.dtab{
+  font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.10em;
+  padding:9px 14px;color:var(--t3);cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .1s;
+}
+.dtab:hover{color:var(--t2)}
+.dtab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.detail-body{padding:16px}
+
+/* ── METADATA GRID ── */
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.meta-block{}
+.meta-block h4{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.10em;color:var(--t3);margin-bottom:6px}
+.meta-block p{font-size:11px;color:var(--t2);line-height:1.6;font-family:'Inter',sans-serif}
+.meta-row{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--ln);font-size:10px}
+.meta-row:last-child{border-bottom:none}
+.meta-key{font-family:var(--mono);color:var(--t3);min-width:140px;flex-shrink:0}
+.meta-val{color:var(--t2);font-family:'Inter',sans-serif}
+
+/* ── FLAGS ── */
+.flag-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.flag{
+  display:inline-flex;align-items:center;gap:4px;
+  font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:3px;
+}
+.flag-yes{background:var(--passbg);color:var(--pass);border:1px solid var(--passln)}
+.flag-no{background:var(--sur2);color:var(--t4);border:1px solid var(--ln)}
+
+/* ── FIGURES GRID ── */
+.figs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fig-card{background:var(--sur);border:1px solid var(--ln);border-radius:4px;overflow:hidden;cursor:pointer;transition:border-color .12s}
+.fig-card:hover{border-color:var(--blueln)}
+.fig-placeholder{background:var(--sur2);height:100px;display:flex;align-items:center;justify-content:center;color:var(--t4);font-size:9px;font-family:var(--mono)}
+.fig-cap{padding:5px 8px;border-top:1px solid var(--ln);font-family:var(--mono);font-size:8px;color:var(--t3)}
+
+/* ── STUB PANELS ── */
+.stub-panel{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 20px;text-align:center;
+}
+.stub-label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--t4);margin-bottom:8px}
+.stub-desc{font-size:12px;color:var(--t3);font-family:'Inter',sans-serif}
+
+/* ── EMPTY STATE ── */
+.empty-state{padding:40px 20px;text-align:center;color:var(--t4);font-family:var(--mono);font-size:10px;letter-spacing:.08em}
+
+/* ── LOADING ── */
+.loading{padding:40px 20px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--t4);letter-spacing:.10em;text-transform:uppercase}
+
+/* ── ERROR BOX ── */
+.error-box{background:var(--failbg);border:1px solid var(--failln);border-radius:4px;padding:12px 16px;font-family:var(--mono);font-size:10px;color:var(--fail);margin:16px 0}
+
+/* ── SUMMARY STRIP ── */
+.summary-strip{
+  display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;
+}
+.sum-chip{
+  font-family:var(--mono);font-size:9px;padding:3px 10px;border-radius:3px;
+  border:1px solid var(--ln2);background:var(--sur2);color:var(--t3);
+}
+.sum-chip strong{color:var(--t1)}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="header">
+  <div class="header-left">
+    <span class="logo">CHP</span>
+    <span class="proj-badge" id="projBadge">context-hacking</span>
+    <span class="hstat">T:<strong id="hTurn">—</strong></span>
+    <span class="mode-badge mode-none" id="hMode">—</span>
+    <span class="hstat" id="hDeadEnds" style="display:none"><strong style="color:#991B1B" id="hDeadCount">0</strong> dead ends</span>
+  </div>
+  <div class="htime">
+    <span id="hClock">—</span>
+    <span id="hRefresh" style="font-size:9px;color:#C8CCDB">auto-refresh 5s</span>
+  </div>
+</div>
+
+<!-- ── TABS ── -->
+<div class="tabs">
+  <div class="tab active"  onclick="switchTab(0)">Live Monitor</div>
+  <div class="tab"         onclick="switchTab(1)">Protocol Health</div>
+  <div class="tab"         onclick="switchTab(2)">Experiment Report</div>
+  <div class="tab"         onclick="switchTab(3)">Gallery</div>
+  <div class="tab"         onclick="switchTab(4)">New Experiment</div>
+</div>
+
+<!-- ── ACTIONS ── -->
+<div class="actions">
+  <button class="btn btn-blue" onclick="showRunModal()">Run Loop</button>
+  <button class="btn btn-red">Stop Loop</button>
+  <button class="btn">Export Paper</button>
+  <button class="btn">Download Figures</button>
+  <button class="btn" onclick="loadAll()">Refresh</button>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 0 — LIVE MONITOR (stub)                                  -->
+<!-- ============================================================ -->
+<div class="panel active" id="panel-0">
+  <div class="stub-panel">
+    <div class="stub-label">Live Monitor</div>
+    <div class="stub-desc">Reads state_vector.md · innovation_log.md · dead_ends.md<br>Polls every 5 seconds — building next.</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 1 — PROTOCOL HEALTH (stub)                               -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-1">
+  <div class="stub-panel">
+    <div class="stub-label">Protocol Health</div>
+    <div class="stub-desc">Reads .chp/telemetry.json — building next.</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 2 — EXPERIMENT REPORT (stub)                             -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-2">
+  <div class="stub-panel">
+    <div class="stub-label">Experiment Report</div>
+    <div class="stub-desc">Renders REPORT.md with false positive story and figures — building next.</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 3 — GALLERY                                              -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-3">
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+
+    <div class="filter-group">
+      <span class="filter-label">Standard</span>
+      <button class="filter-chip active" data-filter="standard" data-val="all"   onclick="setFilter('standard','all',this)">All</button>
+      <button class="filter-chip cat"   data-filter="standard" data-val="cat"   onclick="setFilter('standard','cat',this)">Cat</button>
+      <button class="filter-chip disc"  data-filter="standard" data-val="disc"  onclick="setFilter('standard','disc',this)">Disc</button>
+      <button class="filter-chip loop"  data-filter="standard" data-val="loop"  onclick="setFilter('standard','loop',this)">Loop</button>
+    </div>
+
+    <div class="filter-sep"></div>
+
+    <div class="filter-group">
+      <span class="filter-label">Status</span>
+      <button class="filter-chip active" data-filter="status" data-val="all"       onclick="setFilter('status','all',this)">All</button>
+      <button class="filter-chip"        data-filter="status" data-val="complete"  onclick="setFilter('status','complete',this)">Complete</button>
+      <button class="filter-chip"        data-filter="status" data-val="staged"    onclick="setFilter('status','staged',this)">Staged</button>
+    </div>
+
+    <div class="filter-sep"></div>
+
+    <div class="filter-group">
+      <span class="filter-label">Discipline</span>
+      <div id="discFilters" style="display:flex;gap:4px;flex-wrap:wrap"></div>
+    </div>
+
+    <div class="filter-sep"></div>
+
+    <input class="search-box" type="text" placeholder="Search experiments..." id="searchBox" oninput="renderTable()">
+
+    <span class="filter-count" id="filterCount"></span>
+  </div>
+
+  <!-- Summary strip -->
+  <div class="summary-strip" id="summaryStrip"></div>
+
+  <!-- Table -->
+  <div id="galleryError"></div>
+  <div id="galleryLoading" class="loading">Loading experiment index…</div>
+  <div class="gallery-table-wrap" id="galleryWrap" style="display:none">
+    <table class="gallery-table">
+      <thead>
+        <tr>
+          <th>Experiment</th>
+          <th>Standard</th>
+          <th>Discipline</th>
+          <th style="text-align:center">FPs</th>
+          <th>Key Result</th>
+          <th>Status</th>
+          <th style="text-align:center">Tests</th>
+          <th style="text-align:center">Figs</th>
+        </tr>
+      </thead>
+      <tbody id="galleryBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Detail panel -->
+  <div class="detail-panel" id="detailPanel" style="display:none">
+    <div class="detail-hdr">
+      <div class="detail-hdr-info">
+        <div class="detail-title" id="detailTitle">—</div>
+        <div class="detail-meta" id="detailMeta">—</div>
+      </div>
+      <span id="detailStatusBadge"></span>
+    </div>
+    <div class="detail-subtabs">
+      <div class="dtab active" onclick="switchDetail(0)">Overview</div>
+      <div class="dtab"        onclick="switchDetail(1)">Figures</div>
+      <div class="dtab"        onclick="switchDetail(2)">Files</div>
+    </div>
+    <div class="detail-body">
+      <div id="dpanel-0"></div>
+      <div id="dpanel-1" style="display:none"></div>
+      <div id="dpanel-2" style="display:none"></div>
+    </div>
+  </div>
+
+</div><!-- /panel-3 -->
+
+<!-- ============================================================ -->
+<!-- TAB 4 — NEW EXPERIMENT (stub)                                -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-4">
+  <div class="stub-panel">
+    <div class="stub-label">New Experiment</div>
+    <div class="stub-desc">Step-by-step wizard to scaffold a new experiment — building next.</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- JAVASCRIPT                                                    -->
+<!-- ============================================================ -->
+<script>
+// ── STATE ──
+const API = '';  // same origin
+let allExperiments = [];   // flat array from index
+let indexSummary   = {};
+let filters = { standard: 'all', status: 'all', discipline: 'all' };
+let selectedSlug = null;
+let detailTab = 0;
+
+// ── INIT ──
+async function loadAll() {
+  await loadIndex();
+  tickClock();
+}
+
+async function loadIndex() {
+  document.getElementById('galleryLoading').style.display = 'block';
+  document.getElementById('galleryWrap').style.display    = 'none';
+  document.getElementById('galleryError').innerHTML       = '';
+
+  try {
+    const res  = await fetch(`${API}/api/index`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    if (data.error) throw new Error(data.error);
+
+    // Flatten experiments object to array
+    allExperiments = Object.values(data.experiments || {});
+    indexSummary   = data.summary || {};
+
+    buildDiscFilters();
+    buildSummaryStrip();
+    renderTable();
+
+    document.getElementById('galleryLoading').style.display = 'none';
+    document.getElementById('galleryWrap').style.display    = 'block';
+
+  } catch(e) {
+    document.getElementById('galleryLoading').style.display = 'none';
+    document.getElementById('galleryError').innerHTML =
+      `<div class="error-box">Failed to load index: ${e.message}<br>
+       Run <code>python rebuild_index.py</code> from the project root first.</div>`;
+  }
+}
+
+// ── CLOCK ──
+function tickClock() {
+  const now = new Date();
+  document.getElementById('hClock').textContent =
+    now.toTimeString().slice(0,8);
+  setTimeout(tickClock, 1000);
+}
+
+// ── DISC FILTERS ──
+function buildDiscFilters() {
+  const disciplines = [...new Set(allExperiments.map(e => e.discipline).filter(Boolean))].sort();
+  const wrap = document.getElementById('discFilters');
+  wrap.innerHTML = '';
+
+  const all = mk('button','filter-chip active');
+  all.textContent = 'All';
+  all.dataset.filter = 'discipline';
+  all.dataset.val    = 'all';
+  all.onclick = () => setFilter('discipline','all',all);
+  wrap.appendChild(all);
+
+  disciplines.forEach(d => {
+    const btn = mk('button','filter-chip');
+    btn.textContent    = d;
+    btn.dataset.filter = 'discipline';
+    btn.dataset.val    = d;
+    btn.onclick        = () => setFilter('discipline', d, btn);
+    wrap.appendChild(btn);
+  });
+}
+
+// ── SUMMARY STRIP ──
+function buildSummaryStrip() {
+  const s = indexSummary;
+  const strip = document.getElementById('summaryStrip');
+  strip.innerHTML = '';
+  const chips = [
+    [`<strong>${s.total||0}</strong> total`, ''],
+    [`<strong>${s.complete||0}</strong> complete`, ''],
+    [`<strong>${s.staged||0}</strong> staged`, ''],
+    [`cat <strong>${(s.by_standard||{}).cat||0}</strong>`, 'std-cat'],
+    [`disc <strong>${(s.by_standard||{}).disc||0}</strong>`, 'std-disc'],
+    [`loop <strong>${(s.by_standard||{}).loop||0}</strong>`, 'std-loop'],
+    [`<strong>${s.total_false_positives||0}</strong> FPs caught`, ''],
+  ];
+  chips.forEach(([html, cls]) => {
+    const c = mk('span', 'sum-chip ' + cls);
+    c.innerHTML = html;
+    strip.appendChild(c);
+  });
+}
+
+// ── FILTER ──
+function setFilter(key, val, btn) {
+  filters[key] = val;
+  // Update chip states for this filter group
+  document.querySelectorAll(`[data-filter="${key}"]`).forEach(el => {
+    el.classList.toggle('active', el.dataset.val === val);
+  });
+  renderTable();
+}
+
+function filtered() {
+  const q = document.getElementById('searchBox').value.toLowerCase().trim();
+  return allExperiments.filter(e => {
+    if (filters.standard !== 'all' && e.standard !== filters.standard) return false;
+    if (filters.status   !== 'all' && e.status   !== filters.status)   return false;
+    if (filters.discipline !== 'all' && e.discipline !== filters.discipline) return false;
+    if (q) {
+      const hay = [e.slug, e.display_name, e.domain, e.key_result, e.discipline, e.notes]
+        .filter(Boolean).join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+// ── TABLE ──
+function renderTable() {
+  const rows  = filtered();
+  const tbody = document.getElementById('galleryBody');
+  tbody.innerHTML = '';
+
+  document.getElementById('filterCount').textContent =
+    `${rows.length} of ${allExperiments.length}`;
+
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">No experiments match the current filters.</div></td></tr>`;
+    return;
+  }
+
+  rows.forEach(e => {
+    const tr = mk('tr');
+    if (e.slug === selectedSlug) tr.classList.add('selected');
+    tr.onclick = () => selectExperiment(e.slug);
+
+    tr.appendChild(tdHTML(`
+      <div class="exp-name">${e.display_name || e.slug}</div>
+      <div class="exp-slug">${e.slug}</div>
+    `));
+    tr.appendChild(tdHTML(stdBadge(e.standard)));
+    tr.appendChild(tdHTML(`<span class="domain-tag">${e.domain || e.discipline || '—'}</span>`));
+
+    const fp = e.false_positives_caught;
+    const fpTd = td(fp != null ? fp : '—');
+    fpTd.className = 'fp-count ' + (fp > 0 ? 'has-fp' : 'no-fp');
+    fpTd.style.textAlign = 'center';
+    tr.appendChild(fpTd);
+
+    tr.appendChild(tdHTML(`<span class="key-result-cell">${(e.key_result||'—').slice(0,90)}${(e.key_result||'').length>90?'…':''}</span>`));
+    tr.appendChild(tdHTML(statusBadge(e.status)));
+
+    const hasTasks = e.has_tests ? '✓' : '—';
+    const testTd = td(hasTasks);
+    testTd.style.textAlign = 'center';
+    testTd.style.color = e.has_tests ? 'var(--pass)' : 'var(--t4)';
+    testTd.style.fontFamily = 'var(--mono)';
+    testTd.style.fontSize = '11px';
+    tr.appendChild(testTd);
+
+    const figCount = (e.figures||[]).length;
+    const figTd = td(figCount || '—');
+    figTd.style.textAlign = 'center';
+    figTd.style.color = figCount ? 'var(--blue)' : 'var(--t4)';
+    figTd.style.fontFamily = 'var(--mono)';
+    figTd.style.fontSize = '11px';
+    tr.appendChild(figTd);
+
+    tbody.appendChild(tr);
+  });
+}
+
+// ── SELECT EXPERIMENT ──
+function selectExperiment(slug) {
+  selectedSlug = slug;
+  renderTable(); // re-render to update selection highlight
+
+  const exp = allExperiments.find(e => e.slug === slug);
+  if (!exp) return;
+
+  const panel = document.getElementById('detailPanel');
+  panel.style.display = 'block';
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  document.getElementById('detailTitle').textContent = exp.display_name || exp.slug;
+  document.getElementById('detailMeta').textContent  =
+    [exp.domain, exp.discipline, exp.sprint && `Sprint: ${exp.sprint}`,
+     exp.turns && `${exp.turns} turns`].filter(Boolean).join(' · ');
+  document.getElementById('detailStatusBadge').innerHTML = statusBadge(exp.status);
+
+  switchDetail(0);
+  renderDetailOverview(exp);
+}
+
+function switchDetail(i) {
+  detailTab = i;
+  document.querySelectorAll('.dtab').forEach((t,idx) => t.classList.toggle('active', idx===i));
+  document.querySelectorAll('[id^="dpanel-"]').forEach((p,idx) => p.style.display = idx===i?'block':'none');
+
+  const exp = allExperiments.find(e => e.slug === selectedSlug);
+  if (!exp) return;
+  if (i === 0) renderDetailOverview(exp);
+  if (i === 1) renderDetailFigures(exp);
+  if (i === 2) renderDetailFiles(exp);
+}
+
+function renderDetailOverview(exp) {
+  const el = document.getElementById('dpanel-0');
+  const rows = [
+    ['Slug',           exp.slug],
+    ['Standard',       stdBadge(exp.standard)],
+    ['Status',         statusBadge(exp.status)],
+    ['Discipline',     exp.discipline],
+    ['Domain',         exp.domain],
+    ['Sprint',         exp.sprint || '—'],
+    ['Turns',          exp.turns ?? '—'],
+    ['Gate Scores',    exp.gate_scores ? Object.entries(exp.gate_scores).map(([k,v])=>`${k}: ${v}`).join(' · ') : '—'],
+    ['Statistical',    exp.statistical_result || '—'],
+    ['FPs Caught',     exp.false_positives_caught ?? '—'],
+    ['Meta-spec Errs', exp.meta_spec_errors ?? '—'],
+    ['Notes',          exp.notes || '—'],
+  ];
+
+  const flags = [
+    ['Report',   exp.has_report],
+    ['Tests',    exp.has_tests],
+    ['Figures',  exp.has_figures],
+    ['Frozen',   exp.has_frozen],
+    ['Inn. Log', exp.has_innovation_log],
+    ['State Vec',exp.has_state_vector],
+    ['Dead Ends',exp.has_dead_ends],
+  ];
+
+  el.innerHTML = `
+    <div class="meta-grid">
+      <div>
+        <div class="sh"><span class="sh-lbl">Key Result</span><div class="sh-line"></div></div>
+        <p style="font-family:'Inter',sans-serif;font-size:11px;color:var(--t2);line-height:1.6;margin-bottom:16px">
+          ${exp.key_result || '<span style="color:var(--t4)">No result yet.</span>'}
+        </p>
+        <div class="sh"><span class="sh-lbl">Metadata</span><div class="sh-line"></div></div>
+        <div>
+          ${rows.map(([k,v]) => `<div class="meta-row"><span class="meta-key">${k}</span><span class="meta-val">${v}</span></div>`).join('')}
+        </div>
+      </div>
+      <div>
+        <div class="sh"><span class="sh-lbl">Files Present</span><div class="sh-line"></div></div>
+        <div class="flag-row" style="margin-bottom:16px">
+          ${flags.map(([label,has]) => `
+            <span class="flag ${has?'flag-yes':'flag-no'}">${has?'✓':'—'} ${label}</span>
+          `).join('')}
+        </div>
+        <div class="sh"><span class="sh-lbl">Source Files</span><div class="sh-line"></div></div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--t3);line-height:1.8">
+          ${(exp.source_files||[]).length
+            ? exp.source_files.map(f=>`<div>${f}</div>`).join('')
+            : '<span style="color:var(--t4)">none found</span>'}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderDetailFigures(exp) {
+  const el = document.getElementById('dpanel-1');
+  const figs = exp.figures || [];
+  if (!figs.length) {
+    el.innerHTML = '<div class="empty-state">No figures yet.</div>';
+    return;
+  }
+  el.innerHTML = `
+    <div class="figs-grid">
+      ${figs.map(f => `
+        <div class="fig-card" onclick="openFigure('${exp.dir}/${f}')">
+          <div class="fig-placeholder">${f}</div>
+          <div class="fig-cap">${f}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderDetailFiles(exp) {
+  const el = document.getElementById('dpanel-2');
+  el.innerHTML = `
+    <div class="sh"><span class="sh-lbl">Directory</span><div class="sh-line"></div></div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--t3);padding:8px 0">${exp.dir}</div>
+    <div class="sh" style="margin-top:8px"><span class="sh-lbl">Source Files</span><div class="sh-line"></div></div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--t2);line-height:2">
+      ${(exp.source_files||[]).map(f=>`<div>· ${f}</div>`).join('') || '<span style="color:var(--t4)">none</span>'}
+    </div>
+  `;
+}
+
+function openFigure(path) {
+  window.open(`${API}/api/file?path=${encodeURIComponent(path)}`, '_blank');
+}
+
+// ── TAB SWITCHING ──
+const tabEls   = document.querySelectorAll('.tab');
+const panelEls = document.querySelectorAll('.panel');
+function switchTab(i) {
+  tabEls.forEach((t,idx)   => t.classList.toggle('active', idx===i));
+  panelEls.forEach((p,idx) => p.classList.toggle('active', idx===i));
+  if (i === 3 && !allExperiments.length) loadAll();
+}
+
+// ── RUN MODAL (placeholder) ──
+function showRunModal() {
+  alert('Run Loop: copy this command into your terminal:\n\nclaude --project context-hacking chp run');
+}
+
+// ── BADGE HELPERS ──
+function stdBadge(s) {
+  if (!s) return '<span style="color:var(--t4)">—</span>';
+  const cls = {cat:'std-cat',disc:'std-disc',loop:'std-loop'}[s] || '';
+  return `<span class="std-badge ${cls}">${s}</span>`;
+}
+function statusBadge(s) {
+  const map = {complete:'status-complete',staged:'status-staged',superseded:'status-superseded',active:'status-active'};
+  return `<span class="status-badge ${map[s]||''}">${s||'—'}</span>`;
+}
+
+// ── DOM HELPERS ──
+function mk(tag, cls='') {
+  const el = document.createElement(tag);
+  if (cls) el.className = cls.trim();
+  return el;
+}
+function td(text) {
+  const el = document.createElement('td');
+  el.textContent = text ?? '—';
+  return el;
+}
+function tdHTML(html) {
+  const el = document.createElement('td');
+  el.innerHTML = html;
+  return el;
+}
+
+// ── BOOT ──
+window.addEventListener('load', loadAll);
+// Auto-refresh every 5s (index only, lightweight)
+setInterval(() => {
+  if (document.getElementById('panel-3').classList.contains('active')) {
+    loadIndex();
+  }
+}, 5000);
+</script>
+</body>
+</html>

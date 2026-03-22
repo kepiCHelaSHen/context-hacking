@@ -1,0 +1,19 @@
+{
+  "display_name": "Izhikevich Neurons",
+  "standard": "loop",
+  "domain": "Neuroscience",
+  "sprint": null,
+  "status": "complete",
+  "key_result": "All 5 firing patterns reproduced; HH contamination check passed",
+  "false_positives_caught": 1,
+  "turns": 2,
+  "gate_scores": {
+    "g1": 1.0,
+    "g2": 0.95,
+    "g3": 0.92,
+    "g4": 0.95
+  },
+  "statistical_result": "5 patterns confirmed",
+  "meta_spec_errors": 0,
+  "notes": null
+}

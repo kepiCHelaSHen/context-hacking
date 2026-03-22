@@ -1,3 +1,4 @@
+<!-- STATUS: agent-role | USAGE: role context for Critic in CHP loop -->
 ---
 name: chp-critic
 description: "The Pessimist — proves the science is wrong and the code is fragile."

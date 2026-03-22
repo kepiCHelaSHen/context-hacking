@@ -1,0 +1,14 @@
+{
+  "display_name": "sqrt(2) via Newton (10K Digits)",
+  "standard": "cat",
+  "domain": "Mathematics",
+  "sprint": "math-sprint-2026",
+  "status": "complete",
+  "key_result": "sqrt(2) to 10000 digits; META-SPEC: frozen digits hallucinated after pos 50",
+  "false_positives_caught": 1,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": "10000 digits verified",
+  "meta_spec_errors": 1,
+  "notes": null
+}

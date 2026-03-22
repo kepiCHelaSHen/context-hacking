@@ -1,0 +1,14 @@
+{
+  "display_name": "Radioactive Decay",
+  "standard": "cat",
+  "domain": "Chemistry",
+  "sprint": "chemistry-sprint-2026",
+  "status": "complete",
+  "key_result": "C-14 age at 50% = 5730 yr (correct); secular equilibrium N(Th234)/N(U238) = 1.48e-11.",
+  "false_positives_caught": 2,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": "4/4 tests pass",
+  "meta_spec_errors": 0,
+  "notes": "NNDC BNL Nuclear Data Center (ENSDF database)."
+}
