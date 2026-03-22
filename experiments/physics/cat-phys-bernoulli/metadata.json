@@ -1,0 +1,14 @@
+{
+  "display_name": "Bernoulli Equation",
+  "standard": "cat",
+  "domain": "Physics",
+  "sprint": "physics-sprint-2026",
+  "status": "complete",
+  "key_result": "Must include rho*g*h term; uses half*rho*v2; Torricelli v=sqrt(2gh)",
+  "false_positives_caught": 2,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

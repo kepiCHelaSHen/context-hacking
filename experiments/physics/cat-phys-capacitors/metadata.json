@@ -1,0 +1,14 @@
+{
+  "display_name": "Capacitors",
+  "standard": "cat",
+  "domain": "Physics",
+  "sprint": "physics-sprint-2026",
+  "status": "complete",
+  "key_result": "Series/parallel OPPOSITE of resistors; energy has 1/2 factor; dielectric increases C",
+  "false_positives_caught": 2,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}
