@@ -1,0 +1,14 @@
+{
+  "display_name": "Genetic Drift (Wright-Fisher)",
+  "standard": "cat",
+  "domain": "Biology",
+  "sprint": "biology-sprint-2026",
+  "status": "complete",
+  "key_result": "Fixation probability of neutral allele is p0 (initial frequency), NOT 1/(2N)",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

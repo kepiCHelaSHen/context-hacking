@@ -1,0 +1,14 @@
+{
+  "display_name": "Plate Velocity from Hotspot Tracks",
+  "standard": "cat",
+  "domain": "Earth Science",
+  "sprint": "earth-science-sprint-2026",
+  "status": "complete",
+  "key_result": "Velocity must be calculated per segment between bends; total-distance/total-time averages across direction changes",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": "Hawaiian-Emperor chain: bend at ~43 Ma marks Pacific plate direction change (NNW to WNW)"
+}

@@ -1,0 +1,14 @@
+{
+  "display_name": "Soil Texture Classification",
+  "standard": "cat",
+  "domain": "Earth Science",
+  "sprint": "earth-science-sprint-2026",
+  "status": "complete",
+  "key_result": "USDA texture triangle: clay>=40% for clay class; %clay+%silt+%sand MUST equal 100",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

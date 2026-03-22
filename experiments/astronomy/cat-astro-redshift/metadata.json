@@ -1,0 +1,14 @@
+{
+  "display_name": "Cosmological Redshift",
+  "standard": "cat",
+  "domain": "Astronomy",
+  "sprint": "astronomy-sprint-2026",
+  "status": "complete",
+  "key_result": "v=cz only valid for z<<1; SR Doppler gives v/c=((1+z)^2-1)/((1+z)^2+1); cosmological redshift is NOT Doppler",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

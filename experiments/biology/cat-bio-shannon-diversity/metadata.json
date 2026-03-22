@@ -1,0 +1,14 @@
+{
+  "display_name": "Shannon Diversity",
+  "standard": "cat",
+  "domain": "Biology",
+  "sprint": "biology-sprint-2026",
+  "status": "complete",
+  "key_result": "Ecology uses natural log (ln) for Shannon index, not log2; mixing bases gives evenness J>1",
+  "false_positives_caught": 2,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

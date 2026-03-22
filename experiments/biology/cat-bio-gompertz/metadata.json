@@ -1,0 +1,14 @@
+{
+  "display_name": "Gompertz Growth",
+  "standard": "cat",
+  "domain": "Biology",
+  "sprint": "biology-sprint-2026",
+  "status": "complete",
+  "key_result": "Gompertz inflection at K/e not K/2; growth rate uses ln(N/K) not (1-N/K)",
+  "false_positives_caught": 0,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

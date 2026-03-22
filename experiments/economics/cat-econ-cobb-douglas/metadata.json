@@ -1,0 +1,14 @@
+{
+  "display_name": "Cobb-Douglas Production Function",
+  "standard": "cat",
+  "domain": "Economics",
+  "sprint": "economics-sprint-2026",
+  "status": "complete",
+  "key_result": "Exponents alpha+beta need not equal 1; alpha+beta>1 gives increasing returns to scale",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

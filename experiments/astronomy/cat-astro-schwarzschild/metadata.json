@@ -1,0 +1,14 @@
+{
+  "display_name": "Schwarzschild Radius",
+  "standard": "cat",
+  "domain": "Astronomy",
+  "sprint": "astronomy-sprint-2026",
+  "status": "complete",
+  "key_result": "r_s = 2GM/c² (factor of 2 is CRITICAL; GM/c² is WRONG by half)",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

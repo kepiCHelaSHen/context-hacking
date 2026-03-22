@@ -1,0 +1,14 @@
+{
+  "display_name": "F-Distribution",
+  "standard": "cat",
+  "domain": "Statistics",
+  "sprint": "statistics-sprint-2026",
+  "status": "complete",
+  "key_result": "F = MSB/MSW with df1 = k-1 (between), df2 = N-k (within); not swapped",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

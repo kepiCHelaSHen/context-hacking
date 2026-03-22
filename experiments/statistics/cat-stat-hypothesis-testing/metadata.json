@@ -1,0 +1,14 @@
+{
+  "display_name": "Hypothesis Testing",
+  "standard": "cat",
+  "domain": "Statistics",
+  "sprint": "statistics-sprint-2026",
+  "status": "complete",
+  "key_result": "Type I (alpha) vs Type II (beta) distinction; p-value is P(data|H0), not P(H0|data)",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

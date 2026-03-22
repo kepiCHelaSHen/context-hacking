@@ -1,0 +1,14 @@
+{
+  "display_name": "DNA Melting Temperature",
+  "standard": "cat",
+  "domain": "Biology",
+  "sprint": "biology-sprint-2026",
+  "status": "complete",
+  "key_result": "Nearest-neighbor Tm is sequence-order-dependent (stacking interactions), unlike %GC or Wallace methods which only count bases",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

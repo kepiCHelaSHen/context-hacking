@@ -1,0 +1,14 @@
+{
+  "display_name": "PID Controller",
+  "standard": "cat",
+  "domain": "Engineering",
+  "sprint": "engineering-sprint-2026",
+  "status": "complete",
+  "key_result": "Integral includes dt factor; derivative sign (e[n]-e[n-1]) correct; D acts on error not PV",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

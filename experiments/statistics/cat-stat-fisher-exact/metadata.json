@@ -1,0 +1,14 @@
+{
+  "display_name": "Fisher's Exact Test",
+  "standard": "cat",
+  "domain": "Statistics",
+  "sprint": "statistics-sprint-2026",
+  "status": "complete",
+  "key_result": "Exact hypergeometric calculation for 2x2 tables using C(R1,a)*C(R2,C1-a)/C(N,C1), not chi-squared approximation",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

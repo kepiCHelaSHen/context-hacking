@@ -1,0 +1,14 @@
+{
+  "display_name": "Belt Drives — Tension Ratio (Euler Belt Equation)",
+  "standard": "cat",
+  "domain": "Engineering",
+  "sprint": "engineering-sprint-2026",
+  "status": "complete",
+  "key_result": "T1/T2 = e^(mu*theta) with theta in RADIANS not degrees; power P = (T1-T2)*v not T1*v; T1=tight side T2=slack side",
+  "false_positives_caught": 0,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

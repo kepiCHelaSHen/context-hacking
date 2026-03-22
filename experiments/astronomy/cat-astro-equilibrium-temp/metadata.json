@@ -1,0 +1,14 @@
+{
+  "display_name": "Planetary Equilibrium Temperature",
+  "standard": "cat",
+  "domain": "Astronomy",
+  "sprint": "astronomy-sprint-2026",
+  "status": "complete",
+  "key_result": "T_eq = (L(1-A)/(16*pi*sigma*d^2))^(1/4); Earth T_eq=254K but actual=288K — greenhouse adds ~34K; Venus greenhouse adds ~510K",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

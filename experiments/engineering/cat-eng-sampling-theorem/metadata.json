@@ -1,0 +1,14 @@
+{
+  "display_name": "Nyquist-Shannon Sampling Theorem",
+  "standard": "cat",
+  "domain": "Engineering",
+  "sprint": "engineering-sprint-2026",
+  "status": "complete",
+  "key_result": "Nyquist rate = 2*f_max NOT f_max; aliased freq = |f_signal - k*f_s| for nearest k; Nyquist freq (f_s/2) distinct from Nyquist rate (2*f_max)",
+  "false_positives_caught": 0,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

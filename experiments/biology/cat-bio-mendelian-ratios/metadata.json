@@ -1,0 +1,14 @@
+{
+  "display_name": "Mendelian Ratios",
+  "standard": "cat",
+  "domain": "Biology",
+  "sprint": "biology-sprint-2026",
+  "status": "complete",
+  "key_result": "Dihybrid AaBb × AaBb yields 9:3:3:1 phenotype ratio (not 3:1:1:1); Punnett has 16 combos",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

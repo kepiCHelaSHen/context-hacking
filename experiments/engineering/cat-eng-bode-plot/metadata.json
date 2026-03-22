@@ -1,0 +1,14 @@
+{
+  "display_name": "Bode Plot",
+  "standard": "cat",
+  "domain": "Engineering",
+  "sprint": "engineering-sprint-2026",
+  "status": "complete",
+  "key_result": "Phase at pole = -45 deg NOT -90 deg; gain in dB via 20*log10; pole slope -20 dB/dec not +20",
+  "false_positives_caught": 0,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

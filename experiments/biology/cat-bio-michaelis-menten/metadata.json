@@ -1,0 +1,14 @@
+{
+  "display_name": "Michaelis-Menten",
+  "standard": "cat",
+  "domain": "Biology",
+  "sprint": "biology-sprint-2026",
+  "status": "complete",
+  "key_result": "Km is substrate concentration at half-max velocity (Vmax/2), not at Vmax",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

@@ -1,0 +1,14 @@
+{
+  "display_name": "Ordinary Least Squares Regression",
+  "standard": "cat",
+  "domain": "Statistics",
+  "sprint": "statistics-sprint-2026",
+  "status": "complete",
+  "key_result": "Must use adjusted R^2 (not R^2) for model comparison across different numbers of predictors; R^2 always increases with more predictors",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

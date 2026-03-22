@@ -1,0 +1,14 @@
+{
+  "display_name": "Supply and Demand Equilibrium",
+  "standard": "cat",
+  "domain": "Economics",
+  "sprint": "economics-sprint-2026",
+  "status": "complete",
+  "key_result": "P*=24, Q*=52 for Qd=100-2P, Qs=-20+3P; supply shift right lowers price (not raises it).",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": "Mankiw Principles of Economics 9th Ed Ch4, Varian Microeconomic Analysis 3rd Ed Ch1."
+}

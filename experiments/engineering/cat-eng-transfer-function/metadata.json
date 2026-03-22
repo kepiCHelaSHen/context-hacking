@@ -1,0 +1,14 @@
+{
+  "display_name": "Transfer Function",
+  "standard": "cat",
+  "domain": "Engineering",
+  "sprint": "engineering-sprint-2026",
+  "status": "complete",
+  "key_result": "Poles (roots of denominator) determine stability; ALL Re(s)<0 for BIBO; zeros don't affect stability",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

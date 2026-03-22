@@ -1,0 +1,14 @@
+{
+  "display_name": "Predator Functional Response",
+  "standard": "cat",
+  "domain": "Biology",
+  "sprint": "biology-sprint-2026",
+  "status": "complete",
+  "key_result": "Type III uses aN²/(1+ahN²) giving sigmoidal curve (accelerating at low N), not aN/(1+ahN) which is Type II hyperbolic",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

@@ -1,0 +1,14 @@
+{
+  "display_name": "Stellar Parallax",
+  "standard": "cat",
+  "domain": "Astronomy",
+  "sprint": "astronomy-sprint-2026",
+  "status": "complete",
+  "key_result": "d(pc)=1/p(arcsec) where p is the SEMI-ANGLE (half annual shift); 1 pc = 3.262 ly = 206265 AU",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

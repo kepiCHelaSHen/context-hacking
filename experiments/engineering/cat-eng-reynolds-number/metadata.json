@@ -1,0 +1,14 @@
+{
+  "display_name": "Reynolds Number",
+  "standard": "cat",
+  "domain": "Engineering",
+  "sprint": "engineering-sprint-2026",
+  "status": "complete",
+  "key_result": "Re uses diameter D not radius r; laminar/turbulent transition at Re=2300 not 2000 or 4000",
+  "false_positives_caught": 2,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

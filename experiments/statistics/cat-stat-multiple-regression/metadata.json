@@ -1,0 +1,14 @@
+{
+  "display_name": "Multiple Regression",
+  "standard": "cat",
+  "domain": "Statistics",
+  "sprint": "statistics-sprint-2026",
+  "status": "complete",
+  "key_result": "VIF=1/(1-R\u00b2_j); VIF>10 signals severe multicollinearity making partial coefficients unreliable",
+  "false_positives_caught": 2,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

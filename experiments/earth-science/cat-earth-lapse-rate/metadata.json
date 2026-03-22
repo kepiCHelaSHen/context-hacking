@@ -1,0 +1,14 @@
+{
+  "display_name": "Temperature Lapse Rate",
+  "standard": "cat",
+  "domain": "Earth Science",
+  "sprint": "earth-science-sprint-2026",
+  "status": "complete",
+  "key_result": "DALR=9.8C/km > env=6.5C/km > MALR~5-6C/km; DALR for unsaturated, MALR for saturated parcels",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

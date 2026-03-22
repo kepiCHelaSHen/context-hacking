@@ -1,0 +1,14 @@
+{
+  "display_name": "Thermal Expansion",
+  "standard": "cat",
+  "domain": "Engineering",
+  "sprint": "engineering-sprint-2026",
+  "status": "complete",
+  "key_result": "Volumetric beta=3*alpha NOT alpha; area gamma=2*alpha; using alpha alone gives 1/3 or 1/2 correct answer",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

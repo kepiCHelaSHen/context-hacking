@@ -1,0 +1,14 @@
+{
+  "display_name": "Nernst Equation",
+  "standard": "cat",
+  "domain": "Biology",
+  "sprint": "biology-sprint-2026",
+  "status": "complete",
+  "key_result": "Nernst E_ion=(RT/zF)*ln(out/in); z=-1 for Cl- flips sign",
+  "false_positives_caught": 2,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

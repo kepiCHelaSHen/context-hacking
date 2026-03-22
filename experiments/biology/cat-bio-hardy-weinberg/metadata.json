@@ -1,0 +1,14 @@
+{
+  "display_name": "Hardy-Weinberg",
+  "standard": "cat",
+  "domain": "Biology",
+  "sprint": "biology-sprint-2026",
+  "status": "complete",
+  "key_result": "Heterozygote frequency is 2pq not pq; frequencies must sum to 1",
+  "false_positives_caught": 2,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

@@ -1,0 +1,14 @@
+{
+  "display_name": "Gear Train Analysis",
+  "standard": "cat",
+  "domain": "Engineering",
+  "sprint": "engineering-sprint-2026",
+  "status": "complete",
+  "key_result": "Direction reversal for odd meshes; GR = N_driven/N_driver; torque increases with speed reduction",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

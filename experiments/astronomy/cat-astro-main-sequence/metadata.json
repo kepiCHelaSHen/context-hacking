@@ -1,0 +1,14 @@
+{
+  "display_name": "Main Sequence Lifetime",
+  "standard": "cat",
+  "domain": "Astronomy",
+  "sprint": "astronomy-sprint-2026",
+  "status": "complete",
+  "key_result": "t_ms proportional M^(1-alpha); massive stars die FAST; alpha varies by mass range",
+  "false_positives_caught": 2,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

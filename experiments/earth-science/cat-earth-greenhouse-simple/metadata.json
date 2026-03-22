@@ -1,0 +1,14 @@
+{
+  "display_name": "Single-Layer Atmosphere Model — Greenhouse Effect",
+  "standard": "cat",
+  "domain": "Earth Science",
+  "sprint": "earth-science-sprint-2026",
+  "status": "complete",
+  "key_result": "T_bare=255K (-18°C); single-layer ε=1 gives 303K (overestimates); real ε<1 gives 288K (15°C); ΔT_greenhouse=33K",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

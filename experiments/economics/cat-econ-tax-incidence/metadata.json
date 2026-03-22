@@ -1,0 +1,14 @@
+{
+  "display_name": "Tax Incidence",
+  "standard": "cat",
+  "domain": "Economics",
+  "sprint": "economics-sprint-2026",
+  "status": "complete",
+  "key_result": "Tax burden falls MORE on the more INELASTIC side; consumer share = Es/(Es+Ed), DWL = 0.5*tax*dQ",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

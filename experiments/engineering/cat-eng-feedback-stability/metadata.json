@@ -1,0 +1,14 @@
+{
+  "display_name": "Feedback Stability (Routh-Hurwitz)",
+  "standard": "cat",
+  "domain": "Engineering",
+  "sprint": "engineering-sprint-2026",
+  "status": "complete",
+  "key_result": "Sign changes in Routh array first column = number of RHP poles; stable iff zero sign changes",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

@@ -1,0 +1,14 @@
+{
+  "display_name": "Phylogenetic Distance (Jukes-Cantor)",
+  "standard": "cat",
+  "domain": "Biology",
+  "sprint": "biology-sprint-2026",
+  "status": "complete",
+  "key_result": "Jukes-Cantor correction -(3/4)ln(1-(4/3)p) exceeds raw distance p; raw underestimates true evolutionary distance",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

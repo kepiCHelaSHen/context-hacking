@@ -1,0 +1,14 @@
+{
+  "display_name": "Darcy-Weisbach Pipe Friction",
+  "standard": "cat",
+  "domain": "Engineering",
+  "sprint": "engineering-sprint-2026",
+  "status": "complete",
+  "key_result": "Darcy f_D = 64/Re vs Fanning f_F = 16/Re — factor of 4 difference; never mix conventions",
+  "false_positives_caught": 0,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

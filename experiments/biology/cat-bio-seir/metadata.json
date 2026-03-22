@@ -1,0 +1,14 @@
+{
+  "display_name": "SEIR Epidemic Model",
+  "standard": "cat",
+  "domain": "Biology",
+  "sprint": "biology-sprint-2026",
+  "status": "complete",
+  "key_result": "SEIR R0 = beta/gamma, same as SIR; sigma (exposed rate) affects timing only, not R0",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

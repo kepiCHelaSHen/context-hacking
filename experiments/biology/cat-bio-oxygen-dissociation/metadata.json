@@ -1,0 +1,14 @@
+{
+  "display_name": "Hemoglobin O\u2082 Saturation Curve",
+  "standard": "cat",
+  "domain": "Biology",
+  "sprint": "biology-sprint-2026",
+  "status": "complete",
+  "key_result": "P\u2085\u2080=26.6 mmHg at pH 7.4 (not 27 or 30); Bohr effect shifts curve with pH",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

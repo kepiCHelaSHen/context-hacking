@@ -1,0 +1,14 @@
+{
+  "display_name": "Solow Growth Model — Steady-State Capital per Worker",
+  "standard": "cat",
+  "domain": "Economics",
+  "sprint": "economics-sprint-2026",
+  "status": "complete",
+  "key_result": "Steady-state uses (n+delta) not just delta; population growth dilutes capital per worker",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

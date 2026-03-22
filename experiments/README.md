@@ -91,23 +91,29 @@ etc.) from the filesystem. No manual index editing.
 
 ## Current Status
 
-| Discipline | Cat | Loop | Total | Target |
+| Discipline | Cat | Disc | Loop | Total |
 |---|---|---|---|---|
-| Chemistry | 10 | 0 | 10 | 50 |
-| Physics | 20 | 1 | 21 | 50 |
-| Mathematics | 5 | 0 | 5 | 50 |
-| Biology | 0 | 3 | 3 | 50 |
-| Social Science | 0 | 2 | 2+2 staged | 30 |
-| Computer Science | 0 | 3 | 3 | 40 |
-| Medicine | 2 | 0 | 2 | 20 |
-| Engineering | 0 | 0 | 0 | 40 |
-| Statistics | 0 | 0 | 0 | 40 |
-| Economics | 0 | 0 | 0 | 30 |
-| Earth Science | 0 | 0 | 0 | 30 |
-| Astronomy | 0 | 0 | 0 | 30 |
-| Audio DSP | 0 | 1 | 1 | 10 |
-| Music | 0 | 1 | 1 | 10 |
-| **Total** | **37** | **13** | **51** | **500** |
+| Chemistry | 10 | 0 | 0 | 10 |
+| Physics | 30 | 0 | 1 | 31 |
+| Mathematics | 5 | 0 | 0 | 5 |
+| Statistics | 25 | 0 | 0 | 25 |
+| Biology | 30 | 0 | 3 | 33 |
+| Engineering | 25 | 0 | 0 | 25 |
+| Economics | 20 | 0 | 0 | 20 |
+| Earth Science | 20 | 0 | 0 | 20 |
+| Astronomy | 20 | 0 | 0 | 20 |
+| Social Science | 0 | 0 | 2 | 2+2 staged |
+| Computer Science | 0 | 0 | 3 | 3 |
+| Medicine | 2 | 0 | 0 | 2 |
+| Audio DSP | 0 | 0 | 1 | 1 |
+| Music | 0 | 0 | 1 | 1 |
+| **Total** | **187** | **0** | **13** | **201** |
+
+### What each type validates
+
+- **cat-** experiments validate **Layer 1 (Prior-as-Detector)** and **Layer 3 (Frozen Code Forcing)** — they catalog predictable LLM errors and prove frozen specs catch them
+- **loop-** experiments validate **all 9 CHP layers** — full Builder/Critic/Reviewer with sigma gates, dead ends, and mode switching
+- **disc-** experiments validate **Layer 1 in the wild** — proving errors occur naturally, not just in constructed test cases
 
 ## Error Taxonomy
 
@@ -127,11 +133,15 @@ layer introduced them.
 ## Running Tests
 
 ```bash
-# All catalog experiments
-python -m pytest experiments/chemistry/cat-*/tests/ experiments/physics/cat-*/tests/ -v --tb=short
-
-# Single discipline
-python -m pytest experiments/chemistry/ -v --tb=short
+# All catalog experiments (by discipline)
+python -m pytest experiments/statistics/cat-stat-*/tests/ -q
+python -m pytest experiments/biology/cat-bio-*/tests/ -q
+python -m pytest experiments/engineering/cat-eng-*/tests/ -q
+python -m pytest experiments/economics/cat-econ-*/tests/ -q
+python -m pytest experiments/earth-science/cat-earth-*/tests/ -q
+python -m pytest experiments/astronomy/cat-astro-*/tests/ -q
+python -m pytest experiments/physics/cat-phys-*/tests/ -q
+python -m pytest experiments/chemistry/cat-chem-*/tests/ -q
 
 # Single experiment
 python -m pytest experiments/chemistry/cat-chem-equilibrium/tests/ -v --tb=short

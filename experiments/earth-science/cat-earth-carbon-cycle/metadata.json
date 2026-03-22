@@ -1,0 +1,14 @@
+{
+  "display_name": "Carbon Cycle — Reservoir Sizes & Fluxes",
+  "standard": "cat",
+  "domain": "Earth Science",
+  "sprint": "earth-science-sprint-2026",
+  "status": "complete",
+  "key_result": "Ocean is NET SINK (~2.5 GtC/yr absorbed); ocean is largest active reservoir (~38000 GtC), not atmosphere (~860 GtC)",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

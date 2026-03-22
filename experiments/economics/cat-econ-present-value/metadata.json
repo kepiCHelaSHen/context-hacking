@@ -1,0 +1,14 @@
+{
+  "display_name": "Present Value (NPV, IRR, Annuities)",
+  "standard": "cat",
+  "domain": "Economics",
+  "sprint": "economics-sprint-2026",
+  "status": "complete",
+  "key_result": "Discrete PV=620.92 vs continuous PV=606.53 for FV=1000,r=0.10,n=5; annuity PV=379.08; e^(-rn) != 1/(1+r)^n",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": "9/9 tests pass",
+  "meta_spec_errors": 0,
+  "notes": "Key trap: continuous vs discrete compounding use different formulas for same nominal rate. LLMs frequently swap them or use PMT/r for finite annuities."
+}

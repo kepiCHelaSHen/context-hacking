@@ -1,0 +1,14 @@
+{
+  "display_name": "One-Compartment Pharmacokinetics",
+  "standard": "cat",
+  "domain": "Biology",
+  "sprint": "biology-sprint-2026",
+  "status": "complete",
+  "key_result": "Half-life is t½=ln(2)/ke, not 1/ke; C(t½) must equal C₀/2",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

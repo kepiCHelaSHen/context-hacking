@@ -1,0 +1,14 @@
+{
+  "display_name": "Digital Logic: Boolean Simplification",
+  "standard": "cat",
+  "domain": "Engineering",
+  "sprint": "engineering-sprint-2026",
+  "status": "complete",
+  "key_result": "K-map Σm(1,3,5,7)=C; De Morgan's uses OR for NAND, AND for NOR; don't-cares are optional",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

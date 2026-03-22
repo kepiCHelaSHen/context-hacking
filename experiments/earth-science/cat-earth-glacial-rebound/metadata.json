@@ -1,0 +1,14 @@
+{
+  "display_name": "Glacial Rebound (Isostatic Adjustment)",
+  "standard": "cat",
+  "domain": "Earth Science",
+  "sprint": "earth-science-sprint-2026",
+  "status": "complete",
+  "key_result": "d=h_ice*rho_ice/rho_mantle; rebound d(t)=d0*exp(-t/tau); mantle eta~10^21 Pa·s",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

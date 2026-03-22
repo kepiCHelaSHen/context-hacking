@@ -1,0 +1,14 @@
+{
+  "display_name": "Allometric Scaling (Kleiber's Law)",
+  "standard": "cat",
+  "domain": "Biology",
+  "sprint": "biology-sprint-2026",
+  "status": "complete",
+  "key_result": "Metabolic scaling exponent is 3/4 (Kleiber), not 2/3 (Rubner surface-area law)",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

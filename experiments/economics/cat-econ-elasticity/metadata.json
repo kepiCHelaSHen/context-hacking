@@ -1,0 +1,14 @@
+{
+  "display_name": "Price Elasticity of Demand",
+  "standard": "cat",
+  "domain": "Economics",
+  "sprint": "economics-sprint-2026",
+  "status": "complete",
+  "key_result": "PED is NEGATIVE for normal goods; |PED|>1 elastic, |PED|<1 inelastic; midpoint method uses averages",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

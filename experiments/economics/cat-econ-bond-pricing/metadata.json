@@ -1,0 +1,14 @@
+{
+  "display_name": "Bond Pricing (YTM, Duration, Convexity)",
+  "standard": "cat",
+  "domain": "Economics",
+  "sprint": "economics-sprint-2026",
+  "status": "complete",
+  "key_result": "P=918.89 for 6% semi-annual 5yr bond at 8% YTM; annual convention gives 920.15 (WRONG for US bonds).",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": "Fabozzi Fixed Income Analysis 3rd Ed; Hull Options, Futures & Other Derivatives 11th Ed Ch4."
+}

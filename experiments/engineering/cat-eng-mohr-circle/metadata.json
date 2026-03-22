@@ -1,0 +1,14 @@
+{
+  "display_name": "Mohr's Circle",
+  "standard": "cat",
+  "domain": "Engineering",
+  "sprint": "engineering-sprint-2026",
+  "status": "complete",
+  "key_result": "Center C = (sx+sy)/2 NOT (sx-sy)/2; radius R includes shear term; principal angle has 1/2 factor",
+  "false_positives_caught": 0,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

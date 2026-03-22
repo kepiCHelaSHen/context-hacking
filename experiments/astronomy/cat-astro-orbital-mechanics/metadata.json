@@ -1,0 +1,14 @@
+{
+  "display_name": "Hohmann Transfer Orbit",
+  "standard": "cat",
+  "domain": "Astronomy",
+  "sprint": "astronomy-sprint-2026",
+  "status": "complete",
+  "key_result": "Two burns required: dv1 at departure + dv2 at arrival; total ~5.59 km/s Earth-Mars; transfer time is HALF orbit period",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

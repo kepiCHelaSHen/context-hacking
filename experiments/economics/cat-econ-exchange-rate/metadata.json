@@ -1,0 +1,14 @@
+{
+  "display_name": "PPP & Interest Rate Parity",
+  "standard": "cat",
+  "domain": "Economics",
+  "sprint": "economics-sprint-2026",
+  "status": "complete",
+  "key_result": "PPP rate 1.20 $/£; relative PPP predicts 2% depreciation to 1.224; IRP confirms depreciation direction.",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": "12/12 tests pass",
+  "meta_spec_errors": 0,
+  "notes": "Three prior LLM errors targeted: PPP inversion (P_f/P_d), wrong appreciation direction for higher inflation, and IRP same-direction error. All use domestic/foreign convention with E in $/£."
+}

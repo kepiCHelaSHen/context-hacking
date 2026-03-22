@@ -1,0 +1,14 @@
+{
+  "display_name": "Population Age Structure (Leslie Matrix)",
+  "standard": "cat",
+  "domain": "Biology",
+  "sprint": "biology-sprint-2026",
+  "status": "complete",
+  "key_result": "Dominant eigenvalue of Leslie matrix = asymptotic growth rate \u03bb; \u03bb \u2260 r=ln(\u03bb)",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

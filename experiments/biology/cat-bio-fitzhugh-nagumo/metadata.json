@@ -1,0 +1,14 @@
+{
+  "display_name": "FitzHugh-Nagumo Model",
+  "standard": "cat",
+  "domain": "Biology",
+  "sprint": "biology-sprint-2026",
+  "status": "complete",
+  "key_result": "v-nullcline is CUBIC (w = v - v^3/3), not linear or parabolic; epsilon must appear in dw/dt",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

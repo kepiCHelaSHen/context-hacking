@@ -1,0 +1,14 @@
+{
+  "display_name": "Tidal Forces (Lunar & Solar Tidal Bulge)",
+  "standard": "cat",
+  "domain": "Earth Science",
+  "sprint": "earth-science-sprint-2026",
+  "status": "complete",
+  "key_result": "Tidal force ∝ M/d³; Sun/Moon ratio ≈ 0.46; spring ≈ 1.46×, neap ≈ 0.54× Moon alone",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

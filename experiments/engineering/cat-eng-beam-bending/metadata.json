@@ -1,0 +1,14 @@
+{
+  "display_name": "Euler-Bernoulli Beam Bending",
+  "standard": "cat",
+  "domain": "Engineering",
+  "sprint": "engineering-sprint-2026",
+  "status": "complete",
+  "key_result": "Rectangular I = bh^3/12 NOT bh^2/12; circular I = pi*d^4/64 NOT polar J = pi*d^4/32; deflection coeff 48 for simply-supported center load",
+  "false_positives_caught": 0,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

@@ -1,0 +1,14 @@
+{
+  "display_name": "Chi-Squared Distribution",
+  "standard": "cat",
+  "domain": "Statistics",
+  "sprint": "statistics-sprint-2026",
+  "status": "complete",
+  "key_result": "Contingency table df=(r-1)(c-1), not r*c-1 or (r-1)+(c-1); GoF df=k-1",
+  "false_positives_caught": 2,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

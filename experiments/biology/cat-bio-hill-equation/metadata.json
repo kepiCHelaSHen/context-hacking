@@ -1,0 +1,14 @@
+{
+  "display_name": "Hill Equation",
+  "standard": "cat",
+  "domain": "Biology",
+  "sprint": "biology-sprint-2026",
+  "status": "complete",
+  "key_result": "Hill coefficient n is NOT the number of binding sites; hemoglobin has 4 sites but n\u22482.8",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

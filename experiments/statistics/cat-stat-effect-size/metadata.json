@@ -1,0 +1,14 @@
+{
+  "display_name": "Effect Size — Cohen\u2019s d, \u03b7\u00b2, r",
+  "standard": "cat",
+  "domain": "Statistics",
+  "sprint": "statistics-sprint-2026",
+  "status": "complete",
+  "key_result": "Correct pooled SD weights by df: \u221a(((n\u2081\u22121)\u00b7s\u2081\u00b2+(n\u2082\u22121)\u00b7s\u2082\u00b2)/(n\u2081+n\u2082\u22122)); the equal-n shortcut \u221a((s\u2081\u00b2+s\u2082\u00b2)/2) gives d\u22480.453 instead of the correct d\u22480.457",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

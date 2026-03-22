@@ -1,0 +1,14 @@
+{
+  "display_name": "Normal Distribution",
+  "standard": "cat",
+  "domain": "Statistics",
+  "sprint": "statistics-sprint-2026",
+  "status": "complete",
+  "key_result": "68-95-99.7 is approximate; true \u00b13\u03c3 coverage is 99.7300%, not 99.7%",
+  "false_positives_caught": 2,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

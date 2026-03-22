@@ -1,0 +1,14 @@
+{
+  "display_name": "RLC Resonance",
+  "standard": "cat",
+  "domain": "Engineering",
+  "sprint": "engineering-sprint-2026",
+  "status": "complete",
+  "key_result": "Q=(1/R)*sqrt(L/C) for series; BW=f0/Q; at resonance Z=R purely resistive",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

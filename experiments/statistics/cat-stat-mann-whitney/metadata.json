@@ -1,0 +1,14 @@
+{
+  "display_name": "Mann-Whitney U Test",
+  "standard": "cat",
+  "domain": "Statistics",
+  "sprint": "statistics-sprint-2026",
+  "status": "complete",
+  "key_result": "Correct U formula with n1*n2 term; U1+U2=n1*n2 identity holds; U=min(U1,U2)",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

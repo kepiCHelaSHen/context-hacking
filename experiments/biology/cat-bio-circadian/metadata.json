@@ -1,0 +1,14 @@
+{
+  "display_name": "Goodwin Oscillator (Circadian Rhythm)",
+  "standard": "cat",
+  "domain": "Biology",
+  "sprint": "biology-sprint-2026",
+  "status": "complete",
+  "key_result": "Basic 3-variable Goodwin model requires Hill coefficient n>8 for sustained oscillations; n=2 gives only damped oscillations",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

@@ -1,0 +1,14 @@
+{
+  "display_name": "Correlation (Pearson, Spearman, Kendall)",
+  "standard": "cat",
+  "domain": "Statistics",
+  "sprint": "statistics-sprint-2026",
+  "status": "complete",
+  "key_result": "Correlation does not imply causation; must use correct Pearson r and Spearman rho formulas (Pearson-on-ranks for ties, not the no-tie shortcut)",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

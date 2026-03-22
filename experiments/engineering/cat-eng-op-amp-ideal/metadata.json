@@ -1,0 +1,14 @@
+{
+  "display_name": "Ideal Op-Amp",
+  "standard": "cat",
+  "domain": "Engineering",
+  "sprint": "engineering-sprint-2026",
+  "status": "complete",
+  "key_result": "Inverting gain is NEGATIVE (-Rf/Rin); non-inverting gain is 1+Rf/Rin (>= 1); virtual ground at V-",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

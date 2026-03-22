@@ -1,0 +1,14 @@
+{
+  "display_name": "Phillips Curve",
+  "standard": "cat",
+  "domain": "Economics",
+  "sprint": "economics-sprint-2026",
+  "status": "complete",
+  "key_result": "Long-run Phillips curve is VERTICAL at NAIRU — no permanent inflation-unemployment tradeoff",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

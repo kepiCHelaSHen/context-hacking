@@ -1,0 +1,14 @@
+{
+  "display_name": "Hagen-Poiseuille Pipe Flow",
+  "standard": "cat",
+  "domain": "Engineering",
+  "sprint": "engineering-sprint-2026",
+  "status": "complete",
+  "key_result": "HP only valid for laminar Re<2300; uses d⁴ not r⁴; Q=piDPd4/(128muL)",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": "LLM commonly applies HP to turbulent flow; Darcy-Weisbach needed for Re>2300"
+}

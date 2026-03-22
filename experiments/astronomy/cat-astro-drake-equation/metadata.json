@@ -1,0 +1,14 @@
+{
+  "display_name": "Drake Equation",
+  "standard": "cat",
+  "domain": "Astronomy",
+  "sprint": "astronomy-sprint-2026",
+  "status": "complete",
+  "key_result": "N = R* x f_p x n_e x f_l x f_i x f_c x L; f_p~1.0 (Kepler); N ranges 0.00015 to 200+",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": "Orders of magnitude disagreement in factor estimates; f_p~1.0 is now well-established via Kepler"
+}

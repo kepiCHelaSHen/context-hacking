@@ -1,0 +1,14 @@
+{
+  "display_name": "Bonferroni Correction",
+  "standard": "cat",
+  "domain": "Statistics",
+  "sprint": "statistics-sprint-2026",
+  "status": "complete",
+  "key_result": "Bonferroni is overly conservative (2 rejections); BH-FDR discovers 5 — missing 3 true positives by ignoring FDR alternatives",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

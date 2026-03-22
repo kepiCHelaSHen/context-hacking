@@ -1,0 +1,14 @@
+{
+  "display_name": "CMB Temperature — 2.725 K, Wien Peak Wavelength",
+  "standard": "cat",
+  "domain": "Astronomy",
+  "sprint": "astronomy-sprint-2026",
+  "status": "complete",
+  "key_result": "T_CMB=2.7255 K (COBE/FIRAS); Wien peak at 1.063 mm (microwave); NOT 3K — rounding error is 10%",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

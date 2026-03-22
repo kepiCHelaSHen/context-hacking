@@ -1,0 +1,14 @@
+{
+  "display_name": "S-N Curve \u2014 Fatigue Life & Miner\u2019s Rule",
+  "standard": "cat",
+  "domain": "Engineering",
+  "sprint": "engineering-sprint-2026",
+  "status": "complete",
+  "key_result": "Steel has endurance limit Se\u22480.5*Su (for Su<1400MPa); aluminum has NO true endurance limit \u2014 fatigue life always finite; Miner damage sum = 1 at failure",
+  "false_positives_caught": 0,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

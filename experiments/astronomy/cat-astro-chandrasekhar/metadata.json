@@ -1,0 +1,14 @@
+{
+  "display_name": "Chandrasekhar Limit",
+  "standard": "cat",
+  "domain": "Astronomy",
+  "sprint": "astronomy-sprint-2026",
+  "status": "complete",
+  "key_result": "M_Ch ≈ 1.44 M_sun (NOT 1.4 — the extra 0.04 matters for precision)",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

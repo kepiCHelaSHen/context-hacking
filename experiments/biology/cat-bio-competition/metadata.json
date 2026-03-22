@@ -1,0 +1,14 @@
+{
+  "display_name": "Lotka-Volterra Competition",
+  "standard": "cat",
+  "domain": "Biology",
+  "sprint": "biology-sprint-2026",
+  "status": "complete",
+  "key_result": "Coexistence requires BOTH alpha conditions: α₁₂ < K₁/K₂ AND α₂₁ < K₂/K₁",
+  "false_positives_caught": 2,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

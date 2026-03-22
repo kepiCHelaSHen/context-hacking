@@ -1,0 +1,14 @@
+{
+  "display_name": "CO2 Radiative Forcing",
+  "standard": "cat",
+  "domain": "Earth Science",
+  "sprint": "earth-science-sprint-2026",
+  "status": "complete",
+  "key_result": "dF=5.35*ln(C/C0); doubling gives 3.7 W/m^2; LOGARITHMIC not linear",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

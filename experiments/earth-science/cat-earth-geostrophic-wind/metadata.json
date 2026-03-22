@@ -1,0 +1,14 @@
+{
+  "display_name": "Geostrophic Wind",
+  "standard": "cat",
+  "domain": "Earth Science",
+  "sprint": "earth-science-sprint-2026",
+  "status": "complete",
+  "key_result": "Wind parallel to isobars; NH low-to-left (Buys-Ballot); v_g=1/(rho*f)*dP/dx=6.33 m/s",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

@@ -1,0 +1,14 @@
+{
+  "display_name": "Goldman-Hodgkin-Katz Equation",
+  "standard": "cat",
+  "domain": "Biology",
+  "sprint": "biology-sprint-2026",
+  "status": "complete",
+  "key_result": "Anions (Cl⁻) reverse inside/outside in GHK equation vs cations; LLMs frequently treat Cl⁻ like a cation yielding ≈-21 mV instead of ≈-75 mV",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

@@ -1,0 +1,14 @@
+{
+  "display_name": "Codon Table",
+  "standard": "cat",
+  "domain": "Biology",
+  "sprint": "biology-sprint-2026",
+  "status": "complete",
+  "key_result": "Exactly 3 stop codons (UAA/UAG/UGA); AUG is the only standard eukaryotic start codon; UGA is stop, not Trp",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

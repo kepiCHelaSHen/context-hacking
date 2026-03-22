@@ -1,0 +1,14 @@
+{
+  "display_name": "Einstein Ring — Gravitational Lensing Radius",
+  "standard": "cat",
+  "domain": "Astronomy",
+  "sprint": "astronomy-sprint-2026",
+  "status": "complete",
+  "key_result": "theta_E = sqrt(4GM/c^2 * D_ls/(D_l*D_s)); deflection = 4GM/(c^2*b), NOT 2GM/(c^2*b)",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": "D_ls != D_s - D_l for cosmological distances (angular diameter distances don't subtract). Einstein deflection is 2x Newtonian — confirmed GR in 1919."
+}

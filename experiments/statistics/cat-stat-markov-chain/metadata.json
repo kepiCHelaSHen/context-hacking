@@ -1,0 +1,14 @@
+{
+  "display_name": "Markov Chains",
+  "standard": "cat",
+  "domain": "Statistics",
+  "sprint": "statistics-sprint-2026",
+  "status": "complete",
+  "key_result": "Steady state requires πP = π with Σπᵢ = 1; solving Pπ = π (wrong direction) or forgetting normalization yields invalid distributions",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

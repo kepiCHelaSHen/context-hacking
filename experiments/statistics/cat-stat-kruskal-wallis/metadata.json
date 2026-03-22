@@ -1,0 +1,14 @@
+{
+  "display_name": "Kruskal-Wallis Test",
+  "standard": "cat",
+  "domain": "Statistics",
+  "sprint": "statistics-sprint-2026",
+  "status": "complete",
+  "key_result": "Tie correction uses t\u00b3-t not t\u00b2-t; df = k-1 not k or N-1",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

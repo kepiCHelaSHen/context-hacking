@@ -1,0 +1,14 @@
+{
+  "display_name": "Helical Spring — Wahl Correction Factor",
+  "standard": "cat",
+  "domain": "Engineering",
+  "sprint": "engineering-sprint-2026",
+  "status": "complete",
+  "key_result": "Wahl factor K_W = (4C-1)/(4C-4) + 0.615/C always > 1; corrected tau = K_W * 8FD/(pi*d^3); without correction stress is underestimated 10-50% and spring may fail",
+  "false_positives_caught": 0,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}

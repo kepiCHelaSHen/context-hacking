@@ -1,0 +1,14 @@
+{
+  "display_name": "Escape Velocity",
+  "standard": "cat",
+  "domain": "Astronomy",
+  "sprint": "astronomy-sprint-2026",
+  "status": "complete",
+  "key_result": "v_esc=sqrt(2GM/R) where R is distance from CENTER; Earth 11.19 km/s using mean R=6371km",
+  "false_positives_caught": 3,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": null
+}
