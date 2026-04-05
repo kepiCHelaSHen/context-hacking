@@ -77,3 +77,13 @@ class TestHelp:
         assert "--experiment" in result.output
         assert "--method" in result.output
         assert "--all-experiments" in result.output
+
+
+class TestResume:
+    def test_resume_flag_in_help(self):
+        """run command shows --resume flag in help."""
+        from click.testing import CliRunner
+        from context_hacking.cli import main
+        runner = CliRunner()
+        result = runner.invoke(main, ["run", "--help"])
+        assert "--resume" in result.output

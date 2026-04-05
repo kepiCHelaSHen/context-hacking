@@ -126,8 +126,30 @@ def init(name: str, experiment: str | None, existing: bool, cursor: bool) -> Non
               help="Run all 9 built-in experiments sequentially")
 @click.option("--dashboard", is_flag=True,
               help="Launch live WebSocket dashboard (for CHP-TETRIS-AI)")
-def run(experiment: str | None, method: str, all_experiments: bool, dashboard: bool) -> None:
+@click.option("--resume", is_flag=True, default=False,
+              help="Resume from last state_vector.md checkpoint")
+def run(experiment: str | None, method: str, all_experiments: bool, dashboard: bool, resume: bool) -> None:
     """Launch the CHP loop — builds, critiques, tests, and reports autonomously."""
+    resume_state = None
+    if resume:
+        from pathlib import Path as _Path
+        state_path = _Path("state_vector.md")
+        if not state_path.exists():
+            click.echo("Error: No state_vector.md found. Cannot resume.", err=True)
+            raise SystemExit(1)
+        from context_hacking.core.memory import MemoryManager
+        from context_hacking.core.orchestrator import Config
+        config_path = _Path("config.yaml")
+        if config_path.exists():
+            config = Config.from_yaml(config_path)
+            mm = MemoryManager(config)
+        else:
+            click.echo("Error: No config.yaml found. Cannot resume.", err=True)
+            raise SystemExit(1)
+        resume_state = mm.read_state_vector()
+        start_turn = int(resume_state.get("TURN", "0")) + 1
+        click.echo(f"Resuming from turn {start_turn} (mode: {resume_state.get('MODE', 'VALIDATION')})")
+
     if dashboard and experiment:
         exp_dir = Path.cwd() / "experiments" / experiment
         server_module = exp_dir / "server.py"
@@ -189,7 +211,7 @@ def run(experiment: str | None, method: str, all_experiments: bool, dashboard: b
         console.print(f"[bold]CHP Loop starting:[/bold] {experiment}")
         console.print(f"  Method: {method}")
         console.print()
-        run_experiment(experiment, method=method)
+        run_experiment(experiment, method=method, resume_state=resume_state)
         return
 
     # Default: detect experiment from config.yaml and run it
@@ -202,7 +224,7 @@ def run(experiment: str | None, method: str, all_experiments: bool, dashboard: b
         console.print(f"[bold]CHP Loop starting:[/bold] {project_name}")
         console.print(f"  Method: {method}")
         console.print()
-        run_experiment(project_name, method=method)
+        run_experiment(project_name, method=method, resume_state=resume_state)
     else:
         # Fallback: just do one orchestrator step (original behavior)
         from context_hacking.core.orchestrator import Config, Orchestrator

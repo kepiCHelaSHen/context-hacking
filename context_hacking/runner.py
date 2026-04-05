@@ -538,6 +538,7 @@ def run_experiment(
     experiment_name: str,
     method: str = "auto",
     project_dir: Path | None = None,
+    resume_state: dict | None = None,
 ) -> None:
     """Run the full CHP loop on an experiment.
 
@@ -552,6 +553,9 @@ def run_experiment(
         "auto"        — Try API, fall back to claude-cli, then interactive
     project_dir:
         Project root. Defaults to current directory.
+    resume_state:
+        Dict from state_vector.md for crash recovery. If provided,
+        the API loop starts from TURN+1.
     """
     if project_dir is None:
         project_dir = Path.cwd()
@@ -580,7 +584,7 @@ def run_experiment(
         _log.info("Auto-detected method: %s", method)
 
     if method == "api":
-        _run_api_loop(experiment_dir)
+        _run_api_loop(experiment_dir, resume_state=resume_state)
     elif method == "claude-cli":
         prompt = _load_loop_prompt(experiment_dir)
         _run_claude_cli(prompt, experiment_dir)
