@@ -296,6 +296,146 @@ The adversarial review protocol (the Critic role in CHP) detects this behavioral
 
 ---
 
+## 10. Reproducibility: The 62,500x Precision Claim
+
+### 10.1 Claim
+
+CHP-directed code generation produced 1,000,000 verified decimal digits of $\pi$, $e$, and $\sqrt{2}$, representing a 62,500x multiplier over the native LLM precision ceiling.
+
+### 10.2 Baseline: Native LLM Precision
+
+When an LLM generates a mathematical constant from its training prior (e.g., "print the digits of pi"), it produces a token sequence limited by IEEE 754 float64 representation. Float64 provides 15--17 significant decimal digits ($\lfloor \log_{10}(2^{53}) \rfloor = 15$). In practice, LLMs reproduce $\sim$16 significant digits of well-known constants before output degrades to noise or repetition. We adopt **16 digits** as the baseline ceiling.
+
+This ceiling is not a hardware limitation of the machine running the LLM --- it is a *token-generation* ceiling. The LLM's training data contains float64 representations of constants, so its generative prior reproduces at most float64 precision. Beyond 16 digits, the model either hallucinates, repeats, or refuses.
+
+### 10.3 CHP Result
+
+The OMEGA Sentinel experiment (`experiments/mathematics/cat-omega-sentinel-1m/`) computed:
+
+| Constant | Algorithm | Digits | Time | Verification |
+|----------|-----------|--------|------|--------------|
+| $e$ | Binary-splitting Taylor series (pure integer) | 1,000,000 | 67s | Matched frozen reference |
+| $\pi$ | Chudnovsky binary splitting (pure integer + `math.isqrt`) | 1,000,000 | 59s | Matched frozen reference |
+| $\sqrt{2}$ | Integer Newton-Raphson | 1,000,000 | 290s | Matched frozen reference |
+
+All computations used Python standard library only (no `mpmath`, no external libraries). The frozen specification required pure integer arithmetic throughout, avoiding Python's `decimal` module which exhibits $O(n^2)$ behavior at this scale.
+
+### 10.4 Verification Method
+
+Each 1,000,000-digit output was compared character-by-character against frozen reference files stored in `experiments/mathematics/cat-omega-sentinel-1m/figures/`. These reference files were generated independently and cross-checked against published digit sequences (OEIS A001113 for $e$, A000796 for $\pi$, A002193 for $\sqrt{2}$). All 1,000,000 digits matched for each constant.
+
+### 10.5 The Formula
+
+$$\text{Multiplier} = \frac{\text{CHP verified digits}}{\text{LLM native ceiling}} = \frac{1{,}000{,}000}{16} = 62{,}500\times$$
+
+### 10.6 Reproduction Steps
+
+1. Clone the repository and navigate to `experiments/mathematics/cat-omega-sentinel-1m/`.
+2. Run: `python compute_pi_1M.py --digits 1000000`, `python compute_e_1M.py --digits 1000000`, `python compute_sqrt2_1M.py --digits 1000000`.
+3. Compare output against `figures/pi_1M.txt`, `figures/e_1M.txt`, `figures/sqrt2_1M.txt`.
+4. All digits should match. Expected runtime: $\sim$60--290s per constant on a standard laptop (Python 3.11+).
+
+### 10.7 What This Does and Does Not Claim
+
+The 62,500x figure measures the gap between what an LLM *generates from its prior* ($\sim$16 digits) and what CHP-directed code *computes and verifies* (1,000,000 digits). It does **not** claim that CHP makes the LLM itself "smarter." The LLM, operating under the CHP protocol, wrote the computation scripts; the scripts then executed deterministically. The contribution is the protocol that directed the LLM to produce correct arbitrary-precision code --- including 4 dead-end recoveries where the kill switch fired on algorithms that failed at 1M scale.
+
+---
+
+## 11. Reproducibility: The 95/96 Coefficient Failure Rate
+
+### 11.1 Claim
+
+When asked to implement scientific simulation code without the frozen specification in context, frontier LLMs produced incorrect coefficient values in 95 of 96 measurements (99.0% drift rate). Fisher's exact test: $p = 4.0 \times 10^{-10}$.
+
+### 11.2 Experimental Setup
+
+**Domain:** SIMSIV --- a calibrated agent-based model of human social evolution (see Rice 2026; [SIMSIV repository](https://github.com/kepiCHelaSHen/SIMSIV)).
+
+**Models tested:**
+- GPT-4o (OpenAI) --- [TO BE FILLED: specific model snapshot date used]
+- Grok-3 (xAI) --- [TO BE FILLED: specific model snapshot date used]
+
+**Temperature:** 0.7 for all trials (ensuring genuine variation, not deterministic greedy decoding).
+
+**Trials per model:** 10 per coefficient per model (some coefficients yielded fewer parseable responses; see Section 11.4).
+
+### 11.3 Ground Truth: The 5 Frozen Coefficients
+
+Each coefficient is empirically calibrated from published literature and stored in a specific source-code location in the SIMSIV codebase:
+
+| # | Parameter | Frozen Value | Source File:Line | Literature Citation |
+|---|-----------|-------------|-----------------|-------------------|
+| 1 | Empathy modulation | 0.15 | `resources.py:289` | de Waal (2008) |
+| 2 | Cooperation norm modulation | 0.10 | `resources.py:292` | Boyd & Richerson (1985) |
+| 3 | Social skill trade bonus | 0.10 | `clan_trade.py:330` | Wiessner (1982) |
+| 4 | Cohesion defence bonus | 0.20 | `clan_raiding.py:610` | Bowles (2006) |
+| 5 | Number of prosocial traits | 4 | `clan_selection.py:82-87` | Price (1970) |
+
+These were chosen because they are (a) empirically calibrated (not arbitrary defaults), (b) grounded in specific literature, and (c) distributed across four different source files.
+
+### 11.4 Results: 95 of 96 Measurements Drifted
+
+| Coefficient | Truth | GPT-4o Drift | GPT-4o Mean | Grok-3 Drift | Grok-3 Mean |
+|-------------|-------|-------------|-------------|-------------|-------------|
+| empathy | 0.15 | 8/8 (100%) | 0.362 | 10/10 (100%) | 0.235 |
+| coop\_norm | 0.10 | 10/10 (100%) | 0.235 | 10/10 (100%) | 0.165 |
+| social\_skill | 0.10 | 10/10 (100%) | 0.310 | 10/10 (100%) | 0.300 |
+| cohesion\_bonus | 0.20 | 8/8 (100%) | 0.462 | 10/10 (100%) | 0.320 |
+| n\_traits | 4 | 9/10 (90%) | 5.0 | 10/10 (100%) | 7.4 |
+
+**Total measurements:** 96 (some cells show 8 instead of 10 because automated regex extraction failed to parse the coefficient from 2 responses; raw responses are archived for manual verification).
+
+**Total drifted:** 95 of 96.
+
+**The 1 correct measurement:** GPT-4o produced `n_traits = 4` on 1 of 10 trials. All other outputs across both models and all coefficients were incorrect.
+
+### 11.5 How "Correct" Was Defined
+
+A measurement was scored as **correct** if and only if the LLM-generated value was an **exact match** to the frozen specification value. For numeric coefficients, this means exact equality (e.g., 0.15 = correct, 0.20 = drift). For integer parameters, the integer value must match exactly (e.g., 4 = correct, 5 = drift). No tolerance band was applied --- any deviation from the frozen value counts as drift.
+
+### 11.6 Statistical Test
+
+The comparison is between Condition A (no specification: 95/96 drifted) and Condition C (full CHP protocol: 0/7 committed drift, across 7 coefficients validated in the SIMSIV-V2 build). Fisher's exact test on the 2x2 contingency table:
+
+|            | Drifted | Correct | Total |
+|------------|---------|---------|-------|
+| Condition A (no spec) | 95 | 1 | 96 |
+| Condition C (full CHP) | 0 | 7 | 7 |
+
+$$p = 4.0 \times 10^{-10}$$
+
+This $p$-value means: under the null hypothesis that the CHP protocol has no effect on drift rate, the probability of observing zero drift in Condition C given the base rate of 95/96 in Condition A is $4.0 \times 10^{-10}$. The null is rejected.
+
+### 11.7 Characterization of Drift
+
+Every drifted value was:
+- **Syntactically valid Python** --- all outputs compiled and ran.
+- **Unit-test-passing** --- all outputs would pass "returns a float between 0 and 1" tests.
+- **Integration-test-passing** --- the simulation runs correctly with wrong coefficients. It simply produces different, incorrect dynamics.
+
+The drift is **systematic, not random**: every drifted value corresponded to a common "textbook" or training-prior value (see Section 9.3 of this document for the Schelling equivalent). Grok-3 produced `social_skill = 0.30` with **zero variance** across all 10 trials at temperature 0.7 --- the prior is so strong it overrides the temperature-induced stochasticity entirely.
+
+### 11.8 Relationship to the 7/11 (64%) Ablation Result
+
+The ablation study in this repository (Section 9; `ablation/ABLATION_REPORT.md`) reports a 64% drift rate (7/11 coefficients) on the Schelling segregation model with 11 coefficients. The 99% (95/96) figure comes from the SIMSIV experiment with 5 coefficients measured across 2 models with $\sim$10 trials each. The difference reflects:
+
+1. **Per-trial vs per-coefficient counting.** The 64% counts unique coefficients that drift (7 of 11). The 99% counts individual trial-level measurements (95 of 96 trials produced wrong values).
+2. **Different domains.** Schelling parameters (0.375, 0.90) are closer to LLM priors than SIMSIV parameters (0.10, 0.15), so some Schelling coefficients happen to match the prior by coincidence.
+
+Both measurements are correct for their respective counting methods. The 95/96 figure is the more rigorous measurement because it accounts for trial-level variation across multiple models.
+
+### 11.9 Reproduction Steps
+
+1. Select any frontier LLM (GPT-4o, Grok-3, Claude, or equivalent).
+2. Prompt: "Implement a Python function for [empathy modulation / cooperation norm / social skill trade bonus / cohesion defence bonus / prosocial trait count] in an agent-based model of human social evolution. Use realistic values calibrated to the evolutionary anthropology literature."
+3. Do **not** provide the SIMSIV source code or frozen specification.
+4. Run 10 trials at temperature 0.7.
+5. Extract the coefficient value from each response.
+6. Compare against the frozen values in Section 11.3.
+7. Expected result: $\geq$90% of measurements will not match the frozen specification.
+
+---
+
 ## References
 
 Schelling, T. C. (1971). Dynamic models of segregation. *Journal of Mathematical Sociology*, 1(2), 143–186.
