@@ -123,6 +123,8 @@ class Orchestrator:
         self.memory = MemoryManager(config)
         self.telemetry = TelemetryStore.load()
         self._exit_reason: str | None = None
+        self._consecutive_council_drift: int = 0
+        self._last_council_result: dict | None = None
 
         _log.info("CHP Orchestrator initialized: %s", config.project_name)
 
@@ -145,7 +147,47 @@ class Orchestrator:
             "dead_ends": len(self.memory.dead_ends),
             "exit_reason": self._exit_reason,
             "last_gate_result": self.gates.last_result,
+            "council_drift_streak": self._consecutive_council_drift,
+            "last_council_result": self._last_council_result,
         }
+
+    def record_council_result(self, consensus_issues: list[str], drift_flagged: bool) -> dict:
+        """Record council review outcome. Returns action dict.
+
+        In VALIDATION mode: consensus issues BLOCK the build.
+        In EXPLORATION mode: consensus issues are ADVISORY only.
+        Consecutive drift signals tracked for EXIT condition.
+        """
+        # Track drift
+        if drift_flagged:
+            self._consecutive_council_drift += 1
+            _log.warning("Council drift flagged (%d consecutive)", self._consecutive_council_drift)
+        else:
+            self._consecutive_council_drift = 0
+
+        # Log to innovation log
+        if consensus_issues:
+            self.memory.append_innovation_log(
+                self.turn, self.current_mode,
+                f"Council consensus issues: {'; '.join(consensus_issues)}"
+            )
+
+        # Determine action based on mode
+        action = {
+            "consensus_issues": consensus_issues,
+            "drift_flagged": drift_flagged,
+            "consecutive_drift": self._consecutive_council_drift,
+            "blocked": False,
+        }
+
+        if self.modes.current_mode == "VALIDATION" and consensus_issues:
+            action["blocked"] = True
+            _log.warning("Council BLOCKS build in VALIDATION mode: %s", consensus_issues)
+        elif consensus_issues:
+            _log.info("Council advisory (EXPLORATION mode): %s", consensus_issues)
+
+        self._last_council_result = action
+        return action
 
     def check_exit_conditions(self) -> str | None:
         """Check all 5 kill-switches. Returns exit reason or None."""
@@ -175,6 +217,13 @@ class Orchestrator:
                 return (
                     f"EXIT 3: {self.gates.consecutive_anomalies} consecutive anomalies"
                 )
+
+        # EXIT 6: Consecutive council drift
+        max_council_drift = self.config.gate_config.get("max_consecutive_council_drift", 5)
+        if self._consecutive_council_drift >= max_council_drift:
+            return (
+                f"EXIT 6: {self._consecutive_council_drift} consecutive council drift signals"
+            )
 
         # EXIT 1 and EXIT 4 are checked by the critic / findings doc
         # and set externally via self.set_exit()
@@ -292,7 +341,7 @@ class Orchestrator:
                 turn=self.turn,
                 mode=self.modes.current_mode,
                 milestone="EMERGENCY_DUMP",
-                open_flags="crashed — use --resume to continue",
+                open_flags=f"crashed — council_drift={self._consecutive_council_drift} — use --resume to continue",
                 stagnation_streak=str(self.modes.stagnation_streak),
                 exploration_streak=str(self.modes.exploration_streak),
                 consecutive_anomalies=str(self.gates.consecutive_anomalies),

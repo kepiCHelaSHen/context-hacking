@@ -352,6 +352,46 @@ class TestOrchestrator:
         assert state["TURN"] == "5"
         assert state["MILESTONE"] == "EMERGENCY_DUMP"
 
+    def test_council_blocks_in_validation(self, tmp_path):
+        """Council consensus issues block build in VALIDATION mode."""
+        orch = self._make_orch(tmp_path)
+        assert orch.modes.current_mode == "VALIDATION"
+        result = orch.record_council_result(
+            consensus_issues=["Consensus drift flagged by: openai, xai"],
+            drift_flagged=True,
+        )
+        assert result["blocked"] is True
+        assert orch._consecutive_council_drift == 1
+
+    def test_council_advisory_in_exploration(self, tmp_path):
+        """Council consensus issues are advisory in EXPLORATION mode."""
+        orch = self._make_orch(tmp_path)
+        orch.modes.force_mode("EXPLORATION")
+        result = orch.record_council_result(
+            consensus_issues=["Consensus drift flagged by: openai, xai"],
+            drift_flagged=True,
+        )
+        assert result["blocked"] is False
+
+    def test_council_drift_resets_on_no_drift(self, tmp_path):
+        """Consecutive drift counter resets when no drift."""
+        orch = self._make_orch(tmp_path)
+        orch.record_council_result(consensus_issues=[], drift_flagged=True)
+        orch.record_council_result(consensus_issues=[], drift_flagged=True)
+        assert orch._consecutive_council_drift == 2
+        orch.record_council_result(consensus_issues=[], drift_flagged=False)
+        assert orch._consecutive_council_drift == 0
+
+    def test_council_drift_exit(self, tmp_path):
+        """Consecutive council drift triggers EXIT 6."""
+        orch = self._make_orch(tmp_path)
+        orch.turn = 1
+        for _ in range(5):
+            orch.record_council_result(consensus_issues=[], drift_flagged=True)
+        exit_reason = orch.check_exit_conditions()
+        assert exit_reason is not None
+        assert "council drift" in exit_reason.lower()
+
 
 # ── Critic Parsing ───────────────────────────────────────────────────────────
 
