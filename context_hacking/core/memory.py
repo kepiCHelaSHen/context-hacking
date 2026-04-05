@@ -137,6 +137,9 @@ class MemoryManager:
             "LAST_PASSING_TAG": kwargs.get("last_tag", "none"),
             "NEXT_TURN_FOCUS": kwargs.get("next_focus", "continue"),
             "SCIENCE_GROUNDING": kwargs.get("grounding", "aligned"),
+            "STAGNATION_STREAK": kwargs.get("stagnation_streak", "0"),
+            "EXPLORATION_STREAK": kwargs.get("exploration_streak", "0"),
+            "CONSECUTIVE_ANOMALIES": kwargs.get("consecutive_anomalies", "0"),
         }
 
         lines = [

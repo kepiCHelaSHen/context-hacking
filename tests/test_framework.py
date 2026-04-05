@@ -200,6 +200,23 @@ class TestMemoryManager:
         assert sv["TURN"] == "5"
         assert sv["MODE"] == "EXPLORATION"
 
+    def test_state_vector_roundtrip_with_streaks(self, tmp_path):
+        """State vector round-trips streak fields for crash recovery."""
+        mm = self._make_mm(tmp_path)
+        mm.write_state_vector(
+            turn=7,
+            mode="EXPLORATION",
+            stagnation_streak="3",
+            exploration_streak="2",
+            consecutive_anomalies="0",
+        )
+        restored = mm.read_state_vector()
+        assert restored["TURN"] == "7"
+        assert restored["MODE"] == "EXPLORATION"
+        assert restored["STAGNATION_STREAK"] == "3"
+        assert restored["EXPLORATION_STREAK"] == "2"
+        assert restored["CONSECUTIVE_ANOMALIES"] == "0"
+
     def test_empty_dead_ends(self, tmp_path):
         mm = self._make_mm(tmp_path)
         ends = mm.load_dead_ends()
