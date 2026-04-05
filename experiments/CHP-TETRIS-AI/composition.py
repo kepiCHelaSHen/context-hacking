@@ -5,7 +5,7 @@ from typing import Callable
 
 import numpy as np
 
-from features import FEATURE_NAMES, FEATURE_FNS
+from features import FEATURE_NAMES, FEATURE_FNS, evaluate_all
 
 
 # ---------------------------------------------------------------------------
@@ -104,16 +104,29 @@ def build_evaluate_fn(weights: dict) -> Callable[[np.ndarray], float]:
 
     The returned function computes the weighted sum of all features.
     Features with weight 0.0 are skipped for efficiency.
+
+    Uses the fast single-pass ``evaluate_all`` to compute all features
+    at once, avoiding redundant grid scans.
     """
-    # Pre-compute the list of (feature_fn, weight) pairs, dropping zeros.
-    active = [
-        (FEATURE_FNS[name], float(w))
+    # Pre-compute the list of (feature_name, weight) pairs, dropping zeros.
+    active_names = [
+        (name, float(w))
         for name, w in weights.items()
         if w != 0.0
     ]
 
+    need_col_trans = weights.get("column_transitions", 0.0) != 0.0
+    need_row_trans = weights.get("row_transitions", 0.0) != 0.0
+
+    # Bind for fast closure access
+    _eval_all = evaluate_all
+
     def evaluate(board: np.ndarray) -> float:
-        return sum(fn(board) * w for fn, w in active)
+        feats = _eval_all(board, need_col_trans, need_row_trans)
+        total = 0.0
+        for name, w in active_names:
+            total += feats[name] * w
+        return total
 
     return evaluate
 
