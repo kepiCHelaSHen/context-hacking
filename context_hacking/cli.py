@@ -124,8 +124,40 @@ def init(name: str, experiment: str | None, existing: bool, cursor: bool) -> Non
               default="auto", help="Execution method for the loop")
 @click.option("--all-experiments", is_flag=True,
               help="Run all 9 built-in experiments sequentially")
-def run(experiment: str | None, method: str, all_experiments: bool) -> None:
+@click.option("--dashboard", is_flag=True,
+              help="Launch live WebSocket dashboard (for CHP-TETRIS-AI)")
+def run(experiment: str | None, method: str, all_experiments: bool, dashboard: bool) -> None:
     """Launch the CHP loop — builds, critiques, tests, and reports autonomously."""
+    if dashboard and experiment:
+        exp_dir = Path.cwd() / "experiments" / experiment
+        server_module = exp_dir / "server.py"
+        if server_module.exists():
+            import subprocess
+            import sys
+            port = 8080
+            # Try to read port from experiment config
+            config_path = exp_dir / "config.yaml"
+            if config_path.exists():
+                import yaml
+                with open(config_path) as f:
+                    cfg = yaml.safe_load(f) or {}
+                port = cfg.get("dashboard", {}).get("port", 8080)
+
+            console.print(f"[bold green]Launching CHP Dashboard[/bold green] on port {port}")
+            console.print(f"  Experiment: {experiment}")
+            console.print(f"  Dashboard:  http://localhost:{port}")
+            console.print()
+
+            import webbrowser
+            webbrowser.open(f"http://localhost:{port}")
+
+            subprocess.run(
+                [sys.executable, "-m", "uvicorn", "server:app",
+                 "--host", "127.0.0.1", "--port", str(port)],
+                cwd=str(exp_dir),
+            )
+            return
+
     from context_hacking.runner import run_experiment
 
     config_path = Path("config.yaml")

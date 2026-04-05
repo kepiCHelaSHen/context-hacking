@@ -57,8 +57,13 @@ dashboard = [
 ml = [
     "scikit-learn>=1.4",
 ]
+tetris = [
+    "starlette>=0.37",
+    "uvicorn>=0.29",
+    "websockets>=12.0",
+]
 all = [
-    "context-hacking[dashboard,ml]",
+    "context-hacking[dashboard,ml,tetris]",
 ]
 dev = [
     "pytest>=8.0",
