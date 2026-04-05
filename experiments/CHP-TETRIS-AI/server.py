@@ -136,32 +136,8 @@ class TetrisServer:
                     _log.warning("run_history.json is empty")
                     return
 
-                # Determine time deltas between messages
-                prev_ts: float | None = None
-                for msg in messages:
-                    if self._stop_event.is_set():
-                        _log.info("Demo stopped by stop_event")
-                        break
-
-                    ts = msg.get("ts") or msg.get("timestamp")
-                    if ts is not None and prev_ts is not None:
-                        raw_delay = float(ts) - float(prev_ts)
-                        # Apply speed multiplier (clamp to reasonable bounds)
-                        delay = max(0.0, raw_delay) / max(self.speed, 0.1)
-                        delay = min(delay, 5.0)  # cap at 5 s regardless of speed
-                        if delay > 0:
-                            try:
-                                await asyncio.wait_for(
-                                    self._stop_event.wait(),
-                                    timeout=delay,
-                                )
-                                # If we get here the event was set — stop
-                                break
-                            except asyncio.TimeoutError:
-                                pass  # Normal — just means the delay elapsed
-
-                    prev_ts = ts
-                    await self.broadcast(msg)
+                # Replay messages with timing based on _timestamp field
+                await self._replay_demo(messages, self.speed)
 
                 _log.info("Demo replay complete")
                 await self.broadcast({"type": "demo_complete"})
@@ -175,6 +151,33 @@ class TetrisServer:
                 self.running = False
 
         self._task = asyncio.create_task(_demo_runner())
+
+    # ------------------------------------------------------------------
+    # _replay_demo
+    # ------------------------------------------------------------------
+
+    async def _replay_demo(self, messages: list[dict], speed: float) -> None:
+        """Replay recorded messages with proper timing."""
+        prev_ts: float = 0.0
+        for msg in messages:
+            if self._stop_event.is_set():
+                _log.info("Demo stopped by stop_event")
+                break
+            # Pop _timestamp so it is not sent to the client
+            ts = msg.pop("_timestamp", 0)
+            delay = (ts - prev_ts) / max(speed, 0.1)
+            if delay > 0:
+                try:
+                    await asyncio.wait_for(
+                        self._stop_event.wait(),
+                        timeout=delay,
+                    )
+                    # Event was set — stop
+                    break
+                except asyncio.TimeoutError:
+                    pass  # Normal — delay elapsed
+            prev_ts = ts
+            await self.broadcast(msg)
 
     # ------------------------------------------------------------------
     # stop

@@ -23,6 +23,32 @@ import yaml
 
 _log = logging.getLogger(__name__)
 
+
+# ============================================================================
+# RunRecorder — wraps broadcast_fn to record all messages with timestamps
+# ============================================================================
+
+
+class RunRecorder:
+    """Records all broadcast messages for demo playback."""
+
+    def __init__(self, broadcast_fn: Callable[..., Any]):
+        self._broadcast_fn = broadcast_fn
+        self.messages: list[dict] = []
+        self._start = time.time()
+
+    async def broadcast(self, message: dict) -> None:
+        """Record message with timestamp, then broadcast."""
+        recorded = {**message, "_timestamp": time.time() - self._start}
+        self.messages.append(recorded)
+        await self._broadcast_fn(message)
+
+    def save(self, path: str) -> None:
+        """Save recorded messages to JSON file."""
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(self.messages, f, indent=2)
+
+
 # ---------------------------------------------------------------------------
 # Experiment-local imports (frozen/ and composition)
 # ---------------------------------------------------------------------------
@@ -437,14 +463,14 @@ async def run_turn(
                     api_key=state.api_key,
                 )
                 passed = len(hc_response) > 20  # basic sanity
-                broadcast_fn({
+                await broadcast_fn({
                     "type": "health_check",
                     "agent": agent_name,
                     "passed": passed,
                 })
                 if not passed:
                     _log.error("Health check FAILED for %s", agent_name)
-                    broadcast_fn({
+                    await broadcast_fn({
                         "type": "turn_complete",
                         "turn": turn,
                         "accepted": False,
@@ -454,12 +480,12 @@ async def run_turn(
                     return {"turn": turn, "accepted": False, "reason": f"health_check_failed:{agent_name}"}
             except Exception as e:
                 _log.error("Health check error for %s: %s", agent_name, e)
-                broadcast_fn({
+                await broadcast_fn({
                     "type": "health_check",
                     "agent": agent_name,
                     "passed": False,
                 })
-                broadcast_fn({
+                await broadcast_fn({
                     "type": "turn_complete",
                     "turn": turn,
                     "accepted": False,
@@ -495,7 +521,7 @@ async def run_turn(
                 try:
                     innovation_log = memory.read_full_log()
                     council_result = run_council(innovation_log, council_cfg)
-                    broadcast_fn({
+                    await broadcast_fn({
                         "type": "council_result",
                         "n_succeeded": council_result.n_succeeded,
                         "drift_flagged": council_result.any_drift_flagged,
@@ -532,7 +558,7 @@ async def run_turn(
             new_weights = parse_weights_from_response(builder_response)
             if new_weights is None:
                 _log.error("Builder output could not be parsed into valid weights")
-                broadcast_fn({
+                await broadcast_fn({
                     "type": "turn_complete",
                     "turn": turn,
                     "accepted": False,
@@ -566,7 +592,7 @@ async def run_turn(
         if not validate_weights(new_weights):
             _log.error("Gate 1 FAILURE: invalid weight structure")
             metrics.gate_1_frozen = 0.0
-            broadcast_fn({
+            await broadcast_fn({
                 "type": "turn_complete",
                 "turn": turn,
                 "accepted": False,
@@ -605,7 +631,7 @@ async def run_turn(
             anomaly = True
             metrics.anomaly = True
 
-        broadcast_fn({
+        await broadcast_fn({
             "type": "game_results",
             "scores": scores,
             "mean": new_mean,
@@ -624,7 +650,7 @@ async def run_turn(
             metrics.anomaly = True
             metrics.stochastic_instability = True
 
-        broadcast_fn({
+        await broadcast_fn({
             "type": "sigma_gate",
             "passed": sigma_passed,
             "cv": sigma_cv,
@@ -685,7 +711,7 @@ async def run_turn(
         metrics.critic_verdict = verdict.verdict
 
         blocking = verdict.blocking_issues or []
-        broadcast_fn({
+        await broadcast_fn({
             "type": "critic_verdict",
             "gates": {
                 "frozen": verdict.gate_1_frozen,
@@ -717,7 +743,7 @@ async def run_turn(
             _log.error("Reviewer failed: %s", e)
             review = ReviewResult(verdict="APPROVE")
 
-        broadcast_fn({
+        await broadcast_fn({
             "type": "reviewer_verdict",
             "issues": [
                 {"severity": i.severity, "description": i.description}
@@ -767,7 +793,7 @@ async def run_turn(
         modes.record_turn(metrics_improved=improved, anomaly=anomaly)
         new_mode = modes.current_mode
         if old_mode != new_mode:
-            broadcast_fn({
+            await broadcast_fn({
                 "type": "mode_change",
                 "from": old_mode,
                 "to": new_mode,
@@ -806,7 +832,7 @@ async def run_turn(
         # STEP 14 — Broadcast turn_complete
         # ------------------------------------------------------------------
         _log.info("Step 14: Broadcast turn_complete")
-        broadcast_fn({
+        await broadcast_fn({
             "type": "turn_complete",
             "turn": turn,
             "accepted": accepted,
@@ -915,7 +941,7 @@ async def run_loop(config_path: str, broadcast_fn: Callable[..., Any]) -> None:
     api_key = env_keys.get("ANTHROPIC_API_KEY", os.environ.get("ANTHROPIC_API_KEY", ""))
     if not api_key:
         _log.error("No ANTHROPIC_API_KEY found in api.env or environment")
-        broadcast_fn({"type": "exit", "reason": "missing_api_key", "turn": 0})
+        await broadcast_fn({"type": "exit", "reason": "missing_api_key", "turn": 0})
         return
 
     # Inject env keys into environment for council
@@ -948,24 +974,31 @@ async def run_loop(config_path: str, broadcast_fn: Callable[..., Any]) -> None:
 
     max_turns = raw_cfg.get("loop", {}).get("max_turns", 20)
 
+    # Wrap broadcast_fn with RunRecorder so every message is timestamped and saved
+    recorder = RunRecorder(broadcast_fn)
+
     # 5. Loop
     _log.info("Starting CHP optimization loop (max %d turns)", max_turns)
     for _ in range(max_turns):
-        result = await run_turn(state, broadcast_fn, modes, memory, telemetry)
+        result = await run_turn(state, recorder.broadcast, modes, memory, telemetry)
 
         if "exit" in result:
             _log.info("EXIT: %s at turn %d", result["exit"], result["turn"])
-            broadcast_fn({
+            await recorder.broadcast({
                 "type": "exit",
                 "reason": result["exit"],
                 "turn": result["turn"],
             })
+            recorder.save(str(project_root / "run_history.json"))
+            _log.info("Run history saved to %s", project_root / "run_history.json")
             return
 
     # Reached max turns without explicit exit
-    broadcast_fn({
+    await recorder.broadcast({
         "type": "exit",
         "reason": f"max_turns ({max_turns}) reached",
         "turn": state.turn,
     })
+    recorder.save(str(project_root / "run_history.json"))
+    _log.info("Run history saved to %s", project_root / "run_history.json")
     _log.info("Loop complete: max turns reached (%d)", max_turns)
