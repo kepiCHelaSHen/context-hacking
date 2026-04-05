@@ -190,12 +190,20 @@ class Orchestrator:
             _log.warning("EXIT: %s", exit_reason)
             return {"turn": self.turn, "exit": exit_reason}
 
-        # STEP 4: Dead end check
-        dead_ends = self.memory.load_dead_ends()
+        # STEP 4: Dead end check (non-fatal if fails)
+        try:
+            dead_ends = self.memory.load_dead_ends()
+        except Exception as e:
+            _log.warning("Failed to load dead ends (continuing): %s", e)
+            dead_ends = []
         _log.info("Dead ends avoided: %s", dead_ends if dead_ends else "NONE")
 
-        # STEP 5: Read last innovation log entry for context
-        last_entry = self.memory.last_innovation_entry()
+        # STEP 5: Read last innovation log entry for context (non-fatal if fails)
+        try:
+            last_entry = self.memory.last_innovation_entry()
+        except Exception as e:
+            _log.warning("Failed to read innovation log (continuing): %s", e)
+            last_entry = ""
         _log.info("Last turn focus: %s", last_entry)
 
         # Steps 2-3, 6-16 are delegated to the agent framework

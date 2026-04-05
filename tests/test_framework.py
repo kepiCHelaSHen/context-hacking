@@ -305,6 +305,18 @@ class TestOrchestrator:
         orch.record_turn_result(gate_passed=True, metrics_improved=True, anomaly=False, metrics=metrics)
         assert orch.telemetry.total_turns == 1
 
+    def test_step_survives_missing_files(self, tmp_path):
+        """Step doesn't crash when memory files are missing."""
+        orch = self._make_orch(tmp_path)
+        # Delete dead_ends.md to trigger potential I/O issue
+        dead_ends_path = tmp_path / "dead.md"
+        if dead_ends_path.exists():
+            dead_ends_path.unlink()
+        # Step should not raise
+        result = orch.step()
+        assert result is not None
+        assert "turn" in result
+
     def test_emergency_state_dump(self, tmp_path):
         """Emergency dump writes state vector with current turn."""
         orch = self._make_orch(tmp_path)
