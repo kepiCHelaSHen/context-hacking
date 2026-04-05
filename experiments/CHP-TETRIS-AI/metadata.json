@@ -1,0 +1,14 @@
+{
+  "display_name": "CHP Tetris AI — Self-Improving Heuristic Optimization",
+  "standard": "loop",
+  "domain": "Computer Science",
+  "sprint": "tetris-ai-2026",
+  "status": "in_progress",
+  "key_result": null,
+  "false_positives_caught": 0,
+  "turns": null,
+  "gate_scores": null,
+  "statistical_result": null,
+  "meta_spec_errors": 0,
+  "notes": "Showcase experiment for CHP protocol — all 9 layers"
+}

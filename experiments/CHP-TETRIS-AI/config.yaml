@@ -1,0 +1,61 @@
+project:
+  name: "CHP-TETRIS-AI"
+  description: "Self-improving Tetris AI — heuristic weight optimization"
+  frozen_paths: ["frozen/"]
+  chain_prompt: "CHAIN_PROMPT.md"
+  innovation_log: "innovation_log.md"
+  dead_ends: "dead_ends.md"
+  state_vector: "state_vector.md"
+
+models:
+  builder: "claude-sonnet-4-20250514"
+  critic: "claude-sonnet-4-20250514"
+  reviewer: "claude-sonnet-4-20250514"
+  council:
+    - provider: "openai"
+      model: "gpt-4o"
+      api_key_env: "OPENAI_API_KEY"
+    - provider: "xai"
+      model: "grok-3"
+      api_key_env: "XAI_API_KEY"
+
+gates:
+  seeds: 10
+  cv_threshold: 0.15
+  max_consecutive_anomalies: 3
+
+loop:
+  max_turns: 20
+  stagnation_threshold: 3
+  max_consecutive_exploration: 2
+  state_vector_interval: 3
+  auto_tag: true
+
+exit_conditions:
+  science_complete: true
+  science_target_lines: 10000
+  performance_gate: true
+  unresolvable_anomaly: true
+  fundamental_misalignment: true
+  human_stop: true
+
+critic:
+  mindset: "Assume the weights are worse until the data proves otherwise"
+  instruction: "Check for the line-clear greed trap. Verify hole penalty is adequate."
+  gates:
+    - name: "frozen_compliance"
+      threshold: 1.0
+      blocking: true
+    - name: "architecture"
+      threshold: 0.85
+      blocking: false
+    - name: "scientific_validity"
+      threshold: 0.85
+      blocking: false
+    - name: "drift_check"
+      threshold: 0.85
+      blocking: false
+
+dashboard:
+  port: 8080
+  speed: 5
