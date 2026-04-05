@@ -217,9 +217,9 @@ def _run_api_loop(experiment_dir: Path, max_turns: int = 8, resume_state: dict |
         print(f"Resuming from turn: {start_turn}")
     print(f"{'='*60}\n")
 
-    try:
-      for turn in range(start_turn, max_turns + 1):
-        # ── Build the turn prompt ────────────────────────────────────
+    last_turn = start_turn
+    for turn in range(start_turn, max_turns + 1):
+        last_turn = turn
         if turn == 1:
             user_msg = (
                 f"Begin Turn 1. Read the frozen spec and dead ends carefully.\n"
@@ -500,6 +500,33 @@ def _update_state_vector(experiment_dir: Path, turn: int, reply: str) -> None:
     )
 
 
+def _emergency_state_dump(experiment_dir: Path, reason: str) -> None:
+    """Write an emergency state vector on crash for --resume recovery.
+
+    Reads the existing state_vector.md to recover the last turn number,
+    then overwrites with emergency metadata.
+    """
+    try:
+        sv_path = experiment_dir / "state_vector.md"
+        last_turn = 0
+        if sv_path.exists():
+            for line in sv_path.read_text(encoding="utf-8").splitlines():
+                if line.startswith("TURN:"):
+                    last_turn = int(line.split(":", 1)[1].strip())
+                    break
+        sv_path.write_text(
+            f"# State Vector\n\n"
+            f"TURN: {last_turn}\n"
+            f"MILESTONE: EMERGENCY_DUMP\n"
+            f"MODE: UNKNOWN\n"
+            f"OPEN_FLAGS: {reason} — use --resume to continue\n",
+            encoding="utf-8",
+        )
+        _log.error("Emergency state dumped at turn %d (%s)", last_turn, reason)
+    except Exception as e:
+        _log.error("Failed to write emergency state: %s", e)
+
+
 def _write_completion_log(
     experiment_dir: Path, final_turn: int, messages: list[dict],
 ) -> None:
@@ -628,7 +655,16 @@ def run_experiment(
         _log.info("Auto-detected method: %s", method)
 
     if method == "api":
-        _run_api_loop(experiment_dir, resume_state=resume_state)
+        try:
+            _run_api_loop(experiment_dir, resume_state=resume_state)
+        except KeyboardInterrupt:
+            _log.warning("Interrupted — dumping emergency state to %s", experiment_dir)
+            _emergency_state_dump(experiment_dir, "interrupted")
+            raise
+        except Exception:
+            _log.exception("Crash — dumping emergency state to %s", experiment_dir)
+            _emergency_state_dump(experiment_dir, "crashed")
+            raise
     elif method == "claude-cli":
         prompt = _load_loop_prompt(experiment_dir)
         _run_claude_cli(prompt, experiment_dir)

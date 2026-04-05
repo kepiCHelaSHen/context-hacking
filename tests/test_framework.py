@@ -301,6 +301,15 @@ class TestOrchestrator:
         orch.record_turn_result(gate_passed=True, metrics_improved=True, anomaly=False, metrics=metrics)
         assert orch.telemetry.total_turns == 1
 
+    def test_emergency_state_dump(self, tmp_path):
+        """Emergency dump writes state vector with current turn."""
+        orch = self._make_orch(tmp_path)
+        orch.turn = 5
+        orch.emergency_state_dump()
+        state = orch.memory.read_state_vector()
+        assert state["TURN"] == "5"
+        assert state["MILESTONE"] == "EMERGENCY_DUMP"
+
 
 # ── Critic Parsing ───────────────────────────────────────────────────────────
 

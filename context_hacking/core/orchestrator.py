@@ -264,6 +264,22 @@ class Orchestrator:
             )
             break  # In non-automated mode, break after each step
 
+    def emergency_state_dump(self) -> None:
+        """Emergency state dump — called on unhandled exceptions."""
+        try:
+            self.memory.write_state_vector(
+                turn=self.turn,
+                mode=self.modes.current_mode,
+                milestone="EMERGENCY_DUMP",
+                open_flags="crashed — use --resume to continue",
+                stagnation_streak=str(self.modes.stagnation_streak),
+                exploration_streak=str(self.modes.exploration_streak),
+                consecutive_anomalies=str(self.gates.consecutive_anomalies),
+            )
+            _log.error("Emergency state dumped at turn %d", self.turn)
+        except Exception as e:
+            _log.error("Failed to write emergency state: %s", e)
+
     def _git_tag(self, tag_name: str) -> None:
         """Create a git tag on the current HEAD."""
         try:
