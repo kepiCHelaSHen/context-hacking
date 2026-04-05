@@ -43,6 +43,40 @@ PACKAGE_ROOT = Path(__file__).parent.parent
 LOOP_TEMPLATE_PATH = PACKAGE_ROOT / "prompts" / "loop_template.md"
 
 
+# ── Retry helper ────────────────────────────────────────────────────────────
+
+def _api_call_with_retry(call_fn, max_retries: int = 3,
+                         base_delay: float = 1.0, **kwargs):
+    """Call a function with exponential backoff on transient errors.
+
+    Args:
+        call_fn: callable that accepts **kwargs
+        max_retries: max attempts
+        base_delay: initial delay in seconds (doubled each retry)
+        **kwargs: passed through to call_fn
+
+    Returns:
+        Result from call_fn on success
+
+    Raises:
+        Last exception if all retries exhausted
+    """
+    last_error = None
+    for attempt in range(max_retries):
+        try:
+            return call_fn(**kwargs)
+        except (ConnectionError, TimeoutError, OSError) as e:
+            last_error = e
+            if attempt < max_retries - 1:
+                delay = base_delay * (2 ** attempt)
+                _log.warning("API error (attempt %d/%d), retrying in %.0fs: %s",
+                             attempt + 1, max_retries, delay, e)
+                time.sleep(delay)
+            else:
+                _log.error("API error after %d attempts: %s", max_retries, e)
+    raise last_error
+
+
 # ── Context loading ──────────────────────────────────────────────────────────
 
 def _load_experiment_context(experiment_dir: Path) -> dict[str, str]:
@@ -99,7 +133,7 @@ def _build_system_prompt(experiment_dir: Path) -> str:
 
 # ── Multi-turn API loop ──────────────────────────────────────────────────────
 
-def _run_api_loop(experiment_dir: Path, max_turns: int = 8) -> None:
+def _run_api_loop(experiment_dir: Path, max_turns: int = 8, resume_state: dict | None = None) -> None:
     """Execute the full CHP loop via Anthropic API multi-turn conversation."""
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
@@ -129,14 +163,21 @@ def _run_api_loop(experiment_dir: Path, max_turns: int = 8) -> None:
     telemetry.project_name = exp_name
     telemetry.start_time = time.strftime("%Y-%m-%d %H:%M")
 
+    # Determine starting turn (resume support)
+    start_turn = 1
+    if resume_state:
+        start_turn = int(resume_state.get("TURN", "0")) + 1
+
     _log.info("Starting CHP loop: %s (%d milestones detected)", exp_name, len(milestones))
     print(f"\n{'='*60}")
     print(f"CHP Autonomous Loop — {exp_name}")
     print(f"Milestones: {len(milestones)}")
     print(f"Max turns: {max_turns}")
+    if start_turn > 1:
+        print(f"Resuming from turn: {start_turn}")
     print(f"{'='*60}\n")
 
-    for turn in range(1, max_turns + 1):
+    for turn in range(start_turn, max_turns + 1):
         # ── Build the turn prompt ────────────────────────────────────
         if turn == 1:
             user_msg = (
@@ -184,7 +225,9 @@ def _run_api_loop(experiment_dir: Path, max_turns: int = 8) -> None:
 
         with TurnTimer(metrics):
             try:
-                response = client.messages.create(
+                response = _api_call_with_retry(
+                    client.messages.create,
+                    max_retries=3,
                     model="claude-sonnet-4-20250514",
                     max_tokens=16000,
                     system=system_prompt,

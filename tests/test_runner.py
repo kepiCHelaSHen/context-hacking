@@ -1,6 +1,7 @@
 """Tests for the experiment runner."""
 
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -9,7 +10,33 @@ from context_hacking.runner import (
     _check_completion,
     _load_loop_prompt,
     _dead_ends_from_file,
+    _api_call_with_retry,
 )
+
+
+class TestRetryLogic:
+    def test_retry_on_transient_error(self):
+        """API call retries on transient error and succeeds."""
+        call_count = 0
+
+        def flaky_call(**kwargs):
+            nonlocal call_count
+            call_count += 1
+            if call_count < 3:
+                raise ConnectionError("timeout")
+            return MagicMock(content=[MagicMock(text="success")])
+
+        result = _api_call_with_retry(flaky_call, max_retries=3, base_delay=0.01)
+        assert call_count == 3
+        assert result is not None
+
+    def test_retry_exhausted_raises(self):
+        """API call raises after max retries exhausted."""
+        def always_fail(**kwargs):
+            raise ConnectionError("timeout")
+
+        with pytest.raises(ConnectionError):
+            _api_call_with_retry(always_fail, max_retries=3, base_delay=0.01)
 
 
 class TestExtractCodeBlocks:
