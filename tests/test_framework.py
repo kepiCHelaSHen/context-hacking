@@ -339,6 +339,33 @@ class TestCriticParsing:
         v = parse_verdict(text)
         assert v.passed is False
 
+    def test_parse_variant_gate_format(self):
+        """Handles variant gate score formats."""
+        from context_hacking.agents.critic import parse_verdict
+        text = """
+        Gate 1 (frozen_compliance): 1.0/1.0
+        Gate 2 (architecture): 90%
+        Gate 3 (scientific_validity): 0.85
+        Gate 4 (drift_check): .9
+        Verdict: PASS
+        """
+        v = parse_verdict(text)
+        assert v.gate_1_frozen == 1.0
+        assert v.gate_2_architecture == 0.9
+        assert v.gate_3_scientific == 0.85
+        assert v.gate_4_drift == 0.9
+
+    def test_parse_empty_returns_failed(self):
+        from context_hacking.agents.critic import parse_verdict
+        v = parse_verdict("")
+        assert v.verdict == "PARSE_FAILED"
+        assert not v.passed
+
+    def test_parse_garbage_returns_failed(self):
+        from context_hacking.agents.critic import parse_verdict
+        v = parse_verdict("I think the code looks great! No issues found.")
+        assert v.verdict == "PARSE_FAILED"
+
     def test_health_check_validation(self):
         from context_hacking.agents.critic import validate_health_check
         assert validate_health_check("Gate 1 is frozen compliance, must = 1.0. "
@@ -360,4 +387,24 @@ class TestReviewerParsing:
         r = parse_review(text)
         assert r.critical_count == 1
         assert r.warning_count == 1
+        assert r.verdict == "APPROVE WITH NOTES"
+
+    def test_parse_empty_returns_failed(self):
+        from context_hacking.agents.reviewer import parse_review
+        r = parse_review("")
+        assert r.verdict == "PARSE_FAILED"
+        assert r.needs_revision
+
+    def test_parse_variant_formats(self):
+        from context_hacking.agents.reviewer import parse_review
+        text = """
+        **CRITICAL**: `sim.py:42` — Uses print() instead of logging
+        WARNING: model.py line 10 - Missing type annotation
+        MINOR - Unused import in config.py
+        Verdict: APPROVE WITH NOTES
+        """
+        r = parse_review(text)
+        assert r.critical_count == 1
+        assert r.warning_count == 1
+        assert len(r.issues) >= 2
         assert r.verdict == "APPROVE WITH NOTES"

@@ -39,7 +39,7 @@ class ReviewResult:
 
     @property
     def needs_revision(self) -> bool:
-        return self.verdict == "NEEDS REVISION"
+        return self.verdict in ("NEEDS REVISION", "PARSE_FAILED") or self.critical_count > 0
 
 
 def load_reviewer_prompt() -> str:
@@ -65,12 +65,23 @@ def validate_health_check(response: str) -> bool:
 
 def parse_review(raw_text: str) -> ReviewResult:
     """Parse raw Reviewer output into a structured ReviewResult."""
+    if not raw_text or not raw_text.strip():
+        return ReviewResult(
+            issues=[ReviewIssue(severity="CRITICAL", file="", line=0,
+                               description="PARSE_FAILED: empty reviewer response")],
+            verdict="PARSE_FAILED",
+        )
+
     result = ReviewResult()
 
     # Extract issues: lines matching [CRITICAL|WARNING|MINOR] pattern
+    # Handles: CRITICAL: file.py:42 — desc
+    #          **CRITICAL**: `sim.py:42` — desc
+    #          WARNING: model.py line 10 - desc
+    #          MINOR - desc (bare severity, no file)
     issue_pattern = re.compile(
         r"\*?\*?(CRITICAL|WARNING|MINOR)\*?\*?:?\s*"
-        r"(?:`?([^`\n:]+(?::\d+)?)`?)?\s*[-—]?\s*(.+)",
+        r"(?:`?([^`\n:—-]+(?::\d+)?)`?)?\s*[-—]?\s*(.+)",
         re.IGNORECASE,
     )
 
@@ -89,8 +100,26 @@ def parse_review(raw_text: str) -> ReviewResult:
                 line_num = int(parts[1])
             except ValueError:
                 file_path = location.strip()
+        elif re.search(r"\bline\s+(\d+)", location, re.IGNORECASE):
+            # Handle "file.py line 10" notation
+            m = re.search(r"(.+?)\s+line\s+(\d+)", location, re.IGNORECASE)
+            if m:
+                file_path = m.group(1).strip()
+                line_num = int(m.group(2))
         else:
             file_path = location.strip()
+
+        # Check if description starts with "file line N" (location was empty)
+        if not file_path and not line_num:
+            line_match = re.match(
+                r"(\S+\.(?:py|js|ts|md|yaml|toml|cfg|txt|rs|go|java|c|cpp|h))"
+                r"\s+line\s+(\d+)\s*[-—]\s*(.+)",
+                description, re.IGNORECASE,
+            )
+            if line_match:
+                file_path = line_match.group(1)
+                line_num = int(line_match.group(2))
+                description = line_match.group(3).strip()
 
         result.issues.append(
             ReviewIssue(
