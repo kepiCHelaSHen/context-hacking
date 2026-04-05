@@ -129,6 +129,33 @@ class TestContextWindow:
         assert len(result) == len(messages)
 
 
+class TestExtractCodeBlocksRobust:
+    def test_filename_from_comment(self):
+        """Extracts filename from # File: comment."""
+        from context_hacking.runner import _extract_code_blocks
+        text = '# File: my_simulation.py\n```python\ndef run():\n    pass\n```'
+        blocks = _extract_code_blocks(text)
+        assert "my_simulation.py" in blocks
+
+    def test_generic_fallback(self):
+        """Unknown code gets generic filename."""
+        from context_hacking.runner import _extract_code_blocks
+        text = '```python\nclass MyNewExperiment:\n    def compute(self):\n        return 42\n```'
+        blocks = _extract_code_blocks(text)
+        assert len(blocks) == 1
+        filename = list(blocks.keys())[0]
+        assert filename.endswith(".py")
+
+    def test_class_name_inference(self):
+        """Class name converted to snake_case for filename."""
+        from context_hacking.runner import _extract_code_blocks
+        text = '```python\nclass SchellingGrid:\n    pass\n```'
+        blocks = _extract_code_blocks(text)
+        assert len(blocks) == 1
+        filename = list(blocks.keys())[0]
+        assert "schelling" in filename.lower()
+
+
 class TestLoadLoopPrompt:
     def test_loads_template(self):
         # The template should exist in the package

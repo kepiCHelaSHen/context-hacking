@@ -383,8 +383,8 @@ def _run_api_loop(experiment_dir: Path, max_turns: int = 8, resume_state: dict |
 def _extract_code_blocks(text: str) -> dict[str, str]:
     """Extract ```python blocks with filename hints from API response."""
     blocks: dict[str, str] = {}
+    block_count = 0
 
-    # Pattern: ```python or ```py followed by code
     pattern = re.compile(
         r'(?:#\s*(?:File:|filename:)\s*(\S+\.py)\s*\n)?'
         r'```(?:python|py)\s*\n(.*?)```',
@@ -396,28 +396,17 @@ def _extract_code_blocks(text: str) -> dict[str, str]:
         code = match.group(2).strip()
 
         if not filename:
-            # Try to infer filename from code
-            if "class SchellingGrid" in code or "def run_simulation" in code:
-                if "schelling" in code.lower() or "segregation" in code.lower():
-                    filename = "schelling.py"
-                elif "spatial" in code.lower() or "payoff" in code.lower():
-                    filename = "spatial_pd.py"
-                elif "prey" in code.lower() or "predator" in code.lower():
-                    filename = "lotka_volterra.py"
-                elif "SIR" in code or "infected" in code.lower():
-                    filename = "sir_model.py"
-                elif "lorenz" in code.lower():
-                    filename = "lorenz.py"
-                elif "grover" in code.lower() or "oracle" in code.lower():
-                    filename = "grover.py"
-                elif "izhikevich" in code.lower() or "membrane" in code.lower():
-                    filename = "izhikevich.py"
-                elif "consensus" in code.lower() or "pbft" in code.lower():
-                    filename = "consensus.py"
-                elif "hyperparam" in code.lower() or "bayesian" in code.lower():
-                    filename = "hyperparam_search.py"
-                else:
-                    filename = f"generated_{hash(code) % 10000}.py"
+            # Try to infer from class name in first few lines
+            first_lines = code[:500]
+            class_match = re.search(r"class\s+(\w+)", first_lines)
+            if class_match:
+                name = class_match.group(1)
+                # CamelCase to snake_case
+                snake = re.sub(r'(?<!^)(?=[A-Z])', '_', name).lower()
+                filename = f"{snake}.py"
+            else:
+                block_count += 1
+                filename = f"generated_{block_count}.py"
 
         if filename and code:
             blocks[filename] = code
