@@ -28,6 +28,8 @@ class CriticVerdict:
 
     @property
     def passed(self) -> bool:
+        if self.verdict == "PARSE_FAILED":
+            return False
         return self.verdict == "PASS"
 
     @property
@@ -81,24 +83,47 @@ def validate_health_check(response: str) -> bool:
     return has_gate1 and has_mission
 
 
+def _extract_gate(text: str, gate_num: int) -> float:
+    """Extract gate score with fallback patterns."""
+    patterns = [
+        rf"gate.?{gate_num}[^:]*:\s*([0-9]*\.?[0-9]+)\s*(?:/\s*[0-9.]+)?",
+        rf"gate.?{gate_num}[^:]*:\s*([0-9]+)\s*%",
+    ]
+    for pat in patterns:
+        m = re.search(pat, text, re.IGNORECASE)
+        if m:
+            val = float(m.group(1))
+            if val > 1.0:
+                val = val / 100.0
+            return min(max(val, 0.0), 1.0)
+    return 0.0
+
+
 def parse_verdict(raw_text: str) -> CriticVerdict:
     """Parse a raw Critic response into a structured CriticVerdict."""
     verdict = CriticVerdict()
 
-    # Extract gate scores
-    g1 = re.search(r"gate_1[^:]*:\s*([0-9.]+)", raw_text, re.IGNORECASE)
-    g2 = re.search(r"gate_2[^:]*:\s*([0-9.]+)", raw_text, re.IGNORECASE)
-    g3 = re.search(r"gate_3[^:]*:\s*([0-9.]+)", raw_text, re.IGNORECASE)
-    g4 = re.search(r"gate_4[^:]*:\s*([0-9.]+)", raw_text, re.IGNORECASE)
+    # Early exit on empty input
+    if not raw_text or not raw_text.strip():
+        verdict.verdict = "PARSE_FAILED"
+        return verdict
 
-    if g1:
-        verdict.gate_1_frozen = float(g1.group(1))
-    if g2:
-        verdict.gate_2_architecture = float(g2.group(1))
-    if g3:
-        verdict.gate_3_scientific = float(g3.group(1))
-    if g4:
-        verdict.gate_4_drift = float(g4.group(1))
+    # Extract gate scores using fallback-aware helper
+    verdict.gate_1_frozen = _extract_gate(raw_text, 1)
+    verdict.gate_2_architecture = _extract_gate(raw_text, 2)
+    verdict.gate_3_scientific = _extract_gate(raw_text, 3)
+    verdict.gate_4_drift = _extract_gate(raw_text, 4)
+
+    # If no gate scores found and no "gate" keyword, treat as garbage
+    any_gate = (
+        verdict.gate_1_frozen > 0
+        or verdict.gate_2_architecture > 0
+        or verdict.gate_3_scientific > 0
+        or verdict.gate_4_drift > 0
+    )
+    if not any_gate and "gate" not in raw_text.lower():
+        verdict.verdict = "PARSE_FAILED"
+        return verdict
 
     # Extract verdict
     if re.search(r"verdict:\s*PASS", raw_text, re.IGNORECASE):
