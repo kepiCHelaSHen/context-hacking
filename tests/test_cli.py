@@ -79,6 +79,45 @@ class TestHelp:
         assert "--all-experiments" in result.output
 
 
+class TestValidate:
+    def test_validate_good_config(self, runner, tmp_path):
+        """chp validate with valid config exits 0."""
+        import yaml
+        os.chdir(tmp_path)
+        (tmp_path / "config.yaml").write_text(yaml.dump({
+            "project": {"name": "test"},
+            "loop": {"max_turns": 10},
+        }))
+        result = runner.invoke(main, ["validate"])
+        assert result.exit_code == 0
+        assert "Config OK" in result.output
+
+    def test_validate_missing_config(self, runner, tmp_path):
+        """chp validate without config.yaml fails."""
+        os.chdir(tmp_path)
+        result = runner.invoke(main, ["validate"])
+        assert result.exit_code != 0 or "Error" in (result.output + (result.stderr or ""))
+
+    def test_validate_shows_project_name(self, runner, tmp_path):
+        """chp validate displays project name."""
+        import yaml
+        os.chdir(tmp_path)
+        (tmp_path / "config.yaml").write_text(yaml.dump({
+            "project": {"name": "my-cool-project"},
+        }))
+        result = runner.invoke(main, ["validate"])
+        assert "my-cool-project" in result.output
+
+
+class TestResumeErrors:
+    def test_resume_without_state_vector(self, runner, tmp_path):
+        """--resume without state_vector.md produces error."""
+        os.chdir(tmp_path)
+        result = runner.invoke(main, ["run", "--resume"])
+        # Should fail — no state_vector.md
+        assert result.exit_code != 0 or "state_vector" in result.output.lower() or "Error" in result.output
+
+
 class TestResume:
     def test_resume_flag_in_help(self):
         """run command shows --resume flag in help."""
