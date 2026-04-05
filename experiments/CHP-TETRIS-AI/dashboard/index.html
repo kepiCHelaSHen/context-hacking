@@ -1,2 +1,95 @@
 <!DOCTYPE html>
-<html><body><h1>CHP-TETRIS-AI Dashboard</h1><p>Loading...</p></body></html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CHP TETRIS AI — Mission Control</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header id="header">
+    <div class="header-left">
+      <h1>CHP TETRIS AI <span class="subtitle">— Mission Control</span></h1>
+    </div>
+    <div class="header-center">
+      <span class="stat">Turn <span id="turn-current">0</span>/<span id="turn-max">20</span></span>
+      <span class="badge badge-validation" id="mode-badge">VALIDATION</span>
+      <span class="indicator indicator-idle" id="live-indicator">&#9679; IDLE</span>
+    </div>
+    <div class="header-right">
+      <div class="speed-control">
+        <label for="speed-select">Speed:</label>
+        <select id="speed-select">
+          <option value="1">1x</option>
+          <option value="5" selected>5x</option>
+          <option value="20">20x</option>
+        </select>
+      </div>
+      <button id="btn-start-demo" class="btn">Demo</button>
+      <button id="btn-start-live" class="btn btn-primary">Live</button>
+      <button id="btn-stop" class="btn btn-danger" disabled>Stop</button>
+      <button id="btn-reset" class="btn">Reset</button>
+    </div>
+  </header>
+
+  <main id="grid">
+    <!-- Left: Game + Weights -->
+    <section id="panel-game" class="panel">
+      <div class="panel-header">Live Game<span id="game-gen" class="label"></span></div>
+      <canvas id="game-canvas" width="200" height="400"></canvas>
+      <div id="game-stats">
+        <span>Lines: <strong id="stat-lines">0</strong></span>
+        <span>Pieces: <strong id="stat-pieces">0</strong></span>
+        <span>Score: <strong id="stat-score">0</strong></span>
+      </div>
+    </section>
+
+    <section id="panel-weights" class="panel">
+      <div class="panel-header">Current Weights</div>
+      <table id="weights-table">
+        <thead><tr><th>Feature</th><th>Weight</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- Center top: Score Chart -->
+    <section id="panel-chart" class="panel">
+      <div class="panel-header">Score Progression</div>
+      <svg id="score-chart" preserveAspectRatio="xMidYMid meet"></svg>
+    </section>
+
+    <!-- Center bottom: Decision Log -->
+    <section id="panel-log" class="panel">
+      <div class="panel-header">Decision Log <span id="log-count" class="label"></span></div>
+      <div id="decision-log" class="log-scroll"></div>
+    </section>
+
+    <!-- Right top: Code Panel -->
+    <section id="panel-code" class="panel">
+      <div class="panel-header">Live Code <span id="code-status" class="label"></span></div>
+      <pre id="code-display"><code id="code-content">// Waiting for first turn...</code></pre>
+    </section>
+
+    <!-- Right bottom: Protocol Health -->
+    <section id="panel-health" class="panel">
+      <div class="panel-header">Protocol Health</div>
+      <div id="health-content">
+        <div class="gate-bars" id="gate-bars"></div>
+        <div class="section-label">Sigma Gate Seeds</div>
+        <div id="sigma-seeds" class="seed-row"></div>
+        <div id="sigma-cv" class="cv-display"></div>
+        <div class="section-label">Stats</div>
+        <div id="health-stats"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="footer">
+    <span>experiments/CHP-TETRIS-AI</span>
+    <span id="improvement">—</span>
+    <span>CHP v0.2.0</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
