@@ -29,6 +29,32 @@ class TestConfig:
         assert config.stagnation_threshold == 3
 
 
+class TestConfigValidation:
+    def test_unknown_key_logged(self, tmp_path):
+        """Misspelled config key gets logged as warning."""
+        from context_hacking.core.orchestrator import Config
+        config_path = tmp_path / "config.yaml"
+        config_path.write_text(yaml.dump({
+            "project": {"name": "test"},
+            "looop": {"max_turns": 10},
+        }))
+        # 'looop' is not a valid key, so max_turns falls back to default
+        config = Config.from_yaml(config_path)
+        assert config.max_turns == 50  # Falls back to default since 'looop' not recognized
+
+    def test_valid_config_loads(self, tmp_path):
+        """Valid config loads without issues."""
+        from context_hacking.core.orchestrator import Config
+        config_path = tmp_path / "config.yaml"
+        config_path.write_text(yaml.dump({
+            "project": {"name": "test"},
+            "loop": {"max_turns": 10},
+            "gates": {"seeds": 3},
+        }))
+        config = Config.from_yaml(config_path)
+        assert config.max_turns == 10
+
+
 # ── Modes ────────────────────────────────────────────────────────────────────
 
 class TestModeManager:

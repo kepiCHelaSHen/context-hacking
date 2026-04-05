@@ -403,6 +403,22 @@ def dashboard(port: int) -> None:
     )
 
 
+@main.command()
+def validate():
+    """Validate config.yaml without running."""
+    from pathlib import Path as _Path
+    from context_hacking.core.orchestrator import Config
+    config_path = _Path("config.yaml")
+    if not config_path.exists():
+        click.echo("Error: No config.yaml found.", err=True)
+        raise SystemExit(1)
+    config = Config.from_yaml(config_path)
+    click.echo(f"Project: {config.project_name}")
+    click.echo(f"Max turns: {config.max_turns}")
+    click.echo(f"Stagnation threshold: {config.stagnation_threshold}")
+    click.echo("Config OK")
+
+
 def _generate_cursor_rules(target: Path) -> None:
     """Generate .cursorrules and skills/ for Cursor/Claude Code integration."""
     rules_dir = TEMPLATE_DIR / "cursor-rules"

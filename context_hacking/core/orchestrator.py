@@ -44,10 +44,23 @@ class Config:
 
     raw: dict[str, Any] = field(default_factory=dict)
 
+    VALID_TOP_KEYS = {"project", "models", "gates", "loop", "frozen",
+                      "exit_conditions", "critic", "reviewer", "tokens"}
+
     @classmethod
     def from_yaml(cls, path: str | Path) -> Config:
         with open(path) as f:
-            raw = yaml.safe_load(f)
+            raw = yaml.safe_load(f) or {}
+
+        # Validate top-level keys
+        unknown = set(raw.keys()) - cls.VALID_TOP_KEYS
+        if unknown:
+            import difflib
+            for key in unknown:
+                close = difflib.get_close_matches(key, cls.VALID_TOP_KEYS, n=1, cutoff=0.6)
+                suggestion = f" (did you mean '{close[0]}'?)" if close else ""
+                _log.warning("Unknown config key: '%s'%s", key, suggestion)
+
         return cls(raw=raw)
 
     @property
