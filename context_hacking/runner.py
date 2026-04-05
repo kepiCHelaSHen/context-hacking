@@ -77,6 +77,46 @@ def _api_call_with_retry(call_fn, max_retries: int = 3,
     raise last_error
 
 
+# ── Context window management ───────────────────────────────────────────────
+
+def _estimate_tokens(messages: list[dict]) -> int:
+    """Estimate token count from messages. ~4 chars per token heuristic."""
+    total_chars = sum(len(m.get("content", "")) for m in messages)
+    return total_chars // 4
+
+
+def _maybe_summarize_messages(messages: list[dict],
+                               max_tokens: int = 150_000,
+                               keep_recent: int = 6) -> list[dict]:
+    """If messages exceed max_tokens, summarize older turns.
+
+    Keeps the first message (system context) and last keep_recent messages.
+    Replaces middle messages with a synopsis.
+    """
+    estimated = _estimate_tokens(messages)
+    if estimated <= max_tokens:
+        return messages
+
+    if len(messages) <= keep_recent + 1:
+        return messages
+
+    first = messages[0]
+    recent = messages[-keep_recent:]
+    middle = messages[1:-keep_recent]
+
+    turns_summarized = len(middle) // 2
+    synopsis_parts = []
+    for i in range(0, len(middle), 2):
+        user_msg = middle[i].get("content", "")
+        synopsis_parts.append(f"- Turn: {user_msg[:100]}...")
+
+    synopsis = (f"[CONTEXT SUMMARY: {turns_summarized} earlier turns summarized to save context]\n"
+                + "\n".join(synopsis_parts[:20]))
+
+    summary_msg = {"role": "user", "content": synopsis}
+    return [first, summary_msg] + recent
+
+
 # ── Context loading ──────────────────────────────────────────────────────────
 
 def _load_experiment_context(experiment_dir: Path) -> dict[str, str]:
@@ -177,7 +217,8 @@ def _run_api_loop(experiment_dir: Path, max_turns: int = 8, resume_state: dict |
         print(f"Resuming from turn: {start_turn}")
     print(f"{'='*60}\n")
 
-    for turn in range(start_turn, max_turns + 1):
+    try:
+      for turn in range(start_turn, max_turns + 1):
         # ── Build the turn prompt ────────────────────────────────────
         if turn == 1:
             user_msg = (
@@ -214,6 +255,9 @@ def _run_api_loop(experiment_dir: Path, max_turns: int = 8, resume_state: dict |
             )
 
         messages.append({"role": "user", "content": user_msg})
+
+        # ── Summarize if approaching context limit ──────────────────
+        messages = _maybe_summarize_messages(messages, max_tokens=150_000)
 
         # ── Initialize turn metrics ────────────────────────────────
         metrics = TurnMetrics(turn=turn, timestamp=time.strftime("%Y-%m-%d %H:%M"),

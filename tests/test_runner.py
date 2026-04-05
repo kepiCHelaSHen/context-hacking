@@ -11,6 +11,8 @@ from context_hacking.runner import (
     _load_loop_prompt,
     _dead_ends_from_file,
     _api_call_with_retry,
+    _estimate_tokens,
+    _maybe_summarize_messages,
 )
 
 
@@ -93,6 +95,38 @@ class TestDeadEndsFromFile:
     def test_missing_file(self, tmp_path):
         ends = _dead_ends_from_file(tmp_path / "nonexistent.md")
         assert len(ends) == 0
+
+
+class TestContextWindow:
+    def test_estimate_tokens(self):
+        """Token estimation returns reasonable count."""
+        messages = [
+            {"role": "user", "content": "Hello world"},
+            {"role": "assistant", "content": "Hi there, how can I help you today?"},
+        ]
+        tokens = _estimate_tokens(messages)
+        assert 5 < tokens < 50  # ~4 chars per token heuristic
+
+    def test_summarize_when_over_threshold(self):
+        """Summarization compresses messages when over threshold."""
+        messages = []
+        for i in range(50):
+            messages.append({"role": "user", "content": f"Turn {i}: " + "x" * 1000})
+            messages.append({"role": "assistant", "content": f"Response {i}: " + "y" * 1000})
+
+        result = _maybe_summarize_messages(messages, max_tokens=10000)
+        assert len(result) < len(messages)
+        # Last messages preserved
+        assert result[-1]["content"] == messages[-1]["content"]
+
+    def test_no_summarize_under_threshold(self):
+        """No summarization when under threshold."""
+        messages = [
+            {"role": "user", "content": "short"},
+            {"role": "assistant", "content": "reply"},
+        ]
+        result = _maybe_summarize_messages(messages, max_tokens=10000)
+        assert len(result) == len(messages)
 
 
 class TestLoadLoopPrompt:
