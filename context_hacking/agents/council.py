@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 from dataclasses import dataclass, field
@@ -29,6 +30,34 @@ class CouncilReview:
     def succeeded(self) -> bool:
         return self.error is None
 
+    @property
+    def flags_drift(self) -> bool:
+        """Does this review flag drift/issues?"""
+        if not self.succeeded:
+            return False
+        text = self.response.strip()
+        # Try JSON parsing first (OpenAI structured responses)
+        try:
+            data = json.loads(text)
+            if isinstance(data, dict) and "drift_detected" in data:
+                return bool(data["drift_detected"])
+        except (json.JSONDecodeError, ValueError):
+            pass
+        else:
+            # JSON parsed successfully — don't fall through to keyword matching
+            return False
+        # Free-text keyword matching with negation handling
+        lower = text.lower()
+        negation_patterns = ["no drift", "not drift", "no issues", "without drift"]
+        if any(neg in lower for neg in negation_patterns):
+            # Only negation present — check if there's also a positive signal
+            positive_signals = ["mismatch", "incorrect", "wrong",
+                               "does not match", "doesn't match", "violat"]
+            return any(sig in lower for sig in positive_signals)
+        drift_signals = ["drift", "mismatch", "incorrect", "wrong",
+                        "does not match", "doesn't match", "violat"]
+        return any(sig in lower for sig in drift_signals)
+
 
 @dataclass
 class CouncilResult:
@@ -42,24 +71,20 @@ class CouncilResult:
 
     @property
     def consensus_issues(self) -> list[str]:
-        """Issues flagged by ALL successful reviewers (consensus = must fix)."""
+        """Find issues flagged by 2+ council members (true consensus)."""
         if self.n_succeeded < 2:
             return []
-        # Simple heuristic: find keywords that appear in all reviews
-        # In practice, the orchestrator should do a more nuanced comparison.
+
+        drift_flaggers = [r.provider for r in self.reviews if r.flags_drift]
+
+        if len(drift_flaggers) >= 2:
+            return [f"Consensus drift flagged by: {', '.join(drift_flaggers)}"]
         return []
 
     @property
     def any_drift_flagged(self) -> bool:
         """Did any reviewer flag DRIFT?"""
-        for r in self.reviews:
-            if r.succeeded and "drift" in r.response.lower():
-                # Check if it's flagged as a concern vs just mentioned
-                lines = r.response.lower().splitlines()
-                for line in lines:
-                    if "drift" in line and ("yes" in line or "concern" in line or "risk" in line):
-                        return True
-        return False
+        return any(r.flags_drift for r in self.reviews)
 
 
 def _load_prompt(path: Path) -> str:
@@ -78,6 +103,7 @@ def _call_openai(model: str, prompt: str, api_key: str, **kwargs: Any) -> str:
             "messages": [{"role": "user", "content": prompt}],
             "max_tokens": kwargs.get("max_tokens", 600),
             "temperature": kwargs.get("temperature", 0.3),
+            "response_format": {"type": "json_object"},
         },
         timeout=60,
     )

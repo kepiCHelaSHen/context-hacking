@@ -23,3 +23,6 @@ Be critical. Be concise. 1-3 sentences per question max.
 
 INNOVATION LOG TO REVIEW:
 {log}
+
+Respond in JSON format with this structure:
+{"drift_detected": true/false, "issues": ["issue 1", ...], "risk_level": "low/medium/high", "recommendation": "..."}
