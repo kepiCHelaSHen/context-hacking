@@ -269,6 +269,21 @@ class TestOrchestrator:
         assert "mode" in status
         assert status["project"] == "test"
 
+    def test_orchestrator_has_telemetry(self, tmp_path):
+        """Orchestrator creates a TelemetryStore on init."""
+        orch = self._make_orch(tmp_path)
+        assert hasattr(orch, 'telemetry')
+        assert orch.telemetry is not None
+        assert orch.telemetry.total_turns == 0
+
+    def test_record_turn_persists_telemetry(self, tmp_path):
+        """record_turn_result saves telemetry."""
+        orch = self._make_orch(tmp_path)
+        from context_hacking.core.telemetry import TurnMetrics
+        metrics = TurnMetrics(turn=1, tokens_total=500, duration_seconds=10.0)
+        orch.record_turn_result(gate_passed=True, metrics_improved=True, anomaly=False, metrics=metrics)
+        assert orch.telemetry.total_turns == 1
+
 
 # ── Critic Parsing ───────────────────────────────────────────────────────────
 

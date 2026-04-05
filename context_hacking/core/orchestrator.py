@@ -33,6 +33,7 @@ import yaml
 from context_hacking.core.gates import GateChecker
 from context_hacking.core.memory import MemoryManager
 from context_hacking.core.modes import ModeManager
+from context_hacking.core.telemetry import TelemetryStore
 
 _log = logging.getLogger(__name__)
 
@@ -107,6 +108,7 @@ class Orchestrator:
         self.gates = GateChecker(config)
         self.modes = ModeManager(config)
         self.memory = MemoryManager(config)
+        self.telemetry = TelemetryStore.load()
         self._exit_reason: str | None = None
 
         _log.info("CHP Orchestrator initialized: %s", config.project_name)
@@ -215,6 +217,7 @@ class Orchestrator:
         gate_passed: bool,
         metrics_improved: bool,
         anomaly: bool,
+        metrics: "TurnMetrics | None" = None,
     ) -> None:
         """Record the outcome of a turn after build + review + verification."""
         # Update gate tracker
@@ -232,6 +235,10 @@ class Orchestrator:
         # State vector
         if self.turn % self.config.state_vector_interval == 0:
             self.memory.write_state_vector(self.turn, self.current_mode)
+
+        # Telemetry
+        if metrics is not None:
+            self.telemetry.add_turn(metrics)
 
         # Auto git tag
         if self.config.auto_tag and gate_passed and not anomaly:
