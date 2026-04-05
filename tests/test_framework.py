@@ -288,6 +288,8 @@ class TestOrchestrator:
 
     def test_orchestrator_has_telemetry(self, tmp_path):
         """Orchestrator creates a TelemetryStore on init."""
+        from context_hacking.core.telemetry import TELEMETRY_PATH
+        TELEMETRY_PATH.unlink(missing_ok=True)
         orch = self._make_orch(tmp_path)
         assert hasattr(orch, 'telemetry')
         assert orch.telemetry is not None
@@ -295,6 +297,8 @@ class TestOrchestrator:
 
     def test_record_turn_persists_telemetry(self, tmp_path):
         """record_turn_result saves telemetry."""
+        from context_hacking.core.telemetry import TELEMETRY_PATH
+        TELEMETRY_PATH.unlink(missing_ok=True)
         orch = self._make_orch(tmp_path)
         from context_hacking.core.telemetry import TurnMetrics
         metrics = TurnMetrics(turn=1, tokens_total=500, duration_seconds=10.0)
