@@ -5,6 +5,20 @@ import logging
 import webbrowser
 from pathlib import Path
 
+import numpy as np
+
+
+class _NumpyEncoder(json.JSONEncoder):
+    """Handle numpy types in JSON serialization."""
+    def default(self, obj):
+        if isinstance(obj, (np.integer,)):
+            return int(obj)
+        if isinstance(obj, (np.floating,)):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super().default(obj)
+
 from starlette.applications import Starlette
 from starlette.routing import Route, WebSocketRoute, Mount
 from starlette.staticfiles import StaticFiles
@@ -40,7 +54,7 @@ class TetrisServer:
         Disconnected clients are silently removed from the set.
         """
         self.state.append(message)
-        encoded = json.dumps(message)
+        encoded = json.dumps(message, cls=_NumpyEncoder)
         dead: set = set()
         for ws in self.clients:
             try:

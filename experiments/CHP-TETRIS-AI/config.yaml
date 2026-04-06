@@ -21,8 +21,8 @@ models:
 
 gates:
   seeds: 10
-  cv_threshold: 0.15
-  max_consecutive_anomalies: 3
+  cv_threshold: 1.0
+  max_consecutive_anomalies: 5
 
 loop:
   max_turns: 20

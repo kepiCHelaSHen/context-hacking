@@ -6,13 +6,10 @@
 <title>CHP Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-/* ── RESET ── */
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;background:#F8F9FC;color:#0F1117;min-height:100vh}
-
-/* ── DESIGN TOKENS ── */
 :root{
-  --bg:#F8F9FC;--sur:#FFFFFF;--sur2:#F3F4F8;--sur3:#E9EBF2;
+  --bg:#F8F9FC;--sur:#FFF;--sur2:#F3F4F8;--sur3:#E9EBF2;
   --ln:#E2E5EF;--ln2:#C8CCDB;
   --t1:#0F1117;--t2:#374151;--t3:#6B7280;--t4:#9CA3AF;
   --blue:#1D4ED8;--bluebg:#EFF6FF;--blueln:#93C5FD;
@@ -21,743 +18,627 @@ body{font-family:'Inter',sans-serif;background:#F8F9FC;color:#0F1117;min-height:
   --warn:#92400E;--warnbg:#FFFBEB;--warnln:#FCD34D;
   --amber:#D97706;
   --mono:'IBM Plex Mono',monospace;
+  --max:1160px;
 }
+.wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
 
-/* ── TYPOGRAPHY ── */
-.mono{font-family:var(--mono)}
-.label{font-family:var(--mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--t3)}
-.label-sm{font-family:var(--mono);font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:.10em;color:var(--t4)}
-
-/* ── HEADER ── */
-.header{
-  background:var(--sur);border-bottom:1.5px solid var(--ln);
-  padding:10px 20px;display:flex;align-items:center;justify-content:space-between;
-  position:sticky;top:0;z-index:100;
-}
-.header-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.logo{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.14em;color:var(--t1)}
-.proj-badge{
-  font-family:var(--mono);font-size:10px;background:var(--bluebg);color:var(--blue);
-  border:1px solid var(--blueln);border-radius:4px;padding:3px 10px;
-}
-.hstat{font-family:var(--mono);font-size:10px;color:var(--t3);margin-left:4px}
+/* HEADER */
+.header{background:var(--sur);border-bottom:1.5px solid var(--ln);padding:10px 0;position:sticky;top:0;z-index:100}
+.header .wrap{display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:8px}
+.logo{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.14em}
+.proj{font-family:var(--mono);font-size:10px;background:var(--bluebg);color:var(--blue);border:1px solid var(--blueln);border-radius:4px;padding:3px 10px}
+.hstat{font-family:var(--mono);font-size:10px;color:var(--t3)}
 .hstat strong{color:var(--t1)}
-.mode-badge{font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 10px;border-radius:4px;letter-spacing:.06em}
+.mode{font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 10px;border-radius:4px;letter-spacing:.06em}
+.mode-none{background:var(--sur2);color:var(--t4);border:1px solid var(--ln2)}
 .mode-validation{background:var(--passbg);color:var(--pass);border:1px solid var(--passln)}
 .mode-exploration{background:var(--warnbg);color:var(--warn);border:1px solid var(--warnln)}
-.mode-exit{background:var(--failbg);color:var(--fail);border:1px solid var(--failln)}
-.mode-none{background:var(--sur2);color:var(--t3);border:1px solid var(--ln2)}
-.htime{font-family:var(--mono);font-size:10px;color:var(--t4);display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.htime{font-family:var(--mono);font-size:10px;color:var(--t4)}
 
-/* ── ACTION BAR ── */
-.actions{
-  background:var(--bg);border-bottom:1px solid var(--ln);
-  padding:8px 20px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;
-}
-.btn{
-  font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.08em;
-  text-transform:uppercase;border:1.5px solid var(--ln2);background:var(--sur);
-  color:var(--t2);padding:5px 12px;border-radius:4px;cursor:pointer;
-  transition:background .1s;white-space:nowrap;
-}
-.btn:hover{background:var(--sur2)}
-.btn-blue{border-color:var(--blueln);color:var(--blue);background:var(--bluebg)}
-.btn-blue:hover{background:#DBEAFE}
-.btn-red{border-color:var(--failln);color:var(--fail);background:var(--failbg)}
-.btn-red:hover{background:#FEE2E2}
-
-/* ── TABS ── */
-.tabs{
-  background:var(--sur);border-bottom:2px solid var(--ln);
-  display:flex;padding:0 20px;overflow-x:auto;
-}
-.tab{
-  font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.10em;
-  text-transform:uppercase;padding:11px 16px;color:var(--t3);
-  border-bottom:2px solid transparent;margin-bottom:-2px;
-  cursor:pointer;white-space:nowrap;transition:color .12s;
-}
+/* TABS */
+.tabs{background:var(--sur);border-bottom:2px solid var(--ln)}
+.tabs .wrap{display:flex}
+.tab{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.10em;text-transform:uppercase;padding:11px 16px;color:var(--t3);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;white-space:nowrap;transition:color .12s}
 .tab:hover{color:var(--t2)}
 .tab.active{color:var(--blue);border-bottom-color:var(--blue)}
 
-/* ── TAB PANELS ── */
-.panel{display:none;padding:20px}
-.panel.active{display:block}
+/* PANELS */
+.panel{display:none}.panel.active{display:block}
 
-/* ── SECTION HEADER ── */
-.sh{display:flex;align-items:center;gap:10px;margin:0 0 12px}
+/* SECTION HEADER */
+.sh{display:flex;align-items:center;gap:10px;margin:0 0 14px}
 .sh-lbl{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.12em;white-space:nowrap}
 .sh-line{flex:1;height:1px;background:var(--ln)}
-.sh-sub{font-size:10px;color:var(--t3);margin:-8px 0 14px;font-family:'Inter',sans-serif}
 
-/* ── GALLERY FILTERS ── */
-.filter-bar{
-  display:flex;gap:8px;align-items:center;flex-wrap:wrap;
-  margin-bottom:16px;padding:12px 14px;
-  background:var(--sur);border:1px solid var(--ln);border-radius:6px;
-}
-.filter-group{display:flex;align-items:center;gap:6px}
-.filter-label{font-family:var(--mono);font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.10em;white-space:nowrap}
-.filter-chip{
-  font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.06em;
-  text-transform:uppercase;padding:3px 10px;border-radius:20px;cursor:pointer;
-  border:1.5px solid var(--ln2);background:var(--sur);color:var(--t3);
-  transition:all .12s;
-}
-.filter-chip:hover{border-color:var(--blue);color:var(--blue)}
-.filter-chip.active{background:var(--blue);border-color:var(--blue);color:#fff}
-.filter-chip.cat.active{background:#6366F1;border-color:#6366F1;color:#fff}
-.filter-chip.disc.active{background:#0891B2;border-color:#0891B2;color:#fff}
-.filter-chip.loop.active{background:#059669;border-color:#059669;color:#fff}
-.filter-sep{width:1px;height:20px;background:var(--ln2);margin:0 4px}
-.search-box{
-  font-family:var(--mono);font-size:10px;padding:4px 10px;
-  border:1.5px solid var(--ln2);border-radius:4px;background:var(--bg);
-  color:var(--t1);outline:none;min-width:180px;
-}
-.search-box:focus{border-color:var(--blue)}
-.filter-count{font-family:var(--mono);font-size:9px;color:var(--t4);margin-left:auto}
+/* HERO */
+.hero{background:var(--sur);border-bottom:1px solid var(--ln);padding:24px 0}
+.hero .wrap{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.hero-stats{display:flex;gap:36px;flex-wrap:wrap}
+.hv{font-family:var(--mono);font-size:32px;font-weight:700;color:var(--t1);line-height:1}
+.hl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--t4);margin-top:5px}
+.hs{font-size:10px;color:var(--t3);margin-top:3px}
+.hero-right{display:flex;align-items:center;gap:14px}
+.hero-sep{width:1px;height:48px;background:var(--ln2);flex-shrink:0}
+.btn-new{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;background:var(--blue);color:#fff;border:none;padding:11px 22px;border-radius:4px;cursor:pointer;transition:background .12s;white-space:nowrap}
+.btn-new:hover{background:#1e40af}
+.btn-new-sub{font-size:10px;color:var(--t4);text-align:right;line-height:1.5}
 
-/* ── GALLERY TABLE ── */
-.gallery-table-wrap{border:1px solid var(--ln);border-radius:6px;overflow:hidden}
-.gallery-table{width:100%;border-collapse:collapse}
-.gallery-table thead th{
-  text-align:left;padding:8px 12px;
-  border-bottom:2px solid var(--ln2);
-  font-family:var(--mono);font-size:9px;text-transform:uppercase;
-  letter-spacing:.10em;color:var(--t3);background:var(--sur2);
-  white-space:nowrap;
-}
-.gallery-table tbody tr{cursor:pointer;transition:background .08s}
-.gallery-table tbody tr:hover td{background:var(--bluebg)}
-.gallery-table tbody tr.selected td{background:var(--bluebg)}
-.gallery-table tbody tr.selected td:first-child{border-left:3px solid var(--blue)}
-.gallery-table tbody td{
-  padding:8px 12px;border-bottom:1px solid var(--ln);
-  font-size:11px;color:var(--t2);vertical-align:middle;
-}
-.gallery-table tbody tr:last-child td{border-bottom:none}
-.exp-name{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--t1)}
-.exp-slug{font-family:var(--mono);font-size:9px;color:var(--t4);margin-top:1px}
-.domain-tag{font-size:9px;color:var(--t3);font-family:'Inter',sans-serif}
-.fp-count{font-family:var(--mono);font-size:11px;font-weight:700;text-align:center}
-.fp-count.has-fp{color:var(--amber)}
-.fp-count.no-fp{color:var(--t4)}
-.key-result-cell{font-size:10px;color:var(--t2);max-width:280px;font-family:'Inter',sans-serif;line-height:1.4}
+/* FILTERS */
+.filter-bar{background:var(--sur);border:1px solid var(--ln);border-radius:6px;padding:12px 14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.fl{font-family:var(--mono);font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:.10em;white-space:nowrap}
+.chip{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:20px;cursor:pointer;border:1.5px solid var(--ln2);background:var(--sur);color:var(--t3);transition:all .12s}
+.chip:hover{border-color:var(--blue);color:var(--blue)}
+.chip.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.chip.cat.on{background:#7C3AED;border-color:#7C3AED}
+.chip.disc.on{background:#0891B2;border-color:#0891B2}
+.chip.loop.on{background:#059669;border-color:#059669}
+.fsep{width:1px;height:20px;background:var(--ln2);flex-shrink:0}
+.search{font-family:var(--mono);font-size:10px;padding:4px 10px;border:1.5px solid var(--ln2);border-radius:4px;background:var(--bg);color:var(--t1);outline:none;min-width:200px}
+.search:focus{border-color:var(--blue)}
+.fcount{font-family:var(--mono);font-size:9px;color:var(--t4);margin-left:auto;white-space:nowrap}
+#discFilters{display:flex;gap:4px;flex-wrap:wrap}
 
-/* ── STANDARD BADGES ── */
-.std-badge{
-  display:inline-block;font-family:var(--mono);font-size:8px;font-weight:700;
-  padding:2px 7px;border-radius:3px;letter-spacing:.06em;text-transform:uppercase;
-}
-.std-cat{background:#EDE9FE;color:#5B21B6;border:1px solid #C4B5FD}
-.std-disc{background:#CFFAFE;color:#0E7490;border:1px solid #67E8F9}
-.std-loop{background:var(--passbg);color:var(--pass);border:1px solid var(--passln)}
+/* TABLE */
+.tbl-wrap{border:1px solid var(--ln);border-radius:6px;overflow:hidden;margin-bottom:20px}
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;padding:8px 12px;border-bottom:2px solid var(--ln2);font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.10em;color:var(--t3);background:var(--sur2);white-space:nowrap}
+tbody tr{cursor:pointer;transition:background .08s}
+tbody tr:hover td{background:var(--bluebg)}
+tbody tr.sel td{background:var(--bluebg)}
+tbody tr.sel td:first-child{border-left:3px solid var(--blue);padding-left:9px}
+tbody td{padding:8px 12px;border-bottom:1px solid var(--ln);font-size:11px;color:var(--t2);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+.en{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--t1)}
+.es{font-family:var(--mono);font-size:8px;color:var(--t4);margin-top:2px}
+.dt{font-size:9px;color:var(--t3)}
+.fp{font-family:var(--mono);font-size:11px;font-weight:700;text-align:center}
+.fp.has{color:var(--amber)}.fp.nil{color:var(--t4)}
+.kr{font-size:10px;color:var(--t2);max-width:300px;line-height:1.4}
 
-/* ── STATUS BADGES ── */
-.status-badge{
-  display:inline-block;font-family:var(--mono);font-size:8px;font-weight:700;
-  padding:2px 7px;border-radius:3px;letter-spacing:.06em;text-transform:uppercase;
-}
-.status-complete{background:var(--passbg);color:var(--pass);border:1px solid var(--passln)}
-.status-staged{background:var(--sur2);color:var(--t3);border:1px solid var(--ln2)}
-.status-superseded{background:var(--failbg);color:var(--t3);border:1px solid var(--failln)}
-.status-active{background:var(--bluebg);color:var(--blue);border:1px solid var(--blueln)}
+/* BADGES */
+.badge{display:inline-block;font-family:var(--mono);font-size:8px;font-weight:700;padding:2px 7px;border-radius:3px;letter-spacing:.06em;text-transform:uppercase}
+.b-cat{background:#EDE9FE;color:#5B21B6;border:1px solid #C4B5FD}
+.b-disc{background:#CFFAFE;color:#0E7490;border:1px solid #67E8F9}
+.b-loop{background:var(--passbg);color:var(--pass);border:1px solid var(--passln)}
+.b-complete{background:var(--passbg);color:var(--pass);border:1px solid var(--passln)}
+.b-staged{background:var(--sur2);color:var(--t3);border:1px solid var(--ln2)}
+.b-superseded{background:var(--sur2);color:var(--t4);border:1px solid var(--ln)}
+.b-unknown{background:var(--sur2);color:var(--t4);border:1px solid var(--ln)}
 
-/* ── DETAIL PANEL ── */
-.detail-panel{
-  background:var(--sur);border:1px solid var(--ln);border-radius:6px;
-  margin-top:16px;overflow:hidden;
-}
-.detail-hdr{
-  background:var(--sur2);padding:12px 16px;border-bottom:1px solid var(--ln);
-  display:flex;align-items:flex-start;gap:12px;
-}
-.detail-hdr-info{flex:1}
-.detail-title{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--t1)}
-.detail-meta{font-size:10px;color:var(--t3);margin-top:3px;font-family:'Inter',sans-serif}
+/* DETAIL PANEL */
+.detail{background:var(--sur);border:1px solid var(--ln);border-radius:6px;overflow:hidden;margin-bottom:28px;scroll-margin-top:80px}
+.detail-hdr{background:var(--sur2);padding:14px 18px;border-bottom:1px solid var(--ln);display:flex;align-items:flex-start;gap:14px}
+.dt-title{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--t1)}
+.dt-meta{font-size:10px;color:var(--t3);margin-top:3px}
 .detail-subtabs{display:flex;border-bottom:1px solid var(--ln);background:var(--sur)}
-.dtab{
-  font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.10em;
-  padding:9px 14px;color:var(--t3);cursor:pointer;
-  border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .1s;
-}
-.dtab:hover{color:var(--t2)}
-.dtab.active{color:var(--blue);border-bottom-color:var(--blue)}
-.detail-body{padding:16px}
+.stab{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.10em;padding:9px 14px;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .1s}
+.stab:hover{color:var(--t2)}
+.stab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.detail-body{padding:20px}
 
-/* ── METADATA GRID ── */
-.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.meta-block{}
-.meta-block h4{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.10em;color:var(--t3);margin-bottom:6px}
-.meta-block p{font-size:11px;color:var(--t2);line-height:1.6;font-family:'Inter',sans-serif}
-.meta-row{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--ln);font-size:10px}
-.meta-row:last-child{border-bottom:none}
-.meta-key{font-family:var(--mono);color:var(--t3);min-width:140px;flex-shrink:0}
-.meta-val{color:var(--t2);font-family:'Inter',sans-serif}
+/* DETAIL CONTENT */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.mr{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--ln);font-size:10px}
+.mr:last-child{border-bottom:none}
+.mk{font-family:var(--mono);color:var(--t3);min-width:120px;flex-shrink:0;font-size:9px;text-transform:uppercase;letter-spacing:.06em;padding-top:1px}
+.mv{color:var(--t2);font-size:11px}
+.flag{display:inline-block;font-family:var(--mono);font-size:8px;padding:2px 7px;border-radius:3px;margin:2px 2px 2px 0}
+.fy{background:var(--passbg);color:var(--pass);border:1px solid var(--passln)}
+.fn{background:var(--sur2);color:var(--t4);border:1px solid var(--ln)}
 
-/* ── FLAGS ── */
-.flag-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
-.flag{
-  display:inline-flex;align-items:center;gap:4px;
-  font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:3px;
-}
-.flag-yes{background:var(--passbg);color:var(--pass);border:1px solid var(--passln)}
-.flag-no{background:var(--sur2);color:var(--t4);border:1px solid var(--ln)}
+/* FROZEN VIEWER */
+.frozen-content{background:var(--sur2);border:1px solid var(--ln);border-radius:4px;padding:14px 16px;font-family:var(--mono);font-size:10px;color:var(--t2);line-height:1.7;white-space:pre-wrap;word-break:break-word;max-height:400px;overflow-y:auto;margin-top:8px}
 
-/* ── FIGURES GRID ── */
-.figs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.fig-card{background:var(--sur);border:1px solid var(--ln);border-radius:4px;overflow:hidden;cursor:pointer;transition:border-color .12s}
-.fig-card:hover{border-color:var(--blueln)}
-.fig-placeholder{background:var(--sur2);height:100px;display:flex;align-items:center;justify-content:center;color:var(--t4);font-size:9px;font-family:var(--mono)}
-.fig-cap{padding:5px 8px;border-top:1px solid var(--ln);font-family:var(--mono);font-size:8px;color:var(--t3)}
+/* FIGURES */
+.figs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:8px}
+.fig-card{background:var(--sur2);border:1px solid var(--ln);border-radius:4px;overflow:hidden;cursor:pointer;transition:all .12s}
+.fig-card:hover{border-color:var(--blueln);box-shadow:0 2px 8px rgba(29,78,216,.08)}
+.fig-img{width:100%;height:130px;object-fit:cover;display:block;background:var(--sur3)}
+.fig-placeholder{width:100%;height:130px;display:flex;align-items:center;justify-content:center;background:var(--sur3);color:var(--t4);font-family:var(--mono);font-size:9px}
+.fig-cap{padding:6px 8px;font-family:var(--mono);font-size:8px;color:var(--t3);border-top:1px solid var(--ln)}
 
-/* ── STUB PANELS ── */
-.stub-panel{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:60px 20px;text-align:center;
-}
-.stub-label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--t4);margin-bottom:8px}
-.stub-desc{font-size:12px;color:var(--t3);font-family:'Inter',sans-serif}
+/* GATE BARS */
+.gate-bar{background:var(--sur);border:1px solid var(--ln);border-left:3px solid var(--ln2);border-radius:0 4px 4px 0;padding:8px 12px;margin:4px 0}
+.gate-bar.pass{border-left-color:var(--passln)}.gate-bar.fail{border-left-color:var(--failln)}.gate-bar.warn{border-left-color:var(--warnln)}
+.gate-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.gate-lbl{font-family:var(--mono);font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em}
+.gate-score{font-family:var(--mono);font-size:13px;font-weight:700}
+.gate-score.pass{color:var(--pass)}.gate-score.fail{color:var(--fail)}.gate-score.warn{color:var(--warn)}
+.track{height:3px;background:var(--sur3);border-radius:2px;position:relative}
+.fill{height:100%;border-radius:2px;background:var(--passln)}
+.fill.fail{background:var(--failln)}.fill.warn{background:var(--warnln)}
+.tick{position:absolute;top:-4px;width:2px;height:11px;background:var(--amber)}
+.gate-foot{font-size:9px;color:var(--t4);margin-top:4px;font-family:'Inter',sans-serif}
 
-/* ── EMPTY STATE ── */
-.empty-state{padding:40px 20px;text-align:center;color:var(--t4);font-family:var(--mono);font-size:10px;letter-spacing:.08em}
-
-/* ── LOADING ── */
-.loading{padding:40px 20px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--t4);letter-spacing:.10em;text-transform:uppercase}
-
-/* ── ERROR BOX ── */
-.error-box{background:var(--failbg);border:1px solid var(--failln);border-radius:4px;padding:12px 16px;font-family:var(--mono);font-size:10px;color:var(--fail);margin:16px 0}
-
-/* ── SUMMARY STRIP ── */
-.summary-strip{
-  display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;
-}
-.sum-chip{
-  font-family:var(--mono);font-size:9px;padding:3px 10px;border-radius:3px;
-  border:1px solid var(--ln2);background:var(--sur2);color:var(--t3);
-}
-.sum-chip strong{color:var(--t1)}
+/* STUBS & UTILS */
+.stub{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;text-align:center}
+.stub-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--t4);margin-bottom:10px}
+.stub-desc{font-size:12px;color:var(--t3);line-height:1.7;max-width:400px}
+.empty{padding:32px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--t4)}
+.err{background:var(--failbg);border:1px solid var(--failln);border-radius:4px;padding:12px 16px;font-family:var(--mono);font-size:10px;color:var(--fail);margin-bottom:16px}
+.loading{padding:32px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--t4);letter-spacing:.10em;text-transform:uppercase}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid var(--ln2);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin-right:6px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
 
-<!-- ── HEADER ── -->
+<!-- HEADER -->
 <div class="header">
-  <div class="header-left">
-    <span class="logo">CHP</span>
-    <span class="proj-badge" id="projBadge">context-hacking</span>
-    <span class="hstat">T:<strong id="hTurn">—</strong></span>
-    <span class="mode-badge mode-none" id="hMode">—</span>
-    <span class="hstat" id="hDeadEnds" style="display:none"><strong style="color:#991B1B" id="hDeadCount">0</strong> dead ends</span>
-  </div>
-  <div class="htime">
-    <span id="hClock">—</span>
-    <span id="hRefresh" style="font-size:9px;color:#C8CCDB">auto-refresh 5s</span>
+  <div class="wrap">
+    <div class="header-left">
+      <span class="logo">CHP</span>
+      <span class="proj">context-hacking</span>
+      <span class="hstat" style="margin-left:4px">T:<strong id="hTurn">—</strong></span>
+      <span class="mode mode-none" id="hMode">—</span>
+    </div>
+    <span class="htime" id="hClock">—</span>
   </div>
 </div>
 
-<!-- ── TABS ── -->
+<!-- TABS -->
 <div class="tabs">
-  <div class="tab active"  onclick="switchTab(0)">Live Monitor</div>
-  <div class="tab"         onclick="switchTab(1)">Protocol Health</div>
-  <div class="tab"         onclick="switchTab(2)">Experiment Report</div>
-  <div class="tab"         onclick="switchTab(3)">Gallery</div>
-  <div class="tab"         onclick="switchTab(4)">New Experiment</div>
-</div>
-
-<!-- ── ACTIONS ── -->
-<div class="actions">
-  <button class="btn btn-blue" onclick="showRunModal()">Run Loop</button>
-  <button class="btn btn-red">Stop Loop</button>
-  <button class="btn">Export Paper</button>
-  <button class="btn">Download Figures</button>
-  <button class="btn" onclick="loadAll()">Refresh</button>
-</div>
-
-<!-- ============================================================ -->
-<!-- TAB 0 — LIVE MONITOR (stub)                                  -->
-<!-- ============================================================ -->
-<div class="panel active" id="panel-0">
-  <div class="stub-panel">
-    <div class="stub-label">Live Monitor</div>
-    <div class="stub-desc">Reads state_vector.md · innovation_log.md · dead_ends.md<br>Polls every 5 seconds — building next.</div>
+  <div class="wrap">
+    <div class="tab" onclick="switchTab(0)">Live Monitor</div>
+    <div class="tab active" onclick="switchTab(1)">Gallery</div>
+    <div class="tab" onclick="switchTab(2)">Protocol Health</div>
+    <div class="tab" onclick="switchTab(3)">Experiment Report</div>
   </div>
 </div>
 
-<!-- ============================================================ -->
-<!-- TAB 1 — PROTOCOL HEALTH (stub)                               -->
-<!-- ============================================================ -->
-<div class="panel" id="panel-1">
-  <div class="stub-panel">
-    <div class="stub-label">Protocol Health</div>
-    <div class="stub-desc">Reads .chp/telemetry.json — building next.</div>
-  </div>
-</div>
-
-<!-- ============================================================ -->
-<!-- TAB 2 — EXPERIMENT REPORT (stub)                             -->
-<!-- ============================================================ -->
-<div class="panel" id="panel-2">
-  <div class="stub-panel">
-    <div class="stub-label">Experiment Report</div>
-    <div class="stub-desc">Renders REPORT.md with false positive story and figures — building next.</div>
-  </div>
-</div>
-
-<!-- ============================================================ -->
-<!-- TAB 3 — GALLERY                                              -->
-<!-- ============================================================ -->
-<div class="panel" id="panel-3">
-
-  <!-- Filter bar -->
-  <div class="filter-bar">
-
-    <div class="filter-group">
-      <span class="filter-label">Standard</span>
-      <button class="filter-chip active" data-filter="standard" data-val="all"   onclick="setFilter('standard','all',this)">All</button>
-      <button class="filter-chip cat"   data-filter="standard" data-val="cat"   onclick="setFilter('standard','cat',this)">Cat</button>
-      <button class="filter-chip disc"  data-filter="standard" data-val="disc"  onclick="setFilter('standard','disc',this)">Disc</button>
-      <button class="filter-chip loop"  data-filter="standard" data-val="loop"  onclick="setFilter('standard','loop',this)">Loop</button>
+<!-- ================================================ -->
+<!-- TAB 0 — LIVE MONITOR                             -->
+<!-- ================================================ -->
+<div class="panel" id="panel-0">
+  <div class="wrap" style="padding-top:40px">
+    <div class="stub">
+      <div class="stub-lbl">Live Monitor</div>
+      <div class="stub-desc">No experiment is running.<br>Select one from the Gallery and run it from your terminal to watch it here.</div>
     </div>
-
-    <div class="filter-sep"></div>
-
-    <div class="filter-group">
-      <span class="filter-label">Status</span>
-      <button class="filter-chip active" data-filter="status" data-val="all"       onclick="setFilter('status','all',this)">All</button>
-      <button class="filter-chip"        data-filter="status" data-val="complete"  onclick="setFilter('status','complete',this)">Complete</button>
-      <button class="filter-chip"        data-filter="status" data-val="staged"    onclick="setFilter('status','staged',this)">Staged</button>
-    </div>
-
-    <div class="filter-sep"></div>
-
-    <div class="filter-group">
-      <span class="filter-label">Discipline</span>
-      <div id="discFilters" style="display:flex;gap:4px;flex-wrap:wrap"></div>
-    </div>
-
-    <div class="filter-sep"></div>
-
-    <input class="search-box" type="text" placeholder="Search experiments..." id="searchBox" oninput="renderTable()">
-
-    <span class="filter-count" id="filterCount"></span>
   </div>
+</div>
 
-  <!-- Summary strip -->
-  <div class="summary-strip" id="summaryStrip"></div>
+<!-- ================================================ -->
+<!-- TAB 1 — GALLERY                                  -->
+<!-- ================================================ -->
+<div class="panel active" id="panel-1">
 
-  <!-- Table -->
-  <div id="galleryError"></div>
-  <div id="galleryLoading" class="loading">Loading experiment index…</div>
-  <div class="gallery-table-wrap" id="galleryWrap" style="display:none">
-    <table class="gallery-table">
-      <thead>
-        <tr>
-          <th>Experiment</th>
-          <th>Standard</th>
-          <th>Discipline</th>
-          <th style="text-align:center">FPs</th>
-          <th>Key Result</th>
-          <th>Status</th>
-          <th style="text-align:center">Tests</th>
-          <th style="text-align:center">Figs</th>
-        </tr>
-      </thead>
-      <tbody id="galleryBody"></tbody>
-    </table>
-  </div>
-
-  <!-- Detail panel -->
-  <div class="detail-panel" id="detailPanel" style="display:none">
-    <div class="detail-hdr">
-      <div class="detail-hdr-info">
-        <div class="detail-title" id="detailTitle">—</div>
-        <div class="detail-meta" id="detailMeta">—</div>
+  <!-- Hero -->
+  <div class="hero">
+    <div class="wrap">
+      <div class="hero-stats" id="heroStats">
+        <div><div class="hv">—</div><div class="hl">Experiments</div><div class="hs" id="hsSub1">—</div></div>
+        <div><div class="hv" style="color:var(--amber)" id="hsF">—</div><div class="hl">FPs Caught</div><div class="hs">errors blocked before merge</div></div>
+        <div><div class="hv" id="hsD">—</div><div class="hl">Disciplines</div><div class="hs" id="hsSub2">—</div></div>
       </div>
-      <span id="detailStatusBadge"></span>
-    </div>
-    <div class="detail-subtabs">
-      <div class="dtab active" onclick="switchDetail(0)">Overview</div>
-      <div class="dtab"        onclick="switchDetail(1)">Figures</div>
-      <div class="dtab"        onclick="switchDetail(2)">Files</div>
-    </div>
-    <div class="detail-body">
-      <div id="dpanel-0"></div>
-      <div id="dpanel-1" style="display:none"></div>
-      <div id="dpanel-2" style="display:none"></div>
+      <div class="hero-right">
+        <div class="btn-new-sub">Ready to run a new experiment?<br>cat · disc · loop standards</div>
+        <div class="hero-sep"></div>
+        <button class="btn-new" onclick="switchTab(0)">+ New Experiment</button>
+      </div>
     </div>
   </div>
 
-</div><!-- /panel-3 -->
+  <div class="wrap" style="padding-top:20px">
 
-<!-- ============================================================ -->
-<!-- TAB 4 — NEW EXPERIMENT (stub)                                -->
-<!-- ============================================================ -->
-<div class="panel" id="panel-4">
-  <div class="stub-panel">
-    <div class="stub-label">New Experiment</div>
-    <div class="stub-desc">Step-by-step wizard to scaffold a new experiment — building next.</div>
+    <div id="galleryErr"></div>
+    <div id="galleryLoading" class="loading"><span class="spinner"></span>Loading index…</div>
+
+    <div id="galleryMain" style="display:none">
+
+      <!-- Filters -->
+      <div class="filter-bar">
+        <div style="display:flex;align-items:center;gap:5px">
+          <span class="fl">Standard</span>
+          <button class="chip on"   data-f="std" data-v="all"  onclick="setF('std','all',this)">All</button>
+          <button class="chip cat"  data-f="std" data-v="cat"  onclick="setF('std','cat',this)">Cat</button>
+          <button class="chip disc" data-f="std" data-v="disc" onclick="setF('std','disc',this)">Disc</button>
+          <button class="chip loop" data-f="std" data-v="loop" onclick="setF('std','loop',this)">Loop</button>
+        </div>
+        <div class="fsep"></div>
+        <div style="display:flex;align-items:center;gap:5px">
+          <span class="fl">Status</span>
+          <button class="chip on" data-f="status" data-v="all"      onclick="setF('status','all',this)">All</button>
+          <button class="chip"    data-f="status" data-v="complete" onclick="setF('status','complete',this)">Complete</button>
+          <button class="chip"    data-f="status" data-v="staged"   onclick="setF('status','staged',this)">Staged</button>
+        </div>
+        <div class="fsep"></div>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+          <span class="fl">Discipline</span>
+          <div id="discFilters"></div>
+        </div>
+        <div class="fsep"></div>
+        <input class="search" type="text" id="searchBox" placeholder="Search…" oninput="renderTable()">
+        <span class="fcount" id="fCount"></span>
+      </div>
+
+      <!-- Table -->
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Experiment</th>
+              <th>Standard</th>
+              <th>Discipline</th>
+              <th style="text-align:center">FPs</th>
+              <th>Key Result</th>
+              <th>Status</th>
+              <th style="text-align:center">Tests</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Detail panel -->
+      <div class="detail" id="detail" style="display:none">
+        <div class="detail-hdr">
+          <div style="flex:1">
+            <div class="dt-title" id="dTitle">—</div>
+            <div class="dt-meta" id="dMeta">—</div>
+          </div>
+          <span id="dBadge"></span>
+        </div>
+        <div class="detail-subtabs">
+          <div class="stab active" onclick="switchDetail(0,this)">Overview</div>
+          <div class="stab"        onclick="switchDetail(1,this)">Gate Scores</div>
+          <div class="stab"        onclick="switchDetail(2,this)">Figures</div>
+          <div class="stab"        onclick="switchDetail(3,this)">Frozen Spec</div>
+        </div>
+        <div class="detail-body" id="dBody"></div>
+      </div>
+
+    </div>
   </div>
 </div>
 
-<!-- ============================================================ -->
-<!-- JAVASCRIPT                                                    -->
-<!-- ============================================================ -->
+<!-- ================================================ -->
+<!-- TAB 2 — PROTOCOL HEALTH                          -->
+<!-- ================================================ -->
+<div class="panel" id="panel-2">
+  <div class="wrap" style="padding-top:40px">
+    <div class="stub">
+      <div class="stub-lbl">Protocol Health</div>
+      <div class="stub-desc">Token efficiency, gate score trends, false positive history.<br>Select a completed loop experiment in the Gallery to view its protocol health data.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================ -->
+<!-- TAB 3 — EXPERIMENT REPORT                        -->
+<!-- ================================================ -->
+<div class="panel" id="panel-3">
+  <div class="wrap" style="padding-top:40px">
+    <div class="stub">
+      <div class="stub-lbl">Experiment Report</div>
+      <div class="stub-desc">Select a completed experiment in the Gallery to view its full report, false positive story, and publication figures.</div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── STATE ──
-const API = '';  // same origin
-let allExperiments = [];   // flat array from index
-let indexSummary   = {};
-let filters = { standard: 'all', status: 'all', discipline: 'all' };
-let selectedSlug = null;
+let exps    = [];
+let summary = {};
+let filters = {std:'all', status:'all', disc:'all'};
+let selSlug  = null;
+let selExp   = null;
 let detailTab = 0;
 
-// ── INIT ──
-async function loadAll() {
-  await loadIndex();
-  tickClock();
-}
+// ── BOOT ──
+window.addEventListener('load', () => { loadIndex(); tickClock(); });
 
-async function loadIndex() {
-  document.getElementById('galleryLoading').style.display = 'block';
-  document.getElementById('galleryWrap').style.display    = 'none';
-  document.getElementById('galleryError').innerHTML       = '';
-
-  try {
-    const res  = await fetch(`${API}/api/index`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-
-    if (data.error) throw new Error(data.error);
-
-    // Flatten experiments object to array
-    allExperiments = Object.values(data.experiments || {});
-    indexSummary   = data.summary || {};
-
-    buildDiscFilters();
-    buildSummaryStrip();
-    renderTable();
-
-    document.getElementById('galleryLoading').style.display = 'none';
-    document.getElementById('galleryWrap').style.display    = 'block';
-
-  } catch(e) {
-    document.getElementById('galleryLoading').style.display = 'none';
-    document.getElementById('galleryError').innerHTML =
-      `<div class="error-box">Failed to load index: ${e.message}<br>
-       Run <code>python rebuild_index.py</code> from the project root first.</div>`;
-  }
-}
-
-// ── CLOCK ──
-function tickClock() {
-  const now = new Date();
-  document.getElementById('hClock').textContent =
-    now.toTimeString().slice(0,8);
+function tickClock(){
+  document.getElementById('hClock').textContent = new Date().toTimeString().slice(0,8);
   setTimeout(tickClock, 1000);
 }
 
+// ── LOAD INDEX ──
+async function loadIndex(){
+  document.getElementById('galleryLoading').style.display = 'block';
+  document.getElementById('galleryMain').style.display    = 'none';
+  document.getElementById('galleryErr').innerHTML         = '';
+  try {
+    const res = await fetch('/api/index');
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+    // Inject slug from key
+    exps    = Object.entries(data.experiments||{}).map(([slug,e]) => ({...e, slug}));
+    summary = data.summary||{};
+    buildHero();
+    buildDiscFilters();
+    renderTable();
+    document.getElementById('galleryLoading').style.display = 'none';
+    document.getElementById('galleryMain').style.display    = 'block';
+  } catch(e){
+    document.getElementById('galleryLoading').style.display = 'none';
+    document.getElementById('galleryErr').innerHTML =
+      `<div class="err">Failed to load index: ${e.message}<br>Run <code>python rebuild_index.py</code> from the project root.</div>`;
+  }
+}
+
+// ── HERO ──
+function buildHero(){
+  const s   = summary;
+  const std = s.by_standard||{};
+  const catN  = std.cat  || std.catalog  || 0;
+  const discN = std.disc || std.discovery || 0;
+  const loopN = std.loop || 0;
+  const discCount = Object.keys(s.by_discipline||{}).length;
+
+  document.querySelector('#heroStats .hv').textContent       = s.total||0;
+  document.getElementById('hsSub1').textContent              = `${s.complete||0} complete · ${s.staged||0} staged`;
+  document.getElementById('hsF').textContent                 = s.total_false_positives||0;
+  document.getElementById('hsD').textContent                 = discCount;
+  document.getElementById('hsSub2').textContent              = `${catN} cat · ${discN} disc · ${loopN} loop`;
+}
+
 // ── DISC FILTERS ──
-function buildDiscFilters() {
-  const disciplines = [...new Set(allExperiments.map(e => e.discipline).filter(Boolean))].sort();
-  const wrap = document.getElementById('discFilters');
+function buildDiscFilters(){
+  const discs = [...new Set(exps.map(e=>e.discipline).filter(Boolean))].sort();
+  const wrap  = document.getElementById('discFilters');
   wrap.innerHTML = '';
-
-  const all = mk('button','filter-chip active');
-  all.textContent = 'All';
-  all.dataset.filter = 'discipline';
-  all.dataset.val    = 'all';
-  all.onclick = () => setFilter('discipline','all',all);
-  wrap.appendChild(all);
-
-  disciplines.forEach(d => {
-    const btn = mk('button','filter-chip');
-    btn.textContent    = d;
-    btn.dataset.filter = 'discipline';
-    btn.dataset.val    = d;
-    btn.onclick        = () => setFilter('discipline', d, btn);
-    wrap.appendChild(btn);
-  });
+  addChip(wrap, 'All', () => setF('disc','all', null), true, 'disc-all');
+  discs.forEach(d => addChip(wrap, d, () => setF('disc', d, null), false, 'disc-'+d));
 }
 
-// ── SUMMARY STRIP ──
-function buildSummaryStrip() {
-  const s = indexSummary;
-  const strip = document.getElementById('summaryStrip');
-  strip.innerHTML = '';
-  const chips = [
-    [`<strong>${s.total||0}</strong> total`, ''],
-    [`<strong>${s.complete||0}</strong> complete`, ''],
-    [`<strong>${s.staged||0}</strong> staged`, ''],
-    [`cat <strong>${(s.by_standard||{}).cat||0}</strong>`, 'std-cat'],
-    [`disc <strong>${(s.by_standard||{}).disc||0}</strong>`, 'std-disc'],
-    [`loop <strong>${(s.by_standard||{}).loop||0}</strong>`, 'std-loop'],
-    [`<strong>${s.total_false_positives||0}</strong> FPs caught`, ''],
-  ];
-  chips.forEach(([html, cls]) => {
-    const c = mk('span', 'sum-chip ' + cls);
-    c.innerHTML = html;
-    strip.appendChild(c);
+function addChip(wrap, label, onclick, active, id){
+  const b = document.createElement('button');
+  b.className   = 'chip' + (active?' on':'');
+  b.textContent = label;
+  b.dataset.chipId = id;
+  b.addEventListener('click', () => {
+    // deactivate all in this implicit group
+    wrap.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+    b.classList.add('on');
+    onclick();
   });
+  wrap.appendChild(b);
 }
 
-// ── FILTER ──
-function setFilter(key, val, btn) {
+// ── FILTERS ──
+function setF(key, val, btn){
   filters[key] = val;
-  // Update chip states for this filter group
-  document.querySelectorAll(`[data-filter="${key}"]`).forEach(el => {
-    el.classList.toggle('active', el.dataset.val === val);
-  });
+  if(btn){
+    document.querySelectorAll(`[data-f="${key}"]`).forEach(c => c.classList.remove('on'));
+    btn.classList.add('on');
+  }
   renderTable();
 }
 
-function filtered() {
-  const q = document.getElementById('searchBox').value.toLowerCase().trim();
-  return allExperiments.filter(e => {
-    if (filters.standard !== 'all' && e.standard !== filters.standard) return false;
-    if (filters.status   !== 'all' && e.status   !== filters.status)   return false;
-    if (filters.discipline !== 'all' && e.discipline !== filters.discipline) return false;
-    if (q) {
-      const hay = [e.slug, e.display_name, e.domain, e.key_result, e.discipline, e.notes]
-        .filter(Boolean).join(' ').toLowerCase();
-      if (!hay.includes(q)) return false;
+function getFiltered(){
+  const q = (document.getElementById('searchBox').value||'').toLowerCase().trim();
+  return exps.filter(e => {
+    if(filters.std    !== 'all' && e.standard   !== filters.std)    return false;
+    if(filters.status !== 'all' && e.status     !== filters.status) return false;
+    if(filters.disc   !== 'all' && e.discipline !== filters.disc)   return false;
+    if(q){
+      const hay = [e.slug,e.display_name,e.domain,e.discipline,e.key_result,e.notes].filter(Boolean).join(' ').toLowerCase();
+      if(!hay.includes(q)) return false;
     }
     return true;
   });
 }
 
 // ── TABLE ──
-function renderTable() {
-  const rows  = filtered();
-  const tbody = document.getElementById('galleryBody');
+function renderTable(){
+  const rows  = getFiltered();
+  const tbody = document.getElementById('tbody');
   tbody.innerHTML = '';
-
-  document.getElementById('filterCount').textContent =
-    `${rows.length} of ${allExperiments.length}`;
-
-  if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">No experiments match the current filters.</div></td></tr>`;
+  document.getElementById('fCount').textContent = `${rows.length} of ${exps.length}`;
+  if(!rows.length){
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty">No experiments match.</div></td></tr>`;
     return;
   }
-
   rows.forEach(e => {
-    const tr = mk('tr');
-    if (e.slug === selectedSlug) tr.classList.add('selected');
-    tr.onclick = () => selectExperiment(e.slug);
-
-    tr.appendChild(tdHTML(`
-      <div class="exp-name">${e.display_name || e.slug}</div>
-      <div class="exp-slug">${e.slug}</div>
-    `));
-    tr.appendChild(tdHTML(stdBadge(e.standard)));
-    tr.appendChild(tdHTML(`<span class="domain-tag">${e.domain || e.discipline || '—'}</span>`));
-
+    const tr = document.createElement('tr');
+    if(e.slug === selSlug) tr.classList.add('sel');
+    tr.onclick = () => selectExp(e.slug);
+    tr.appendChild(tdh(`<div class="en">${e.display_name||e.slug}</div><div class="es">${e.slug}</div>`));
+    tr.appendChild(tdh(stdBadge(e.standard)));
+    tr.appendChild(tdh(`<span class="dt">${e.domain||e.discipline||'—'}</span>`));
     const fp = e.false_positives_caught;
-    const fpTd = td(fp != null ? fp : '—');
-    fpTd.className = 'fp-count ' + (fp > 0 ? 'has-fp' : 'no-fp');
-    fpTd.style.textAlign = 'center';
+    const fpTd = tdt(fp!=null?fp:'—');
+    fpTd.className = 'fp ' + (fp>0?'has':'nil');
+    fpTd.style.textAlign='center';
     tr.appendChild(fpTd);
-
-    tr.appendChild(tdHTML(`<span class="key-result-cell">${(e.key_result||'—').slice(0,90)}${(e.key_result||'').length>90?'…':''}</span>`));
-    tr.appendChild(tdHTML(statusBadge(e.status)));
-
-    const hasTasks = e.has_tests ? '✓' : '—';
-    const testTd = td(hasTasks);
-    testTd.style.textAlign = 'center';
-    testTd.style.color = e.has_tests ? 'var(--pass)' : 'var(--t4)';
-    testTd.style.fontFamily = 'var(--mono)';
-    testTd.style.fontSize = '11px';
-    tr.appendChild(testTd);
-
-    const figCount = (e.figures||[]).length;
-    const figTd = td(figCount || '—');
-    figTd.style.textAlign = 'center';
-    figTd.style.color = figCount ? 'var(--blue)' : 'var(--t4)';
-    figTd.style.fontFamily = 'var(--mono)';
-    figTd.style.fontSize = '11px';
-    tr.appendChild(figTd);
-
+    tr.appendChild(tdh(`<span class="kr">${(e.key_result||'—').slice(0,90)}${(e.key_result||'').length>90?'…':''}</span>`));
+    tr.appendChild(tdh(statusBadge(e.status)));
+    const tstTd = tdt(e.has_tests?'✓':'—');
+    tstTd.style.cssText=`text-align:center;font-family:var(--mono);font-size:11px;color:${e.has_tests?'var(--pass)':'var(--t4)'}`;
+    tr.appendChild(tstTd);
     tbody.appendChild(tr);
   });
 }
 
 // ── SELECT EXPERIMENT ──
-function selectExperiment(slug) {
-  selectedSlug = slug;
-  renderTable(); // re-render to update selection highlight
+async function selectExp(slug){
+  selSlug = slug;
+  selExp  = exps.find(x => x.slug===slug);
+  renderTable();
+  if(!selExp) return;
 
-  const exp = allExperiments.find(e => e.slug === slug);
-  if (!exp) return;
-
-  const panel = document.getElementById('detailPanel');
+  const panel = document.getElementById('detail');
   panel.style.display = 'block';
-  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-  document.getElementById('detailTitle').textContent = exp.display_name || exp.slug;
-  document.getElementById('detailMeta').textContent  =
-    [exp.domain, exp.discipline, exp.sprint && `Sprint: ${exp.sprint}`,
-     exp.turns && `${exp.turns} turns`].filter(Boolean).join(' · ');
-  document.getElementById('detailStatusBadge').innerHTML = statusBadge(exp.status);
+  document.getElementById('dTitle').textContent = selExp.display_name||selExp.slug;
+  document.getElementById('dMeta').textContent  = [
+    selExp.domain, selExp.discipline,
+    selExp.sprint && `Sprint: ${selExp.sprint}`,
+    selExp.turns  && `${selExp.turns} turns`
+  ].filter(Boolean).join(' · ');
+  document.getElementById('dBadge').innerHTML = statusBadge(selExp.status);
 
-  switchDetail(0);
-  renderDetailOverview(exp);
+  // Activate first subtab
+  switchDetail(0, document.querySelector('.stab'));
+  panel.scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
-function switchDetail(i) {
+// ── DETAIL SUBTABS ──
+async function switchDetail(i, btn){
   detailTab = i;
-  document.querySelectorAll('.dtab').forEach((t,idx) => t.classList.toggle('active', idx===i));
-  document.querySelectorAll('[id^="dpanel-"]').forEach((p,idx) => p.style.display = idx===i?'block':'none');
-
-  const exp = allExperiments.find(e => e.slug === selectedSlug);
-  if (!exp) return;
-  if (i === 0) renderDetailOverview(exp);
-  if (i === 1) renderDetailFigures(exp);
-  if (i === 2) renderDetailFiles(exp);
+  document.querySelectorAll('.stab').forEach((t,idx) => t.classList.toggle('active', idx===i));
+  const body = document.getElementById('dBody');
+  body.innerHTML = `<div class="loading"><span class="spinner"></span>Loading…</div>`;
+  if(i===0) await renderOverview(body);
+  if(i===1) await renderGates(body);
+  if(i===2) await renderFigures(body);
+  if(i===3) await renderFrozen(body);
 }
 
-function renderDetailOverview(exp) {
-  const el = document.getElementById('dpanel-0');
-  const rows = [
-    ['Slug',           exp.slug],
-    ['Standard',       stdBadge(exp.standard)],
-    ['Status',         statusBadge(exp.status)],
-    ['Discipline',     exp.discipline],
-    ['Domain',         exp.domain],
-    ['Sprint',         exp.sprint || '—'],
-    ['Turns',          exp.turns ?? '—'],
-    ['Gate Scores',    exp.gate_scores ? Object.entries(exp.gate_scores).map(([k,v])=>`${k}: ${v}`).join(' · ') : '—'],
-    ['Statistical',    exp.statistical_result || '—'],
-    ['FPs Caught',     exp.false_positives_caught ?? '—'],
-    ['Meta-spec Errs', exp.meta_spec_errors ?? '—'],
-    ['Notes',          exp.notes || '—'],
-  ];
-
+// ── OVERVIEW ──
+async function renderOverview(body){
+  const e = selExp;
   const flags = [
-    ['Report',   exp.has_report],
-    ['Tests',    exp.has_tests],
-    ['Figures',  exp.has_figures],
-    ['Frozen',   exp.has_frozen],
-    ['Inn. Log', exp.has_innovation_log],
-    ['State Vec',exp.has_state_vector],
-    ['Dead Ends',exp.has_dead_ends],
+    ['Report',    e.has_report],
+    ['Tests',     e.has_tests],
+    ['Figures',   e.has_figures],
+    ['Frozen',    e.has_frozen || e.has_frozen_spec],
+    ['Inn. Log',  e.has_innovation_log],
+    ['State Vec', e.has_state_vector],
+    ['Dead Ends', e.has_dead_ends],
   ];
-
-  el.innerHTML = `
-    <div class="meta-grid">
+  const rows = [
+    ['Slug',         e.slug],
+    ['Standard',     stdBadge(e.standard)],
+    ['Status',       statusBadge(e.status)],
+    ['Discipline',   e.discipline||'—'],
+    ['Sprint',       e.sprint||'—'],
+    ['Stat. Result', e.statistical_result||'—'],
+    ['FPs Caught',   e.false_positives_caught??'—'],
+    ['Meta-spec Err',e.meta_spec_errors??0],
+    ['Notes',        e.notes||'—'],
+  ];
+  body.innerHTML = `
+    <div class="two-col">
       <div>
         <div class="sh"><span class="sh-lbl">Key Result</span><div class="sh-line"></div></div>
-        <p style="font-family:'Inter',sans-serif;font-size:11px;color:var(--t2);line-height:1.6;margin-bottom:16px">
-          ${exp.key_result || '<span style="color:var(--t4)">No result yet.</span>'}
-        </p>
+        <p style="font-size:11px;color:var(--t2);line-height:1.7;margin-bottom:20px">${e.key_result||'<span style="color:var(--t4)">No result yet.</span>'}</p>
         <div class="sh"><span class="sh-lbl">Metadata</span><div class="sh-line"></div></div>
-        <div>
-          ${rows.map(([k,v]) => `<div class="meta-row"><span class="meta-key">${k}</span><span class="meta-val">${v}</span></div>`).join('')}
-        </div>
+        ${rows.map(([k,v])=>`<div class="mr"><span class="mk">${k}</span><span class="mv">${v}</span></div>`).join('')}
       </div>
       <div>
         <div class="sh"><span class="sh-lbl">Files Present</span><div class="sh-line"></div></div>
-        <div class="flag-row" style="margin-bottom:16px">
-          ${flags.map(([label,has]) => `
-            <span class="flag ${has?'flag-yes':'flag-no'}">${has?'✓':'—'} ${label}</span>
-          `).join('')}
-        </div>
+        <div style="margin-bottom:20px">${flags.map(([l,has])=>`<span class="flag ${has?'fy':'fn'}">${has?'✓':'—'} ${l}</span>`).join('')}</div>
         <div class="sh"><span class="sh-lbl">Source Files</span><div class="sh-line"></div></div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--t3);line-height:1.8">
-          ${(exp.source_files||[]).length
-            ? exp.source_files.map(f=>`<div>${f}</div>`).join('')
-            : '<span style="color:var(--t4)">none found</span>'}
+        <div style="font-family:var(--mono);font-size:10px;color:var(--t3);line-height:1.9">
+          ${(e.source_files||[]).map(f=>`<div>· ${f}</div>`).join('')||'<span style="color:var(--t4)">none found</span>'}
         </div>
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
-function renderDetailFigures(exp) {
-  const el = document.getElementById('dpanel-1');
-  const figs = exp.figures || [];
-  if (!figs.length) {
-    el.innerHTML = '<div class="empty-state">No figures yet.</div>';
+// ── GATE SCORES ──
+async function renderGates(body){
+  const gs = selExp.gate_scores;
+  if(!gs || Object.keys(gs).length===0){
+    body.innerHTML = `<div class="empty">No gate scores recorded.<br>Gate scores are only available for loop-standard experiments.</div>`;
     return;
   }
-  el.innerHTML = `
-    <div class="figs-grid">
-      ${figs.map(f => `
-        <div class="fig-card" onclick="openFigure('${exp.dir}/${f}')">
-          <div class="fig-placeholder">${f}</div>
-          <div class="fig-cap">${f}</div>
+  const NAMES = {g1:'G1 — Frozen Compliance',g2:'G2 — Architecture',g3:'G3 — Scientific Validity',g4:'G4 — Drift Check'};
+  const THRESH = {g1:1.00,g2:0.85,g3:0.85,g4:0.85};
+  const html = Object.entries(gs).map(([k,v]) => {
+    const thresh = THRESH[k]||0.85;
+    const cls    = v >= thresh ? 'pass' : v >= thresh-0.05 ? 'warn' : 'fail';
+    const pct    = Math.round(v*100);
+    const tpct   = Math.round(thresh*100);
+    return `
+      <div class="gate-bar ${cls}">
+        <div class="gate-hdr">
+          <span class="gate-lbl">${NAMES[k]||k}</span>
+          <span class="gate-score ${cls}">${v.toFixed(2)}</span>
         </div>
-      `).join('')}
-    </div>
-  `;
+        <div class="track">
+          <div class="fill ${cls}" style="width:${pct}%"></div>
+          <div class="tick" style="left:${tpct}%"></div>
+        </div>
+        <div class="gate-foot">threshold ${thresh.toFixed(2)} · ${v>=thresh?'PASS':'BLOCKED'}</div>
+      </div>`;
+  }).join('');
+  body.innerHTML = `
+    <div class="sh"><span class="sh-lbl">Critic Gate Scores</span><div class="sh-line"></div></div>
+    ${html}`;
 }
 
-function renderDetailFiles(exp) {
-  const el = document.getElementById('dpanel-2');
-  el.innerHTML = `
-    <div class="sh"><span class="sh-lbl">Directory</span><div class="sh-line"></div></div>
-    <div style="font-family:var(--mono);font-size:10px;color:var(--t3);padding:8px 0">${exp.dir}</div>
-    <div class="sh" style="margin-top:8px"><span class="sh-lbl">Source Files</span><div class="sh-line"></div></div>
-    <div style="font-family:var(--mono);font-size:10px;color:var(--t2);line-height:2">
-      ${(exp.source_files||[]).map(f=>`<div>· ${f}</div>`).join('') || '<span style="color:var(--t4)">none</span>'}
-    </div>
-  `;
+// ── FIGURES — fetch live from filesystem ──
+async function renderFigures(body){
+  const dir = selExp.dir;
+  if(!dir){ body.innerHTML = `<div class="empty">No directory path available.</div>`; return; }
+  try {
+    const res = await fetch(`/api/ls?path=${encodeURIComponent(dir+'/figures')}`);
+    if(!res.ok){ body.innerHTML = `<div class="empty">No figures directory found.</div>`; return; }
+    const entries = await res.json();
+    const imgs = entries.filter(e => e.type==='file' && /\.(png|jpg|jpeg|svg|pdf)$/i.test(e.name));
+    if(!imgs.length){ body.innerHTML = `<div class="empty">No figures yet.</div>`; return; }
+    body.innerHTML = `
+      <div class="sh"><span class="sh-lbl">Figures (${imgs.length})</span><div class="sh-line"></div></div>
+      <div class="figs-grid">
+        ${imgs.map(f => {
+          const path = `${dir}/figures/${f.name}`;
+          const isImg = /\.(png|jpg|jpeg)$/i.test(f.name);
+          return `
+            <div class="fig-card" onclick="window.open('/api/file?path=${encodeURIComponent(path)}','_blank')">
+              ${isImg
+                ? `<img class="fig-img" src="/api/file?path=${encodeURIComponent(path)}" alt="${f.name}" onerror="this.parentElement.querySelector('.fig-img').style.display='none'">`
+                : `<div class="fig-placeholder">${f.name}</div>`}
+              <div class="fig-cap">${f.name}</div>
+            </div>`;
+        }).join('')}
+      </div>`;
+  } catch(err){
+    body.innerHTML = `<div class="empty">Could not load figures: ${err.message}</div>`;
+  }
 }
 
-function openFigure(path) {
-  window.open(`${API}/api/file?path=${encodeURIComponent(path)}`, '_blank');
+// ── FROZEN SPEC — fetch live ──
+async function renderFrozen(body){
+  const dir = selExp.dir;
+  if(!dir){ body.innerHTML = `<div class="empty">No directory path available.</div>`; return; }
+  try {
+    const lsRes = await fetch(`/api/ls?path=${encodeURIComponent(dir+'/frozen')}`);
+    if(!lsRes.ok){ body.innerHTML = `<div class="empty">No frozen/ directory found.</div>`; return; }
+    const entries = await lsRes.json();
+    const files   = entries.filter(e => e.type==='file');
+    if(!files.length){ body.innerHTML = `<div class="empty">frozen/ directory is empty.</div>`; return; }
+    body.innerHTML = `<div class="sh"><span class="sh-lbl">Frozen Spec (${files.length} file${files.length>1?'s':''})</span><div class="sh-line"></div></div>`;
+    for(const f of files){
+      const path    = `${dir}/frozen/${f.name}`;
+      const fileRes = await fetch(`/api/file?path=${encodeURIComponent(path)}`);
+      const text    = fileRes.ok ? await fileRes.text() : '(could not load file)';
+      const section = document.createElement('div');
+      section.style.marginBottom = '16px';
+      section.innerHTML = `
+        <div style="font-family:var(--mono);font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.10em;margin-bottom:4px">${f.name}</div>
+        <div class="frozen-content">${escHtml(text)}</div>`;
+      body.appendChild(section);
+    }
+  } catch(err){
+    body.innerHTML = `<div class="empty">Could not load frozen spec: ${err.message}</div>`;
+  }
 }
 
-// ── TAB SWITCHING ──
+// ── TABS ──
 const tabEls   = document.querySelectorAll('.tab');
 const panelEls = document.querySelectorAll('.panel');
-function switchTab(i) {
+function switchTab(i){
   tabEls.forEach((t,idx)   => t.classList.toggle('active', idx===i));
   panelEls.forEach((p,idx) => p.classList.toggle('active', idx===i));
-  if (i === 3 && !allExperiments.length) loadAll();
-}
-
-// ── RUN MODAL (placeholder) ──
-function showRunModal() {
-  alert('Run Loop: copy this command into your terminal:\n\nclaude --project context-hacking chp run');
 }
 
 // ── BADGE HELPERS ──
-function stdBadge(s) {
-  if (!s) return '<span style="color:var(--t4)">—</span>';
-  const cls = {cat:'std-cat',disc:'std-disc',loop:'std-loop'}[s] || '';
-  return `<span class="std-badge ${cls}">${s}</span>`;
+function stdBadge(s){
+  if(!s) return '<span style="color:var(--t4)">—</span>';
+  return `<span class="badge b-${s}">${s}</span>`;
 }
-function statusBadge(s) {
-  const map = {complete:'status-complete',staged:'status-staged',superseded:'status-superseded',active:'status-active'};
-  return `<span class="status-badge ${map[s]||''}">${s||'—'}</span>`;
+function statusBadge(s){
+  const m={complete:'b-complete',staged:'b-staged',superseded:'b-superseded'};
+  return `<span class="badge ${m[s]||'b-unknown'}">${s||'—'}</span>`;
 }
-
-// ── DOM HELPERS ──
-function mk(tag, cls='') {
-  const el = document.createElement(tag);
-  if (cls) el.className = cls.trim();
-  return el;
-}
-function td(text) {
-  const el = document.createElement('td');
-  el.textContent = text ?? '—';
-  return el;
-}
-function tdHTML(html) {
-  const el = document.createElement('td');
-  el.innerHTML = html;
-  return el;
-}
-
-// ── BOOT ──
-window.addEventListener('load', loadAll);
-// Auto-refresh every 5s (index only, lightweight)
-setInterval(() => {
-  if (document.getElementById('panel-3').classList.contains('active')) {
-    loadIndex();
-  }
-}, 5000);
+function escHtml(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+function tdt(t){ const e=document.createElement('td'); e.textContent=t??'—'; return e; }
+function tdh(h){ const e=document.createElement('td'); e.innerHTML=h; return e; }
 </script>
 </body>
 </html>

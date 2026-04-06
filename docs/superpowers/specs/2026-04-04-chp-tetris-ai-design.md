@@ -339,7 +339,7 @@ models:
       api_key_env: "OPENAI_API_KEY"
     - provider: "xai"
       model: "grok-3"
-      api_key_env: "GROK_API_KEY"
+      api_key_env: "XAI_API_KEY"
 
 gates:
   seeds: 10
@@ -386,6 +386,15 @@ dashboard:
 ## Telemetry
 
 Telemetry is stored at `.chp/telemetry.json` using the framework's `TelemetryStore` (default location). The experiment directory does not store its own copy. The dashboard reads telemetry via the WebSocket connection, not directly from the file.
+
+## Environment
+
+API keys are loaded from `api.env` in the project root. The optimizer loads this file at startup using `dotenv` or manual parsing. The file contains:
+- `OPENAI_API_KEY` — used by the Multi-Model Council (GPT-4o)
+- `XAI_API_KEY` — used by the Multi-Model Council (Grok-3)
+- `ANTHROPIC_API_KEY` — must be set in the shell environment (not in api.env) for the Builder/Critic/Reviewer API calls
+
+The `api.env` file is gitignored and must never be committed.
 
 ## Error Handling
 

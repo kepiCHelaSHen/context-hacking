@@ -1,0 +1,1 @@
+AI gets scientific code wrong 99% of the time. We measured it: 95/96 coefficients drifted (p=4x10^-10). So we built a framework that uses that weakness as the error detector. 0% drift. 120 runs. Caught its own false positive. Open source: github.com/kepiCHelaSHen/context-hacking

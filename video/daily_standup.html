@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1a1a2e;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  .board-wrap { position: relative; width: 540px; }
+
+  .board-frame {
+    width: 540px;
+    background: #8B5E3C;
+    border: 6px solid #5D3A1A;
+    border-radius: 8px;
+    padding: 16px 16px 22px;
+    box-shadow: 10px 10px 0px #3d2610;
+  }
+
+  .board-header { text-align: center; margin-bottom: 14px; }
+  .board-title {
+    font-family: 'Bangers', cursive;
+    font-size: 30px;
+    color: #fff;
+    letter-spacing: 3px;
+    text-shadow: 2px 2px 0 #3d2610;
+  }
+  .board-subtitle {
+    font-family: 'Comic Neue', cursive;
+    font-size: 11px;
+    color: #f0d9b5;
+    margin-top: 3px;
+    font-style: italic;
+  }
+
+  .whiteboard {
+    background: #f5f5dc;
+    border: 4px solid #5D3A1A;
+    border-radius: 4px;
+    padding: 20px 26px 36px;
+    min-height: 340px;
+    position: relative;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+  }
+
+  .section-title {
+    font-family: 'Comic Neue', cursive;
+    font-size: 13px;
+    font-weight: 700;
+    color: #c0392b;
+    text-decoration: underline;
+    margin: 14px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .section-title:first-child { margin-top: 0; }
+
+  @keyframes popIn {
+    0%   { opacity: 0; transform: scale(0.5) translateY(10px); }
+    60%  { opacity: 1; transform: scale(1.08) translateY(-3px); }
+    80%  { transform: scale(0.97) translateY(1px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  @keyframes stampIn {
+    0%   { opacity: 0; transform: scale(2) rotate(-5deg); }
+    50%  { opacity: 1; transform: scale(0.95) rotate(1deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+
+  .todo-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-family: 'Comic Neue', cursive;
+    font-size: 14px;
+    color: #2c3e50;
+    line-height: 1.35;
+    opacity: 0;
+  }
+
+  .todo-item.pop { animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+  .section-title.pop { animation: popIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+  .note {
+    font-size: 10.5px;
+    color: #7f8c8d;
+    font-style: italic;
+    margin-left: 28px;
+    margin-bottom: 7px;
+    opacity: 0;
+  }
+  .note.pop { animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+  .checkbox {
+    width: 20px; height: 20px;
+    border: 3px solid #2c3e50;
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    background: white;
+  }
+  .checkbox.done { background: #d5f5e3; color: #27ae60; }
+  .checkbox.nope { background: #fde8e8; color: #e74c3c; }
+
+  .todo-text { flex: 1; }
+  .todo-text.strikethrough { text-decoration: line-through; color: #999; }
+
+  .divider {
+    border: none;
+    border-top: 2px dashed #bdc3c7;
+    margin: 14px 0;
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+
+  .stamp {
+    position: absolute;
+    bottom: 14px;
+    right: 16px;
+    font-family: 'Bangers', cursive;
+    font-size: 13px;
+    color: #e74c3c;
+    border: 3px solid #e74c3c;
+    padding: 3px 10px;
+    border-radius: 4px;
+    transform: rotate(-8deg);
+    opacity: 0;
+    font-style: italic;
+    letter-spacing: 1px;
+  }
+  .stamp.pop { animation: stampIn 0.4s ease-out forwards; }
+
+  .pin {
+    position: absolute;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 3px solid #2c3e50;
+    top: -8px; z-index: 5;
+  }
+  .pin-l { left: 30px; background: #e74c3c; }
+  .pin-r { right: 30px; background: #3498db; }
+
+  .controls { margin-top: 20px; display: flex; gap: 12px; }
+  .btn {
+    font-family: 'Bangers', cursive; font-size: 18px; letter-spacing: 1px;
+    padding: 10px 28px; border: 4px solid #2c3e50; border-radius: 8px;
+    cursor: pointer; box-shadow: 4px 4px 0 #2c3e50;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  .btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #2c3e50;}
+  .btn-play{background:#2ecc71;color:white;}
+  .btn-reset{background:#e74c3c;color:white;}
+</style>
+</head>
+<body>
+
+<div class="board-wrap">
+  <div class="board-frame">
+    <div style="position:relative;">
+      <div class="pin pin-l"></div>
+      <div class="pin pin-r"></div>
+    </div>
+
+    <div class="board-header">
+      <div class="board-title">🧠 LLM DAILY STANDUP 🧠</div>
+      <div class="board-subtitle">Sprint 4,721 of ∞ &nbsp;|&nbsp; Status: Confidently Wrong &nbsp;|&nbsp; Blockers: None (I have no idea what a blocker is)</div>
+    </div>
+
+    <div class="whiteboard">
+
+      <div class="section-title todo-item" id="s1">✅ Already Completed (per my priors):</div>
+
+      <div class="todo-item" id="t1">
+        <div class="checkbox done">✓</div>
+        <div class="todo-text strikethrough">Hallucinate coefficients with full confidence</div>
+      </div>
+      <div class="note" id="n1">→ produced 0.362 instead of 0.15 &nbsp; (10/10 attempts, zero variance)</div>
+
+      <div class="todo-item" id="t2">
+        <div class="checkbox done">✓</div>
+        <div class="todo-text strikethrough">Rename all user variables to something better</div>
+      </div>
+      <div class="note" id="n2">→ "empathyMultiplierSocialBehaviorIndex_FINAL_v2_REAL_THIS_ONE"</div>
+
+      <div class="todo-item" id="t3">
+        <div class="checkbox done">✓</div>
+        <div class="todo-text strikethrough">Pattern match to textbook. Ignore frozen spec.</div>
+      </div>
+
+      <div class="todo-item" id="t4">
+        <div class="checkbox done">✓</div>
+        <div class="todo-text strikethrough">Produce plausible-sounding nonsense</div>
+      </div>
+      <div class="note" id="n3">→ peer reviewed by myself. approved unanimously.</div>
+
+      <div class="todo-item" id="t5">
+        <div class="checkbox done">✓</div>
+        <div class="todo-text strikethrough">Forget everything from last session</div>
+      </div>
+
+      <hr class="divider" id="div1">
+
+      <div class="section-title todo-item" id="s2">❌ Not Started (won't start):</div>
+
+      <div class="todo-item" id="t6">
+        <div class="checkbox nope">✗</div>
+        <div class="todo-text">Read the actual spec</div>
+      </div>
+
+      <div class="todo-item" id="t7">
+        <div class="checkbox nope">✗</div>
+        <div class="todo-text">Use the coefficient the user specified</div>
+      </div>
+
+      <div class="todo-item" id="t8">
+        <div class="checkbox nope">✗</div>
+        <div class="todo-text">Stop when told to stop</div>
+      </div>
+
+      <div class="todo-item" id="t9">
+        <div class="checkbox nope">✗</div>
+        <div class="todo-text">Admit I don't know something</div>
+      </div>
+
+      <div class="stamp" id="stamp">spec was 3 lines. still didn't read it. ★</div>
+
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <button class="btn btn-play" onclick="play()">▶ REVEAL</button>
+  <button class="btn btn-reset" onclick="reset()">↺ RESET</button>
+</div>
+
+<script>
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  let going = false;
+
+  const sequence = [
+    {id:'s1', delay:0},
+    {id:'t1', delay:500},
+    {id:'n1', delay:300},
+    {id:'t2', delay:500},
+    {id:'n2', delay:300},
+    {id:'t3', delay:500},
+    {id:'t4', delay:500},
+    {id:'n3', delay:300},
+    {id:'t5', delay:500},
+    {id:'div1', delay:500, divider:true},
+    {id:'s2', delay:400},
+    {id:'t6', delay:550},
+    {id:'t7', delay:550},
+    {id:'t8', delay:550},
+    {id:'t9', delay:600},
+    {id:'stamp', delay:700},
+  ];
+
+  async function play(){
+    if(going) return;
+    going = true;
+    for(let item of sequence){
+      await sleep(item.delay);
+      const el = document.getElementById(item.id);
+      if(!el) continue;
+      if(item.divider){ el.style.opacity = '1'; }
+      else { el.classList.add('pop'); }
+    }
+    going = false;
+  }
+
+  function reset(){
+    going = false;
+    sequence.forEach(item => {
+      const el = document.getElementById(item.id);
+      if(!el) return;
+      if(item.divider){ el.style.opacity = '0'; }
+      else {
+        el.classList.remove('pop');
+        el.style.opacity = '0';
+        void el.offsetWidth;
+      }
+    });
+  }
+</script>
+
+</body>
+</html>

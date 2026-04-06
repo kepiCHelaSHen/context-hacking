@@ -1,0 +1,5 @@
+# Plain-Language Summary
+
+When AI writes scientific code, it quietly gets the numbers wrong. We tested two leading AI models on a specific task: implement a simulation with five calibrated coefficients. Out of 96 measurements, 95 were wrong. The AI didn't crash or produce errors---it just substituted its own "reasonable" values for the ones we specified. One model produced the exact same wrong number on all 10 tries.
+
+We built a system to fix this. It works like evolution: one AI role proposes code freely (mutation), another role checks every number against the original specification (selection). The creative AI still proposes wrong numbers---but they get caught before entering the codebase. Result: zero errors committed across 120 validation runs. The system also caught its own false positive---a statistical fluke that would have been published without the built-in replication requirement. Using this framework, a non-expert built a 7,663-line simulation now under journal review---in a weekend. The framework is open-source and free: github.com/kepiCHelaSHen/context-hacking.
