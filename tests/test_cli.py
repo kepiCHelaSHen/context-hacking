@@ -1,7 +1,6 @@
 """Tests for the CLI commands."""
 
 import os
-import shutil
 from pathlib import Path
 
 import pytest
@@ -115,13 +114,40 @@ class TestResumeErrors:
         os.chdir(tmp_path)
         result = runner.invoke(main, ["run", "--resume"])
         # Should fail — no state_vector.md
-        assert result.exit_code != 0 or "state_vector" in result.output.lower() or "Error" in result.output
+        assert (
+            result.exit_code != 0
+            or "state_vector" in result.output.lower()
+            or "Error" in result.output
+        )
+
+
+class TestDryRun:
+    def test_dry_run_flag_in_help(self, runner):
+        result = runner.invoke(main, ["run", "--help"])
+        assert "--dry-run" in result.output
+
+    def test_dry_run_shows_plan(self, runner, tmp_path):
+        import os
+
+        import yaml
+        os.chdir(tmp_path)
+        (tmp_path / "config.yaml").write_text(yaml.dump({"project": {"name": "test"}}))
+        result = runner.invoke(main, ["run", "--dry-run"])
+        assert "Dry Run" in result.output
+        assert "16-Step" in result.output
+        assert "No API calls" in result.output
+
+class TestVerbose:
+    def test_verbose_flag_in_help(self, runner):
+        result = runner.invoke(main, ["run", "--help"])
+        assert "--verbose" in result.output
 
 
 class TestResume:
     def test_resume_flag_in_help(self):
         """run command shows --resume flag in help."""
         from click.testing import CliRunner
+
         from context_hacking.cli import main
         runner = CliRunner()
         result = runner.invoke(main, ["run", "--help"])

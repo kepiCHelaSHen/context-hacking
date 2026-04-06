@@ -128,8 +128,57 @@ def init(name: str, experiment: str | None, existing: bool, cursor: bool) -> Non
               help="Launch live WebSocket dashboard (for CHP-TETRIS-AI)")
 @click.option("--resume", is_flag=True, default=False,
               help="Resume from last state_vector.md checkpoint")
-def run(experiment: str | None, method: str, all_experiments: bool, dashboard: bool, resume: bool) -> None:
+@click.option("--dry-run", is_flag=True, default=False,
+              help="Show execution plan without running (no API calls)")
+@click.option("--verbose", is_flag=True, default=False,
+              help="Enable debug-level logging")
+def run(
+    experiment: str | None, method: str, all_experiments: bool,
+    dashboard: bool, resume: bool, dry_run: bool, verbose: bool,
+) -> None:
     """Launch the CHP loop — builds, critiques, tests, and reports autonomously."""
+    if verbose:
+        import logging
+        logging.basicConfig(level=logging.DEBUG)
+        click.echo("Verbose mode: debug logging enabled")
+
+    if dry_run:
+        from pathlib import Path
+
+        from context_hacking.core.orchestrator import Config
+        config_path = Path("config.yaml")
+        if config_path.exists():
+            config = Config.from_yaml(config_path)
+        else:
+            config = None
+
+        click.echo("=== CHP Dry Run — Execution Plan ===")
+        click.echo(f"Project: {config.project_name if config else 'unknown'}")
+        click.echo(f"Max turns: {config.max_turns if config else 50}")
+        click.echo(f"Stagnation threshold: {config.stagnation_threshold if config else 5}")
+        click.echo(f"Method: {method}")
+        click.echo()
+        click.echo("16-Step Turn Cycle:")
+        click.echo("  1. Check exit conditions (5 kill-switches)")
+        click.echo("  2. Subagent health checks (3-line confirmations)")
+        click.echo("  3. Choose mode (VALIDATION or EXPLORATION)")
+        click.echo("  4. Dead end check (read dead_ends.md)")
+        click.echo("  5. Determine build target (from innovation log)")
+        click.echo("  6. Council review (before build in Validation)")
+        click.echo("  7. Grounding (citation or hypothesis)")
+        click.echo("  8. BUILD via Builder agent")
+        click.echo("  9. Self-critique (Builder reviews own work)")
+        click.echo("  10. Critic review (hard blocker in Validation)")
+        click.echo("  11. Code Reviewer (hygiene check)")
+        click.echo("  12. Council (post-build review in Exploration)")
+        click.echo("  13. Multi-seed anomaly detection (sigma-gates)")
+        click.echo("  14. Metric improvement tracking")
+        click.echo("  15. Commit and log (innovation log + state vector)")
+        click.echo("  16. Session memory update")
+        click.echo()
+        click.echo("No API calls made. Exiting.")
+        return
+
     resume_state = None
     if resume:
         from pathlib import Path as _Path
@@ -148,7 +197,8 @@ def run(experiment: str | None, method: str, all_experiments: bool, dashboard: b
             raise SystemExit(1)
         resume_state = mm.read_state_vector()
         start_turn = int(resume_state.get("TURN", "0")) + 1
-        click.echo(f"Resuming from turn {start_turn} (mode: {resume_state.get('MODE', 'VALIDATION')})")
+        mode = resume_state.get('MODE', 'VALIDATION')
+        click.echo(f"Resuming from turn {start_turn} (mode: {mode})")
 
     if dashboard and experiment:
         exp_dir = Path.cwd() / "experiments" / experiment
@@ -241,14 +291,17 @@ def run(experiment: str | None, method: str, all_experiments: bool, dashboard: b
             console.print(f"[bold]Turn {result['turn']}[/bold] — Mode: {result['mode']}")
             console.print(f"  Dead ends avoided: {result['dead_ends_avoided'] or 'none'}")
             console.print()
-            console.print("[dim]Tip: use --experiment <name> to run the full autonomous loop.[/dim]")
+            console.print(
+                "[dim]Tip: use --experiment <name> to run the"
+                " full autonomous loop.[/dim]"
+            )
 
 
 @main.command()
 def status() -> None:
     """Show current CHP status."""
-    from context_hacking.core.orchestrator import Config, Orchestrator
     from context_hacking.core.memory import MemoryManager
+    from context_hacking.core.orchestrator import Config
 
     config_path = Path("config.yaml")
     if not config_path.exists():
@@ -404,9 +457,10 @@ def dashboard(port: int) -> None:
 
 
 @main.command()
-def validate():
+def validate() -> None:
     """Validate config.yaml without running."""
     from pathlib import Path as _Path
+
     from context_hacking.core.orchestrator import Config
     config_path = _Path("config.yaml")
     if not config_path.exists():
