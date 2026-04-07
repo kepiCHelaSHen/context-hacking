@@ -695,3 +695,322 @@ Accepted: False
 ### What next turn should focus on
 Either provide stronger statistical justification for the aggregate_height adjustment with more comprehensive testing, or revert the change and explore more substantial parameter modifications that address the high performance variance (CV=0.7190). The current micro-adjustment appears to be parameter drift rather than meaningful optimization.
 
+
+---
+
+## Turn 1 — 2026-04-06 11:49
+
+### Mode
+VALIDATION
+
+### Weights
+```json
+{
+  "aggregate_height": -1.0,
+  "complete_lines": 1.0,
+  "holes": -4.0,
+  "bumpiness": -1.0,
+  "well_depth": 0.0,
+  "tetris_readiness": 0.0,
+  "column_transitions": 0.0,
+  "row_transitions": 0.0
+}
+```
+
+### Results
+Mean: 4917.8, CV: 0.5882
+Accepted: True
+
+### What next turn should focus on
+Reduce holes penalty to research-supported range (-1.5 to -2.0 maximum). The 4x increase is reckless and creates an unbalanced, brittle strategy that will fail under diverse game conditions.
+
+
+---
+
+## Turn 2 — 2026-04-06 11:50
+
+### Mode
+VALIDATION
+
+### Weights
+```json
+{
+  "aggregate_height": -1.0,
+  "complete_lines": 1.0,
+  "holes": -3.5,
+  "bumpiness": -1.0,
+  "well_depth": 0.0,
+  "tetris_readiness": 0.0,
+  "column_transitions": 0.0,
+  "row_transitions": 0.0
+}
+```
+
+### Results
+Mean: 4580.8, CV: 1.2565
+Accepted: False
+
+### What next turn should focus on
+Strengthen hole punishment back to at least -4.0, reduce complete_lines weight to 0.6-0.8 range, and add structural complexity with bumpiness or transition weights to improve stability and architectural soundness.
+
+
+---
+
+## Turn 3 — 2026-04-06 11:51
+
+### Mode
+VALIDATION
+
+### Weights
+```json
+{
+  "aggregate_height": -1.0,
+  "complete_lines": 0.7,
+  "holes": -4.0,
+  "bumpiness": -1.2,
+  "well_depth": 0.0,
+  "tetris_readiness": 0.0,
+  "column_transitions": 0.0,
+  "row_transitions": -0.3
+}
+```
+
+### Results
+Mean: 474.1, CV: 0.8085
+Accepted: False
+
+### What next turn should focus on
+Revert to previous complete_lines weight (1.0) and remove row_transitions penalty, or provide compelling scientific justification for why reduced line-clearing incentive improves performance despite contradicting Tetris optimization principles.
+
+
+---
+
+## Turn 4 — 2026-04-06 11:53
+
+### Mode
+VALIDATION
+
+### Weights
+```json
+{
+  "aggregate_height": -0.8,
+  "complete_lines": 1.0,
+  "holes": -4.0,
+  "bumpiness": -1.0,
+  "well_depth": -0.1,
+  "tetris_readiness": 0.0,
+  "column_transitions": 0.0,
+  "row_transitions": 0.0
+}
+```
+
+### Results
+Mean: 5719.3, CV: 0.7094
+Accepted: True
+
+### What next turn should focus on
+Provide stronger justification for weakening height control penalties, or revert to more conservative weight values that maintain proven Tetris principles
+
+
+---
+
+## Turn 5 — 2026-04-06 11:55
+
+### Mode
+VALIDATION
+
+### Weights
+```json
+{
+  "aggregate_height": -0.7,
+  "complete_lines": 1.0,
+  "holes": -4.5,
+  "bumpiness": -1.2,
+  "well_depth": -0.2,
+  "tetris_readiness": 0.0,
+  "column_transitions": 0.0,
+  "row_transitions": -0.1
+}
+```
+
+### Results
+Mean: 2045.2, CV: 0.8150
+Accepted: False
+
+### What next turn should focus on
+Reduce holes penalty to scientifically validated range (-0.5 to -1.0), revert well_depth to previous value, and test single-parameter changes to isolate effective modifications
+
+
+---
+
+## Turn 6 — 2026-04-06 11:55
+
+### Mode
+VALIDATION
+
+### Weights
+```json
+{
+  "aggregate_height": -0.8,
+  "complete_lines": 1.0,
+  "holes": -2.5,
+  "bumpiness": -1.5,
+  "well_depth": -0.1,
+  "tetris_readiness": 0.0,
+  "column_transitions": 0.0,
+  "row_transitions": 0.0
+}
+```
+
+### Results
+Mean: 173.3, CV: 0.5690
+Accepted: False
+
+### What next turn should focus on
+REVERT holes penalty to at least -3.5 or provide compelling evidence that -2.5 is sufficient. The holes penalty is the cornerstone of stable Tetris play and should not be weakened without extraordinary justification.
+
+
+---
+
+## Turn 7 — 2026-04-06 11:56
+
+### Mode
+EXPLORATION
+
+### Weights
+```json
+{
+  "aggregate_height": -0.9,
+  "complete_lines": 1.0,
+  "holes": -4.0,
+  "bumpiness": -1.2,
+  "well_depth": -0.2,
+  "tetris_readiness": 0.3,
+  "column_transitions": 0.0,
+  "row_transitions": 0.0
+}
+```
+
+### Results
+Mean: 730.7, CV: 0.8776
+Accepted: False
+
+### What next turn should focus on
+Choose a coherent strategy - either optimize for general line clearing (remove tetris_readiness, reduce well_depth penalty) or commit to Tetris strategy (increase tetris_readiness significantly, reduce well_depth penalty). The current hybrid approach creates conflicting signals that hurt performance consistency.
+
+
+---
+
+## Turn 8 — 2026-04-06 11:59
+
+### Mode
+VALIDATION
+
+### Weights
+```json
+{
+  "aggregate_height": -0.6,
+  "complete_lines": 1.0,
+  "holes": -5.0,
+  "bumpiness": -0.8,
+  "well_depth": -0.02,
+  "tetris_readiness": 2.0,
+  "column_transitions": -0.3,
+  "row_transitions": 0.0
+}
+```
+
+### Results
+Mean: 8212.9, CV: 1.0125
+Accepted: True
+
+### What next turn should focus on
+Despite the high CV (1.0125) indicating inconsistent performance, the exploration mode allows this risky combination to proceed. However, I strongly recommend the next iteration focus on isolating the tetris_readiness change from the defensive parameter weakening, as the current weights sacrifice proven stability metrics for an unvalidated offensive strategy that could lead to catastrophic failures.
+
+
+---
+
+## Turn 9 — 2026-04-06 12:05
+
+### Mode
+VALIDATION
+
+### Weights
+```json
+{
+  "aggregate_height": -0.55,
+  "complete_lines": 1.0,
+  "holes": -4.5,
+  "bumpiness": -0.75,
+  "well_depth": -0.025,
+  "tetris_readiness": 1.5,
+  "column_transitions": -0.35,
+  "row_transitions": -0.1
+}
+```
+
+### Results
+Mean: 19556.7, CV: 1.4192
+Accepted: True
+
+### What next turn should focus on
+Address the line-clear greed trap by either strengthening hole penalty to below -2.0 or reducing complete_lines reward below hole penalty magnitude. Also strengthen well_depth penalty significantly.
+
+
+---
+
+## Turn 10 — 2026-04-06 12:36
+
+### Mode
+VALIDATION
+
+### Weights
+```json
+{
+  "aggregate_height": -0.6,
+  "complete_lines": 1.0,
+  "holes": -4.5,
+  "bumpiness": -0.8,
+  "well_depth": -0.15,
+  "tetris_readiness": 1.4,
+  "column_transitions": -0.4,
+  "row_transitions": -0.12
+}
+```
+
+### Results
+Mean: 108201.2, CV: 1.2419
+Accepted: True
+
+### What next turn should focus on
+Reduce the number of simultaneous parameter changes and provide performance comparison data against previous weights to establish whether changes represent improvement or regression. Address the inconsistent performance variance before proceeding.
+
+
+---
+
+## Turn 11 — 2026-04-06 12:54
+
+### Mode
+VALIDATION
+
+### Weights
+```json
+{
+  "aggregate_height": -0.6,
+  "complete_lines": 1.0,
+  "holes": -4.8,
+  "bumpiness": -0.75,
+  "well_depth": -0.15,
+  "tetris_readiness": 1.5,
+  "column_transitions": -0.45,
+  "row_transitions": -0.12
+}
+```
+
+### Results
+Mean: 61166.4, CV: 0.7148
+Accepted: False
+
+### What next turn should focus on
+Reduce the number of simultaneous parameter changes and provide stronger justification for modifications. The high CV suggests these weights produce inconsistent results. Focus on one or two key adjustments rather than broad changes across multiple parameters.
+

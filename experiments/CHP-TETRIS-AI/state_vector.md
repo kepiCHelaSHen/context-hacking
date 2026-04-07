@@ -1,15 +1,15 @@
 # State Vector — Save Game
-# Written at Turn 6, 2026-04-05 12:05
+# Written at Turn 9, 2026-04-06 12:05
 
-TURN: 6
+TURN: 9
 MODE: VALIDATION
 MILESTONE: in progress
 LAST_3_FAILURES: none
-WINNING_PARAMETERS: {"aggregate_height": -0.8, "complete_lines": 1.0, "holes": -4.0, "bumpiness": -1.0, "well_depth": -0.2, "tetris_readiness": 0.1, "column_transitions": -0.05, "row_transitions": -0.12}
-METRIC_STATUS: best=15439.1
+WINNING_PARAMETERS: {"aggregate_height": -0.55, "complete_lines": 1.0, "holes": -4.5, "bumpiness": -0.75, "well_depth": -0.025, "tetris_readiness": 1.5, "column_transitions": -0.35, "row_transitions": -0.1}
+METRIC_STATUS: best=19556.7
 OPEN_FLAGS: none
 LAST_PASSING_TAG: none
-NEXT_TURN_FOCUS: Revert aggregate_height to -0.85 or stronger, and provide clearer justification for any holes weight strengthening. Address performance variance before making destabilizing architectural changes.
+NEXT_TURN_FOCUS: Address the line-clear greed trap by either strengthening hole penalty to below -2.0 or reducing complete_lines reward below hole penalty magnitude. Also strengthen well_depth penalty significantly.
 SCIENCE_GROUNDING: aligned
 STAGNATION_STREAK: 0
 EXPLORATION_STREAK: 0
