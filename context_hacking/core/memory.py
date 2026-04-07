@@ -26,7 +26,7 @@ _log = logging.getLogger(__name__)
 class MemoryManager:
     """Manages the three external memory files."""
 
-    def __init__(self, config: "Config") -> None:
+    def __init__(self, config: Config) -> None:
         project = config.raw.get("project", {})
         self._innovation_log_path = Path(
             project.get("innovation_log", "innovation_log.md")
@@ -35,7 +35,6 @@ class MemoryManager:
         self._state_vector_path = Path(
             project.get("state_vector", "state_vector.md")
         )
-        self._dead_ends_cache: list[str] | None = None
 
     # ── Dead Ends ─────────────────────────────────────────────────────────────
 
@@ -56,7 +55,10 @@ class MemoryManager:
 
     def add_dead_end(self, title: str, attempted: str, result: str, reason: str) -> None:
         """Append a new dead end to dead_ends.md."""
-        existing = self._dead_ends_path.read_text(encoding="utf-8") if self._dead_ends_path.exists() else ""
+        existing = (
+            self._dead_ends_path.read_text(encoding="utf-8")
+            if self._dead_ends_path.exists() else ""
+        )
 
         # Count existing dead ends
         count = len(re.findall(r"^## DEAD END", existing, re.MULTILINE))
@@ -78,7 +80,6 @@ class MemoryManager:
         with open(self._dead_ends_path, "a", encoding="utf-8") as f:
             f.write(entry)
 
-        self._dead_ends_cache = None  # invalidate cache
         _log.info("Dead end #%d logged: %s", new_id, title)
 
     # ── Innovation Log ────────────────────────────────────────────────────────
@@ -113,7 +114,8 @@ class MemoryManager:
             re.DOTALL,
         )
         if matches:
-            return matches[-1].strip()[:200]  # truncate for log
+            result: str = matches[-1].strip()[:200]  # truncate for log
+            return result
         return ""
 
     def read_full_log(self) -> str:
