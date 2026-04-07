@@ -22,8 +22,9 @@ from rich.table import Table
 console = Console()
 
 # Path to the package's bundled templates
-PACKAGE_ROOT = Path(__file__).parent.parent
-TEMPLATE_DIR = PACKAGE_ROOT
+PACKAGE_ROOT = Path(__file__).parent
+REPO_ROOT = PACKAGE_ROOT.parent
+TEMPLATE_DIR = REPO_ROOT
 
 
 @click.group()
@@ -92,7 +93,7 @@ def init(name: str, experiment: str | None, existing: bool, cursor: bool) -> Non
             "blockchain": "blockchain-consensus",
         }
         exp_name = exp_map.get(experiment, experiment)
-        exp_src = TEMPLATE_DIR / "experiments" / exp_name
+        exp_src = REPO_ROOT / ".archive" / "experiment-old" / exp_name
         if exp_src.exists():
             exp_dst = target / "experiments" / exp_name
             shutil.copytree(exp_src, exp_dst, dirs_exist_ok=True)
@@ -384,7 +385,7 @@ def cursor() -> None:
               help="Install to ~/.claude/skills/ (all projects)")
 def install_skills(global_install: bool) -> None:
     """Install CHP skills for Claude Code (/chp-run, /chp-critic, etc)."""
-    skills_src = PACKAGE_ROOT / "claude-code-skills"
+    skills_src = REPO_ROOT / "claude-code-skills"
     if not skills_src.exists():
         console.print("[red]Skills directory not found.[/red]")
         raise SystemExit(1)
@@ -427,7 +428,7 @@ def dashboard(port: int) -> None:
         raise SystemExit(1)
 
     # Find the dashboard app.py
-    app_path = PACKAGE_ROOT / "dashboard" / "app.py"
+    app_path = REPO_ROOT / "dashboard" / "app.py"
     if not app_path.exists():
         console.print(f"[red]Dashboard not found at {app_path}[/red]")
         raise SystemExit(1)
