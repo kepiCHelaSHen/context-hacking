@@ -1,6 +1,5 @@
 """Tests for council consensus detection."""
-import pytest
-from context_hacking.agents.council import CouncilReview, CouncilResult
+from context_hacking.agents.council import CouncilResult, CouncilReview
 
 
 class TestConsensusDetection:

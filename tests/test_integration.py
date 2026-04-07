@@ -1,10 +1,10 @@
 """Integration tests — multi-turn orchestrator loop."""
+
 import pytest
 import yaml
-from pathlib import Path
 
-from context_hacking.core.orchestrator import Orchestrator, Config
-from context_hacking.core.telemetry import TurnMetrics, TELEMETRY_PATH
+from context_hacking.core.orchestrator import Config, Orchestrator
+from context_hacking.core.telemetry import TELEMETRY_PATH, TurnMetrics
 
 
 @pytest.fixture

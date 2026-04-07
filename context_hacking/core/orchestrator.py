@@ -33,7 +33,7 @@ import yaml
 from context_hacking.core.gates import GateChecker
 from context_hacking.core.memory import MemoryManager
 from context_hacking.core.modes import ModeManager
-from context_hacking.core.telemetry import TelemetryStore
+from context_hacking.core.telemetry import TelemetryStore, TurnMetrics
 
 _log = logging.getLogger(__name__)
 
@@ -63,53 +63,62 @@ class Config:
 
         return cls(raw=raw)
 
+    def _section(self, key: str) -> dict[str, Any]:
+        """Return a config section as a dict, defaulting to empty."""
+        val = self.raw.get(key, {})
+        return val  # type: ignore[no-any-return]
+
     @property
     def project_name(self) -> str:
-        return self.raw.get("project", {}).get("name", "unnamed")
+        return str(self._section("project").get("name", "unnamed"))
 
     @property
     def max_turns(self) -> int:
-        return self.raw.get("loop", {}).get("max_turns", 50)
+        return int(self._section("loop").get("max_turns", 50))
 
     @property
     def stagnation_threshold(self) -> int:
-        return self.raw.get("loop", {}).get("stagnation_threshold", 5)
+        return int(self._section("loop").get("stagnation_threshold", 5))
 
     @property
     def max_consecutive_exploration(self) -> int:
-        return self.raw.get("loop", {}).get("max_consecutive_exploration", 3)
+        return int(
+            self._section("loop").get("max_consecutive_exploration", 3)
+        )
 
     @property
     def state_vector_interval(self) -> int:
-        return self.raw.get("loop", {}).get("state_vector_interval", 5)
+        return int(self._section("loop").get("state_vector_interval", 5))
 
     @property
     def context_reset_interval(self) -> int:
-        return self.raw.get("loop", {}).get("context_reset_interval", 15)
+        return int(self._section("loop").get("context_reset_interval", 15))
 
     @property
     def auto_tag(self) -> bool:
-        return self.raw.get("loop", {}).get("auto_tag", True)
+        return bool(self._section("loop").get("auto_tag", True))
 
     @property
     def frozen_paths(self) -> list[str]:
-        return self.raw.get("frozen", {}).get("paths", ["frozen/"])
+        result = self._section("frozen").get("paths", ["frozen/"])
+        return list(result)
 
     @property
     def exit_conditions(self) -> dict[str, bool]:
-        return self.raw.get("exit_conditions", {})
+        result = self.raw.get("exit_conditions", {})
+        return dict(result)
 
     @property
     def gate_config(self) -> dict[str, Any]:
-        return self.raw.get("gates", {})
+        return self._section("gates")
 
     @property
     def critic_config(self) -> dict[str, Any]:
-        return self.raw.get("critic", {})
+        return self._section("critic")
 
     @property
     def model_config(self) -> dict[str, Any]:
-        return self.raw.get("models", {})
+        return self._section("models")
 
 
 class Orchestrator:
@@ -124,7 +133,7 @@ class Orchestrator:
         self.telemetry = TelemetryStore.load()
         self._exit_reason: str | None = None
         self._consecutive_council_drift: int = 0
-        self._last_council_result: dict | None = None
+        self._last_council_result: dict[str, Any] | None = None
 
         _log.info("CHP Orchestrator initialized: %s", config.project_name)
 
@@ -151,7 +160,9 @@ class Orchestrator:
             "last_council_result": self._last_council_result,
         }
 
-    def record_council_result(self, consensus_issues: list[str], drift_flagged: bool) -> dict:
+    def record_council_result(
+        self, consensus_issues: list[str], drift_flagged: bool,
+    ) -> dict[str, Any]:
         """Record council review outcome. Returns action dict.
 
         In VALIDATION mode: consensus issues BLOCK the build.
@@ -287,7 +298,7 @@ class Orchestrator:
         gate_passed: bool,
         metrics_improved: bool,
         anomaly: bool,
-        metrics: "TurnMetrics | None" = None,
+        metrics: TurnMetrics | None = None,
     ) -> None:
         """Record the outcome of a turn after build + review + verification."""
         # Update gate tracker
@@ -341,7 +352,10 @@ class Orchestrator:
                 turn=self.turn,
                 mode=self.modes.current_mode,
                 milestone="EMERGENCY_DUMP",
-                open_flags=f"crashed — council_drift={self._consecutive_council_drift} — use --resume to continue",
+                open_flags=(
+                    f"crashed — council_drift={self._consecutive_council_drift}"
+                    " — use --resume to continue"
+                ),
                 stagnation_streak=str(self.modes.stagnation_streak),
                 exploration_streak=str(self.modes.exploration_streak),
                 consecutive_anomalies=str(self.gates.consecutive_anomalies),

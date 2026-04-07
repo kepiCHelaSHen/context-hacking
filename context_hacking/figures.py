@@ -62,7 +62,6 @@ def generate_figures(experiment_name: str, experiment_dir: Path) -> list[Path]:
     """Generate all figures for an experiment. Returns list of saved paths."""
     import matplotlib
     matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
 
     fig_dir = experiment_dir / "figures"
     fig_dir.mkdir(exist_ok=True)
@@ -101,7 +100,7 @@ def generate_figures(experiment_name: str, experiment_dir: Path) -> list[Path]:
     return saved
 
 
-def _white_style():
+def _white_style() -> None:
     """Apply white background style for publication-quality figures."""
     import matplotlib.pyplot as plt
     plt.style.use("default")
@@ -127,7 +126,7 @@ def _fig_schelling(exp_dir: Path, fig_dir: Path) -> list[Path]:
     import sys
     sys.path.insert(0, str(exp_dir))
     try:
-        from schelling import SchellingGrid, GRID_SIZE, DENSITY, TOLERANCE_DEFAULT
+        from schelling import DENSITY, GRID_SIZE, TOLERANCE_DEFAULT, SchellingGrid
     except ImportError:
         return []
 
@@ -137,19 +136,28 @@ def _fig_schelling(exp_dir: Path, fig_dir: Path) -> list[Path]:
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 
     # Original (fixed tolerance)
-    grid1 = SchellingGrid(seed=42, grid_size=GRID_SIZE, density=DENSITY, tolerance=TOLERANCE_DEFAULT)
+    grid1 = SchellingGrid(
+        seed=42, grid_size=GRID_SIZE, density=DENSITY,
+        tolerance=TOLERANCE_DEFAULT,
+    )
     for _ in range(500):
         n = grid1.step(dynamic_tolerance=False)
         if n == 0:
             break
     ax1.imshow(grid1.grid, cmap="RdBu", interpolation="nearest", vmin=0, vmax=2)
     seg1 = grid1.segregation_index()
-    ax1.set_title(f"Original Schelling\ntolerance={TOLERANCE_DEFAULT} (fixed)\nsegregation={seg1:.3f}",
-                  fontsize=12, color="#e0e0e0")
+    ax1.set_title(
+        f"Original Schelling\ntolerance={TOLERANCE_DEFAULT}"
+        f" (fixed)\nsegregation={seg1:.3f}",
+        fontsize=12, color="#e0e0e0",
+    )
     ax1.axis("off")
 
     # Dynamic tolerance
-    grid2 = SchellingGrid(seed=42, grid_size=GRID_SIZE, density=DENSITY, tolerance=TOLERANCE_DEFAULT)
+    grid2 = SchellingGrid(
+        seed=42, grid_size=GRID_SIZE, density=DENSITY,
+        tolerance=TOLERANCE_DEFAULT,
+    )
     for step in range(500):
         grid2.step(dynamic_tolerance=True)
         for (r, c), agent in grid2.agents.items():
@@ -179,7 +187,6 @@ def _fig_schelling(exp_dir: Path, fig_dir: Path) -> list[Path]:
 
 def _fig_lorenz(exp_dir: Path, fig_dir: Path) -> list[Path]:
     import matplotlib.pyplot as plt
-    from mpl_toolkits.mplot3d import Axes3D
     _white_style()
 
     import sys
@@ -198,7 +205,7 @@ def _fig_lorenz(exp_dir: Path, fig_dir: Path) -> list[Path]:
     colors = np.linspace(0, 1, n)
     for i in range(n - 1):
         ax.plot(x[i:i+2], y[i:i+2], z[i:i+2],
-                color=plt.cm.viridis(colors[i]), alpha=0.7, linewidth=0.5)
+                color=plt.colormaps["viridis"](colors[i]), alpha=0.7, linewidth=0.5)
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
     ax.set_zlabel("Z")
@@ -266,8 +273,11 @@ def _fig_grover(exp_dir: Path, fig_dir: Path) -> list[Path]:
     ax.bar([sim2.target], [amps[sim2.target]], color="#065F46", width=3)
     ax.set_xlabel("Basis State")
     ax.set_ylabel("Probability")
-    ax.set_title(f"Grover State Amplitudes at k=25 — Target={sim2.target} (P={amps[sim2.target]:.4f})",
-                 color="#065F46", fontweight="bold")
+    ax.set_title(
+        f"Grover State Amplitudes at k=25 — Target={sim2.target}"
+        f" (P={amps[sim2.target]:.4f})",
+        color="#065F46", fontweight="bold",
+    )
     ax.set_ylim(0, 0.005)
     ax.annotate(f"Target: {sim2.target}\nP={amps[sim2.target]:.4f}",
                 xy=(sim2.target, amps[sim2.target]),
@@ -345,9 +355,6 @@ def _fig_sir(exp_dir: Path, fig_dir: Path) -> list[Path]:
 
     r = run_simulation(seed=42)
     curve = r["epidemic_curve"]
-    n = 500
-    s_vals = [n - sum(curve[:i+1]) for i in range(len(curve))]  # rough S approximation
-
     fig, ax = plt.subplots(figsize=(10, 5))
     ax.fill_between(range(len(curve)), curve, color="#991B1B", alpha=0.6, label="Infected")
     ax.plot(range(len(curve)), curve, color="#991B1B", linewidth=1.5)
@@ -387,7 +394,8 @@ def _fig_spatial_pd(exp_dir: Path, fig_dir: Path) -> list[Path]:
         grid.step()
 
     fig, ax = plt.subplots(figsize=(8, 8))
-    cmap = plt.cm.colors.ListedColormap(["#991B1B", "#1D4ED8"])
+    from matplotlib.colors import ListedColormap
+    cmap = ListedColormap(["#991B1B", "#1D4ED8"])
     ax.imshow(grid.grid, cmap=cmap, interpolation="nearest")
     ax.set_title(f"Spatial PD — Nowak & May (1992)\n"
                  f"b=1.8, gen=50, cooperation={grid.cooperation_rate():.3f}",
@@ -450,7 +458,7 @@ def _fig_metal(exp_dir: Path, fig_dir: Path) -> list[Path]:
     import sys
     sys.path.insert(0, str(exp_dir))
     try:
-        from metal_analyzer import run_simulation, NOTE_NAMES
+        from metal_analyzer import run_simulation
     except ImportError:
         return []
 
@@ -467,8 +475,8 @@ def _fig_metal(exp_dir: Path, fig_dir: Path) -> list[Path]:
 
     bars1 = ax.bar(x - width/2, classical_errors, width, label="Classical Analysis (WRONG)",
                    color="#991B1B", alpha=0.8)
-    bars2 = ax.bar(x + width/2, metal_errors, width, label="Metal Analysis (CORRECT)",
-                   color="#065F46", alpha=0.8)
+    ax.bar(x + width/2, metal_errors, width, label="Metal Analysis (CORRECT)",
+           color="#065F46", alpha=0.8)
 
     ax.set_ylabel("'Errors' Flagged")
     ax.set_title("Classical vs Metal Harmony Analysis — Pantera Riffs\n"

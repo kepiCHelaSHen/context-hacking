@@ -1,5 +1,4 @@
 """Comprehensive parse robustness tests for all agent parsers."""
-import pytest
 
 
 class TestCriticParseRobustness:
@@ -49,7 +48,10 @@ class TestCriticParseRobustness:
 
     def test_unstructured_garbage(self):
         from context_hacking.agents.critic import parse_verdict
-        v = parse_verdict("The implementation looks solid. I have no concerns about the architecture.")
+        v = parse_verdict(
+            "The implementation looks solid."
+            " I have no concerns about the architecture."
+        )
         assert v.verdict == "PARSE_FAILED"
 
     def test_partial_gates(self):
@@ -274,7 +276,7 @@ class TestCouncilConsensusRobustness:
     """Council consensus detection edge cases."""
 
     def test_both_flag_drift_with_json(self):
-        from context_hacking.agents.council import CouncilReview, CouncilResult
+        from context_hacking.agents.council import CouncilResult, CouncilReview
         reviews = [
             CouncilReview(provider="openai", model="gpt-4o",
                          response='{"drift_detected": true, "issues": ["wrong coefficient"]}'),
@@ -285,7 +287,7 @@ class TestCouncilConsensusRobustness:
         assert len(result.consensus_issues) > 0
 
     def test_all_models_failed(self):
-        from context_hacking.agents.council import CouncilReview, CouncilResult
+        from context_hacking.agents.council import CouncilResult, CouncilReview
         reviews = [
             CouncilReview(provider="openai", model="gpt-4o", response="", error="timeout"),
             CouncilReview(provider="xai", model="grok-3", response="", error="rate limit"),
@@ -296,7 +298,7 @@ class TestCouncilConsensusRobustness:
         assert not result.any_drift_flagged
 
     def test_single_model_no_consensus(self):
-        from context_hacking.agents.council import CouncilReview, CouncilResult
+        from context_hacking.agents.council import CouncilResult, CouncilReview
         reviews = [
             CouncilReview(provider="openai", model="gpt-4o",
                          response='{"drift_detected": true, "issues": ["problem"]}'),
@@ -306,7 +308,7 @@ class TestCouncilConsensusRobustness:
 
     def test_negation_not_false_positive(self):
         """'No drift detected' should NOT flag drift."""
-        from context_hacking.agents.council import CouncilReview, CouncilResult
+        from context_hacking.agents.council import CouncilResult, CouncilReview
         reviews = [
             CouncilReview(provider="openai", model="gpt-4o",
                          response='{"drift_detected": false, "issues": []}'),
@@ -318,14 +320,14 @@ class TestCouncilConsensusRobustness:
 
     def test_json_drift_false_not_flagged(self):
         """JSON with drift_detected=false should not flag."""
-        from context_hacking.agents.council import CouncilReview, CouncilResult
+        from context_hacking.agents.council import CouncilReview
         review = CouncilReview(provider="openai", model="gpt-4o",
                                response='{"drift_detected": false, "issues": []}')
         assert not review.flags_drift
 
     def test_json_drift_true_flagged(self):
         """JSON with drift_detected=true should flag."""
-        from context_hacking.agents.council import CouncilReview, CouncilResult
+        from context_hacking.agents.council import CouncilReview
         review = CouncilReview(provider="openai", model="gpt-4o",
                                response='{"drift_detected": true, "issues": ["bad"]}')
         assert review.flags_drift
@@ -369,7 +371,8 @@ class TestCouncilConsensusRobustness:
         """Negation present but also a positive signal like 'incorrect' -- should flag."""
         from context_hacking.agents.council import CouncilReview
         review = CouncilReview(provider="xai", model="grok-3",
-                               response="No drift in architecture, but the coefficient is incorrect.")
+                               response="No drift in architecture,"
+                                       " but the coefficient is incorrect.")
         assert review.flags_drift
 
     def test_failed_review_never_flags_drift(self):
@@ -388,7 +391,7 @@ class TestCouncilConsensusRobustness:
 
     def test_consensus_requires_two_flaggers(self):
         """One flagger + one non-flagger = no consensus."""
-        from context_hacking.agents.council import CouncilReview, CouncilResult
+        from context_hacking.agents.council import CouncilResult, CouncilReview
         reviews = [
             CouncilReview(provider="openai", model="gpt-4o",
                          response='{"drift_detected": true, "issues": ["bad"]}'),
@@ -401,7 +404,7 @@ class TestCouncilConsensusRobustness:
 
     def test_three_models_two_flag_consensus(self):
         """With 3 models, 2 flagging drift = consensus."""
-        from context_hacking.agents.council import CouncilReview, CouncilResult
+        from context_hacking.agents.council import CouncilResult, CouncilReview
         reviews = [
             CouncilReview(provider="openai", model="gpt-4o",
                          response='{"drift_detected": true, "issues": ["bad"]}'),

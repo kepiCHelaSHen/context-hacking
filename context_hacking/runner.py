@@ -26,7 +26,6 @@ Usage:
 
 from __future__ import annotations
 
-import json
 import logging
 import os
 import re
@@ -34,6 +33,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -45,8 +45,10 @@ LOOP_TEMPLATE_PATH = PACKAGE_ROOT / "prompts" / "loop_template.md"
 
 # ── Retry helper ────────────────────────────────────────────────────────────
 
-def _api_call_with_retry(call_fn, max_retries: int = 3,
-                         base_delay: float = 1.0, **kwargs):
+def _api_call_with_retry(
+    call_fn: Callable[..., Any], max_retries: int = 3,
+    base_delay: float = 1.0, **kwargs: Any,
+) -> Any:
     """Call a function with exponential backoff on transient errors.
 
     Args:
@@ -74,20 +76,22 @@ def _api_call_with_retry(call_fn, max_retries: int = 3,
                 time.sleep(delay)
             else:
                 _log.error("API error after %d attempts: %s", max_retries, e)
-    raise last_error
+    raise last_error  # type: ignore[misc]
 
 
 # ── Context window management ───────────────────────────────────────────────
 
-def _estimate_tokens(messages: list[dict]) -> int:
+def _estimate_tokens(messages: list[dict[str, Any]]) -> int:
     """Estimate token count from messages. ~4 chars per token heuristic."""
     total_chars = sum(len(m.get("content", "")) for m in messages)
     return total_chars // 4
 
 
-def _maybe_summarize_messages(messages: list[dict],
-                               max_tokens: int = 150_000,
-                               keep_recent: int = 6) -> list[dict]:
+def _maybe_summarize_messages(
+    messages: list[dict[str, Any]],
+    max_tokens: int = 150_000,
+    keep_recent: int = 6,
+) -> list[dict[str, Any]]:
     """If messages exceed max_tokens, summarize older turns.
 
     Keeps the first message (system context) and last keep_recent messages.
@@ -173,11 +177,14 @@ def _build_system_prompt(experiment_dir: Path) -> str:
 
 # ── Multi-turn API loop ──────────────────────────────────────────────────────
 
-def _run_api_loop(experiment_dir: Path, max_turns: int = 8, resume_state: dict | None = None) -> None:
+def _run_api_loop(
+    experiment_dir: Path, max_turns: int = 8,
+    resume_state: dict[str, Any] | None = None,
+) -> None:
     """Execute the full CHP loop via Anthropic API multi-turn conversation."""
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
-        raise EnvironmentError(
+        raise OSError(
             "ANTHROPIC_API_KEY not set. "
             "Set it in your environment or use --method interactive."
         )
@@ -217,9 +224,7 @@ def _run_api_loop(experiment_dir: Path, max_turns: int = 8, resume_state: dict |
         print(f"Resuming from turn: {start_turn}")
     print(f"{'='*60}\n")
 
-    last_turn = start_turn
     for turn in range(start_turn, max_turns + 1):
-        last_turn = turn
         if turn == 1:
             user_msg = (
                 f"Begin Turn 1. Read the frozen spec and dead ends carefully.\n"
@@ -260,8 +265,14 @@ def _run_api_loop(experiment_dir: Path, max_turns: int = 8, resume_state: dict |
         messages = _maybe_summarize_messages(messages, max_tokens=150_000)
 
         # ── Initialize turn metrics ────────────────────────────────
-        metrics = TurnMetrics(turn=turn, timestamp=time.strftime("%Y-%m-%d %H:%M"),
-                              mode="EXPLORATION" if "EXPLORATION" in user_msg.upper() else "VALIDATION")
+        turn_mode = (
+            "EXPLORATION" if "EXPLORATION" in user_msg.upper()
+            else "VALIDATION"
+        )
+        metrics = TurnMetrics(
+            turn=turn, timestamp=time.strftime("%Y-%m-%d %H:%M"),
+            mode=turn_mode,
+        )
 
         # ── Call API ─────────────────────────────────────────────────
         print(f"--- Turn {turn}/{max_turns} ---")
@@ -278,7 +289,10 @@ def _run_api_loop(experiment_dir: Path, max_turns: int = 8, resume_state: dict |
                     messages=messages,
                 )
                 reply = response.content[0].text
-                _log.info("Turn %d: received %d chars in %.1fs", turn, len(reply), metrics.duration_seconds)
+                _log.info(
+                    "Turn %d: received %d chars in %.1fs",
+                    turn, len(reply), metrics.duration_seconds,
+                )
 
                 # Record token usage
                 if hasattr(response, "usage"):
@@ -309,7 +323,7 @@ def _run_api_loop(experiment_dir: Path, max_turns: int = 8, resume_state: dict |
         # ── Run tests if any code was written ────────────────────────
         test_dir = experiment_dir / "tests"
         if code_blocks and test_dir.exists():
-            print(f"  Running tests...")
+            print("  Running tests...")
             test_result = _run_tests(experiment_dir)
             metrics.tests_passed = test_result["passed"]
             metrics.tests_failed = test_result["failed"]
@@ -344,7 +358,9 @@ def _run_api_loop(experiment_dir: Path, max_turns: int = 8, resume_state: dict |
         if "FALSE POSITIVE" in reply.upper():
             metrics.false_positive_caught = True
             fp_match = re.search(r"FALSE POSITIVE[^:]*:\s*(.{10,200})", reply, re.IGNORECASE)
-            metrics.false_positive_description = fp_match.group(1).strip() if fp_match else "see log"
+            metrics.false_positive_description = (
+                fp_match.group(1).strip() if fp_match else "see log"
+            )
 
         # ── Dead ends ────────────────────────────────────────────────
         de_path = experiment_dir / "dead_ends.md"
@@ -517,11 +533,11 @@ def _emergency_state_dump(experiment_dir: Path, reason: str) -> None:
 
 
 def _write_completion_log(
-    experiment_dir: Path, final_turn: int, messages: list[dict],
+    experiment_dir: Path, final_turn: int, messages: list[dict[str, Any]],
 ) -> None:
     """Write a summary to innovation_log.md from the conversation."""
     log_path = experiment_dir / "innovation_log.md"
-    summary = f"\n\n---\n\n## Completion Summary\n\n"
+    summary = "\n\n---\n\n## Completion Summary\n\n"
     summary += f"Completed in {final_turn} turns via Anthropic API.\n"
     summary += f"Total messages: {len(messages)}\n"
 
@@ -554,7 +570,7 @@ def _run_claude_cli(prompt: str, experiment_dir: Path) -> None:
         prompt_path = f.name
 
     print(f"\n{'='*60}")
-    print(f"CHP Loop via Claude Code CLI")
+    print("CHP Loop via Claude Code CLI")
     print(f"Experiment: {experiment_dir.name}")
     print(f"Prompt: {prompt_path}")
     print(f"{'='*60}\n")
@@ -579,17 +595,17 @@ def _run_interactive(prompt: str, experiment_dir: Path) -> None:
     prompt_path.write_text(prompt, encoding="utf-8")
 
     print(f"\n{'='*60}")
-    print(f"CHP Loop Prompt Generated")
+    print("CHP Loop Prompt Generated")
     print(f"{'='*60}")
     print(f"\nExperiment: {experiment_dir.name}")
     print(f"Prompt saved to: {prompt_path}")
-    print(f"\nTo run the full loop, use one of:")
-    print(f"  1. Claude Code:")
+    print("\nTo run the full loop, use one of:")
+    print("  1. Claude Code:")
     print(f"     claude --dangerously-skip-permissions < {prompt_path}")
-    print(f"  2. Set ANTHROPIC_API_KEY and run: chp run --method api")
-    print(f"  3. Copy-paste into Claude.ai or Cursor")
-    print(f"\nThe dashboard will show live progress:")
-    print(f"  chp dashboard")
+    print("  2. Set ANTHROPIC_API_KEY and run: chp run --method api")
+    print("  3. Copy-paste into Claude.ai or Cursor")
+    print("\nThe dashboard will show live progress:")
+    print("  chp dashboard")
 
 
 # ── Public API ───────────────────────────────────────────────────────────────
@@ -598,7 +614,7 @@ def run_experiment(
     experiment_name: str,
     method: str = "auto",
     project_dir: Path | None = None,
-    resume_state: dict | None = None,
+    resume_state: dict[str, Any] | None = None,
 ) -> None:
     """Run the full CHP loop on an experiment.
 

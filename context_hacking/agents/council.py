@@ -108,7 +108,8 @@ def _call_openai(model: str, prompt: str, api_key: str, **kwargs: Any) -> str:
         timeout=60,
     )
     r.raise_for_status()
-    return r.json()["choices"][0]["message"]["content"]
+    result: str = r.json()["choices"][0]["message"]["content"]
+    return result
 
 
 def _call_xai(model: str, prompt: str, api_key: str, **kwargs: Any) -> str:
@@ -125,7 +126,8 @@ def _call_xai(model: str, prompt: str, api_key: str, **kwargs: Any) -> str:
         timeout=60,
     )
     r.raise_for_status()
-    return r.json()["choices"][0]["message"]["content"]
+    result: str = r.json()["choices"][0]["message"]["content"]
+    return result
 
 
 _PROVIDERS = {

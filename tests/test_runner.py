@@ -6,12 +6,12 @@ from unittest.mock import MagicMock
 import pytest
 
 from context_hacking.runner import (
-    _extract_code_blocks,
-    _check_completion,
-    _load_loop_prompt,
-    _dead_ends_from_file,
     _api_call_with_retry,
+    _check_completion,
+    _dead_ends_from_file,
     _estimate_tokens,
+    _extract_code_blocks,
+    _load_loop_prompt,
     _maybe_summarize_messages,
 )
 

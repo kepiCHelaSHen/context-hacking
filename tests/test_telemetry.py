@@ -1,7 +1,5 @@
 """Tests for the telemetry system."""
 
-import json
-from pathlib import Path
 
 import pytest
 

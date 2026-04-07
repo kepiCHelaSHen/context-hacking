@@ -30,7 +30,6 @@ def validate_health_check(response: str, chain_prompt_path: str = "CHAIN_PROMPT.
         _log.warning("CHAIN_PROMPT.md not found — cannot validate health check")
         return True  # pass if no chain prompt exists yet
 
-    content = chain.read_text(encoding="utf-8").lower()
     response_lower = response.lower()
 
     # Check if the response contains any architecture rule keyword

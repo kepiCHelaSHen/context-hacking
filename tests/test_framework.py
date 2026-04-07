@@ -4,13 +4,9 @@ CHP Framework Tests — tests for the framework itself, not the experiments.
 These verify that the orchestrator, gates, modes, memory, and CLI work correctly.
 """
 
-import tempfile
 from pathlib import Path
 
-import numpy as np
-import pytest
 import yaml
-
 
 # ── Config ───────────────────────────────────────────────────────────────────
 
@@ -193,8 +189,8 @@ class TestGateChecker:
 
 class TestMemoryManager:
     def _make_mm(self, tmp_path):
-        from context_hacking.core.orchestrator import Config
         from context_hacking.core.memory import MemoryManager
+        from context_hacking.core.orchestrator import Config
         config = Config(raw={
             "project": {
                 "innovation_log": str(tmp_path / "log.md"),
@@ -328,7 +324,10 @@ class TestOrchestrator:
         orch = self._make_orch(tmp_path)
         from context_hacking.core.telemetry import TurnMetrics
         metrics = TurnMetrics(turn=1, tokens_total=500, duration_seconds=10.0)
-        orch.record_turn_result(gate_passed=True, metrics_improved=True, anomaly=False, metrics=metrics)
+        orch.record_turn_result(
+            gate_passed=True, metrics_improved=True,
+            anomaly=False, metrics=metrics,
+        )
         assert orch.telemetry.total_turns == 1
 
     def test_step_survives_missing_files(self, tmp_path):

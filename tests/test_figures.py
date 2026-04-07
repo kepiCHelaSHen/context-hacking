@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from context_hacking.figures import generate_figures, FIGURE_DESCRIPTIONS
+from context_hacking.figures import FIGURE_DESCRIPTIONS, generate_figures
 
 
 class TestFigureDescriptions:
@@ -34,7 +34,8 @@ class TestFigureDescriptions:
 class TestFigureStyle:
     def test_no_dark_colors_in_source(self):
         """figures.py must use white-style colors, not dark-style."""
-        src = (Path(__file__).parent.parent / "context_hacking" / "figures.py").read_text(encoding="utf-8")
+        fig_path = Path(__file__).parent.parent / "context_hacking" / "figures.py"
+        src = fig_path.read_text(encoding="utf-8")
         assert "#0a0a1a" not in src, "Dark background color found — should be white"
         assert "#0d0d20" not in src, "Dark surface color found — should be white"
         assert "#00ff88" not in src, "Neon green found — should be #065F46"
@@ -59,7 +60,8 @@ class TestDashboardSync:
         """health_patch.py must not exist as an unimported dead file."""
         patch_path = Path(__file__).parent.parent / "dashboard" / "health_patch.py"
         if patch_path.exists():
-            app_src = (Path(__file__).parent.parent / "dashboard" / "app.py").read_text(encoding="utf-8")
+            app_path = Path(__file__).parent.parent / "dashboard" / "app.py"
+            app_src = app_path.read_text(encoding="utf-8")
             assert "health_patch" in app_src, (
                 "dashboard/health_patch.py exists but is never imported in app.py — "
                 "either import it or delete it"

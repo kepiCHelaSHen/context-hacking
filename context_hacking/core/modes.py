@@ -38,7 +38,7 @@ EXPLORATION = "EXPLORATION"
 class ModeManager:
     """Manages the Validation/Exploration mode switching logic."""
 
-    def __init__(self, config: "Config") -> None:
+    def __init__(self, config: Config) -> None:
         self._mode: str = VALIDATION
         self._stagnation_streak: int = 0
         self._exploration_streak: int = 0

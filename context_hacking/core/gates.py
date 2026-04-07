@@ -21,7 +21,7 @@ from __future__ import annotations
 import logging
 import operator as op
 from dataclasses import dataclass, field
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 import numpy as np
 
@@ -69,7 +69,7 @@ class GateResult:
 class GateChecker:
     """Manages sigma-gated statistical verification."""
 
-    def __init__(self, config: "Config") -> None:
+    def __init__(self, config: Config) -> None:
         gate_cfg = config.gate_config
         self.n_seeds: int = gate_cfg.get("seeds", 3)
         self.convergence_seeds: int = gate_cfg.get("convergence_seeds", 30)
@@ -145,7 +145,7 @@ class GateChecker:
 
         # ── Variance check: std across seeds for each metric ──
         if len(seed_metrics) >= 2:
-            all_metrics = set()
+            all_metrics: set[str] = set()
             for m in seed_metrics.values():
                 all_metrics.update(m.keys())
 
@@ -210,7 +210,8 @@ class GateChecker:
         degrading = []
 
         for metric in last_3[0]:
-            values = [m.get(metric) for m in last_3 if metric in m]
+            raw = [m.get(metric) for m in last_3 if metric in m]
+            values = [v for v in raw if v is not None]
             if len(values) < 3:
                 continue
             # Check if monotonically worsening (assuming higher = better)
