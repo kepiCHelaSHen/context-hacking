@@ -699,9 +699,11 @@ Honest assessment of what CHP is and isn't:
   instruction-following style. The council calls GPT and Grok for review, but the
   build loop runs best in Claude Code. Portability to other LLMs is untested.
 
-- **No comparison to existing frameworks.** CHP has not been benchmarked against
-  DSPy, LATS, Reflexion, or other LLM agent frameworks. The ablation study
-  compares CHP layers against each other, not against alternative approaches.
+- **No quantitative comparison to existing frameworks.** A qualitative comparison
+  table exists ([`docs/comparison.md`](docs/comparison.md)) covering DSPy, Reflexion,
+  and LATS, but there are no head-to-head quantitative benchmarks on a shared task.
+  The core difficulty: these frameworks solve different problems (prompt optimization
+  vs. anti-drift governance).
 
 - **The drift measurement is domain-specific.** The 99% drift rate (95/96) was
   measured on SIMSIV implementation tasks. Different domains may have different
@@ -709,9 +711,23 @@ Honest assessment of what CHP is and isn't:
 
 ---
 
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [`docs/comparison.md`](docs/comparison.md) | CHP vs DSPy, Reflexion, LATS — honest comparison |
+| [`docs/methods_section.md`](docs/methods_section.md) | Publication-ready methods with reproducibility details |
+| [`docs/future_work.md`](docs/future_work.md) | Honest gaps and next steps |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Setup, testing, and contribution guidelines |
+| [`ablation/ABLATION_REPORT.md`](ablation/ABLATION_REPORT.md) | Layer-by-layer ablation study |
+
+**Test suite:** 157 tests across 8 test files covering framework, integration, parsing robustness, CLI, council, telemetry, and runner.
+
+---
+
 ## License
 
-MIT. Use it. Break it. Ship science with it.
+Free for personal and academic use. Commercial use requires agreement. See [`LICENSE.md`](LICENSE.md).
 
 ## Citation
 
